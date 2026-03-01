@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — DOMO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black:      #0a0a0a;
+      --white:      #f5f5f0;
+      --dark-blue:  #0a0a0a;
+      --mid-blue:   #0a0a0a;
+      --accent:     #FF0000;
+      --light-blue: #FF0000;
+      --muted:      #6a7a8a;
+      --divider:    rgba(200,216,232,0.18);
+      --error:      #c0392b;
+      --success:    #27ae60;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dark-blue);
+      color: var(--white);
+      font-family: 'Libre Baskerville', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(255,0,0,0.35) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 20%, rgba(13,27,42,0.8) 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 80%, rgba(27,58,92,0.4) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(200,216,232,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200,216,232,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 48px;
+      background: rgba(13,27,42,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--divider);
+    }
+    .brand {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--white);
+      line-height: 1.4;
+      text-decoration: none;
+    }
+    .brand span {
+      display: block;
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      line-height: 1;
+    }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--white);
+      text-decoration: none;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .nav-links a:hover { opacity: 1; }
+    .nav-links a.active { opacity: 1; color: var(--light-blue); }
+
+    .page-wrap {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+    }
+
+    /* ── LEFT PANEL ── */
+    .left-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 80px 80px;
+      position: relative;
+    }
+
+    .left-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--light-blue);
+      opacity: 0.7;
+      margin-bottom: 24px;
+    }
+
+    .left-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(44px, 5vw, 80px);
+      font-weight: 900;
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+      margin-bottom: 28px;
+    }
+    .left-heading em {
+      display: block;
+      font-style: italic;
+      color: var(--light-blue);
+    }
+
+    .left-body {
+      font-size: 14px;
+      line-height: 1.9;
+      color: rgba(245,245,240,0.5);
+      max-width: 380px;
+      margin-bottom: 60px;
+    }
+
+    .deco-objects {
+      display: flex;
+      gap: 24px;
+      opacity: 0.15;
+    }
+    .deco-objects svg { animation: floatDeco 6s ease-in-out infinite; }
+    .deco-objects svg:nth-child(2) { animation-delay: -2s; }
+    .deco-objects svg:nth-child(3) { animation-delay: -4s; }
+    @keyframes floatDeco {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* ── DIVIDER ── */
+    .panel-divider {
+      width: 1px;
+      background: var(--divider);
+      margin: 100px 0 40px;
+      flex-shrink: 0;
+    }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel {
+      flex: 0 0 500px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 64px 80px;
+    }
+
+    /* ── TAB BAR ── */
+    .tab-bar {
+      display: flex;
+      margin-bottom: 40px;
+      border-bottom: 1px solid var(--divider);
+    }
+    .tab-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: transparent;
+      border: none;
+      padding: 12px 0;
+      margin-right: 32px;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s;
+    }
+    .tab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; right: 0;
+      height: 2px;
+      background: var(--light-blue);
+      transform: scaleX(0);
+      transition: transform 0.25s;
+    }
+    .tab-btn.active { color: var(--white); }
+    .tab-btn.active::after { transform: scaleX(1); }
+    .tab-btn:hover { color: rgba(245,245,240,0.8); }
+
+    /* ── FORM PANELS ── */
+    .form-panel { display: none; }
+    .form-panel.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .form-subtitle {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+
+    /* ── FIELDS ── */
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+      transition: color 0.2s;
+    }
+    .field:focus-within label { color: var(--light-blue); }
+
+    .field input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--divider);
+      padding: 14px 16px;
+      font-family: 'Libre Baskerville', serif;
+      font-size: 14px;
+      color: var(--white);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-appearance: none;
+      border-radius: 0;
+    }
+    .field input::placeholder { color: rgba(245,245,240,0.2); }
+    .field input:focus {
+      border-color: var(--light-blue);
+      background: rgba(200,216,232,0.06);
+    }
+    .field input.error { border-color: var(--error) !important; }
+
+    .field-pw { position: relative; }
+    .field-pw input { padding-right: 48px; }
+    .pw-toggle {
+      position: absolute;
+      right: 14px; bottom: 14px;
+      background: none; border: none;
+      color: var(--muted); cursor: pointer;
+      font-size: 14px; padding: 4px;
+      transition: color 0.2s; line-height: 1;
+    }
+    .pw-toggle:hover { color: var(--white); }
+
+    .field-error {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: var(--error);
+      margin-top: 6px;
+      display: none;
+    }
+    .field-error.show { display: block; }
+
+    .pw-strength { margin-top: 8px; display: none; }
+    .pw-strength.show { display: block; }
+    .pw-strength-bar { height: 2px; background: var(--divider); position: relative; overflow: hidden; }
+    .pw-strength-fill {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 0; transition: width 0.3s, background 0.3s;
+    }
+    .pw-strength-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 8px; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted); margin-top: 5px;
+    }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .check-row {
+      display: flex; align-items: flex-start;
+      gap: 12px; margin-bottom: 28px;
+    }
+    .check-row input[type="checkbox"] {
+      width: 16px; height: 16px;
+      flex-shrink: 0; accent-color: var(--light-blue);
+      margin-top: 2px; cursor: pointer;
+    }
+    .check-row label {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px; letter-spacing: 0.12em;
+      color: var(--muted); line-height: 1.6; cursor: pointer;
+    }
+    .check-row label a { color: var(--light-blue); text-decoration: none; }
+    .check-row label a:hover { text-decoration: underline; }
+
+    .forgot-row { display: flex; justify-content: flex-end; margin-bottom: 28px; margin-top: -10px; }
+    .forgot-link {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      background: none; border: none; cursor: pointer;
+      transition: color 0.2s;
+    }
+    .forgot-link:hover { color: var(--light-blue); }
+
+    /* ── SUBMIT BUTTON ── */
+    .btn-submit {
+      width: 100%;
+      background: var(--accent);
+      color: var(--white);
+      border: none;
+      padding: 16px 32px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, opacity 0.2s;
+      margin-bottom: 20px;
+      min-height: 52px;
+    }
+    .btn-submit::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(200,216,232,0.15);
+      transform: translateX(-100%);
+      transition: transform 0.4s ease;
+    }
+    .btn-submit:hover::after { transform: translateX(0); }
+    .btn-submit:hover { transform: translateY(-1px); }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit.loading { pointer-events: none; opacity: 0.7; }
+
+    .btn-spinner {
+      display: none;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn-submit.loading .btn-text { display: none; }
+    .btn-submit.loading .btn-spinner { display: block; }
+
+    /* ── OR ── */
+    .or-divider { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+    .or-line { flex: 1; height: 1px; background: var(--divider); }
+    .or-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
+    }
+
+    /* ── SOCIAL ── */
+    .social-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+    .btn-social {
+      background: transparent;
+      border: 1px solid var(--divider);
+      color: var(--white);
+      padding: 12px 16px;
+      font-family: 'Space Mono', monospace;
+      font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .btn-social:hover { border-color: var(--light-blue); background: rgba(200,216,232,0.06); }
+
+    /* ── SUCCESS STATE ── */
+    .success-state { display: none; text-align: center; padding: 40px 0; animation: fadeIn 0.4s ease; }
+    .success-state.show { display: block; }
+    .success-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: rgba(39,174,96,0.15);
+      border: 2px solid var(--success);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px; font-size: 26px; color: var(--success);
+    }
+    .success-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px; font-weight: 700; margin-bottom: 12px;
+    }
+    .success-body {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 0.12em;
+      color: var(--muted); line-height: 1.8; margin-bottom: 32px;
+    }
+    .btn-go {
+      display: inline-block;
+      background: var(--accent); color: var(--white);
+      border: none; padding: 14px 36px;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+      text-decoration: none; cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-go:hover { opacity: 0.85; }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'Space Mono', monospace; font-size: 9px;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      margin-bottom: 32px; cursor: pointer;
+      background: none; border: none; transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--white); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 32px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--mid-blue);
+      border: 1px solid rgba(200,216,232,0.3);
+      color: var(--white);
+      padding: 14px 28px;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 0.15em;
+      z-index: 999;
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 900px) {
+      .page-wrap { flex-direction: column; }
+      .left-panel { display: none; }
+      .panel-divider { display: none; }
+      .right-panel { flex: 1; padding: 100px 28px 48px; }
+      nav { padding: 18px 24px; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="brand">Department of<span>DOMO</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="index.html#objects">Objects</a></li>
+      <li><a href="login.html" class="active">Login</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-wrap">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+      <p class="left-eyebrow">Members Only</p>
+      <h1 class="left-heading">Welcome<br><em>Back.</em></h1>
+      <p class="left-body">
+        The Department of Miscellaneous Objects keeps a record of everything — including who belongs here. Sign in to track your saved objects, order history, and correspondence with the department.
+      </p>
+      <div class="deco-objects">
+        <svg width="90" height="90" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 62 h60 v28 H20z M28 72 a10 10 0 1 0 20 0 a10 10 0 1 0-20 0 M60 70 h14 M60 78 h14 M60 86 h14 M22 62 V48 Q22 38 50 36 Q78 38 78 48 v14 M38 48 h24 M50 36 v-8" stroke="#FF0000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg width="90" height="90" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 15 a35 35 0 1 0 .01 0z M50 22 L57 50 L50 44 L43 50z M50 78 L43 50 L50 56 L57 50z M22 50 L50 43 L44 50 L50 57z M78 50 L50 57 L56 50 L50 43z" stroke="#FF0000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg width="90" height="90" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 44 h64 v46 H18z M50 67 a16 16 0 1 0 .01 0z M50 67 a9 9 0 1 0 .01 0z M66 47 v-9 h14 v9 M24 54 h8 v8 h-8z" stroke="#FF0000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg width="90" height="90" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 28 h64 v58 H18z M50 33 a22 22 0 1 0 .01 0z M50 33 a15 15 0 1 0 .01 0z M50 40 V55 L60 63 M22 86 h56 v6 H22z M32 28 V18 h36 v10" stroke="#FF0000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="panel-divider"></div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+        <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Create Account</button>
+        <button class="tab-btn" id="tab-forgot" onclick="switchTab('forgot')" style="display:none">Reset Password</button>
+      </div>
+
+      <!-- ── LOGIN ── -->
+      <div class="form-panel active" id="panel-login">
+        <h2 class="form-title">Sign In</h2>
+        <p class="form-subtitle">Access your department account</p>
+
+        <div class="field">
+          <label for="l-email">Email Address</label>
+          <input type="email" id="l-email" placeholder="you@example.com" autocomplete="email"/>
+          <div class="field-error" id="l-email-err">Please enter a valid email address.</div>
+        </div>
+
+        <div class="field field-pw">
+          <label for="l-pw">Password</label>
+          <input type="password" id="l-pw" placeholder="••••••••" autocomplete="current-password"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('l-pw',this)">👁</button>
+          <div class="field-error" id="l-pw-err">Password cannot be empty.</div>
+        </div>
+
+        <div class="forgot-row">
+          <button class="forgot-link" type="button" onclick="switchTab('forgot')">Forgot password?</button>
+        </div>
+
+        <div class="check-row">
+          <input type="checkbox" id="remember"/>
+          <label for="remember">Keep me signed in on this device</label>
+        </div>
+
+        <button class="btn-submit" id="btn-login" onclick="handleLogin(this)">
+          <span class="btn-text">Sign In</span>
+          <div class="btn-spinner"></div>
+        </button>
+
+        <div class="or-divider"><div class="or-line"></div><span class="or-text">or continue with</span><div class="or-line"></div></div>
+        <div class="social-btns">
+          <button class="btn-social" onclick="socialLogin('Google')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+            Google
+          </button>
+          <button class="btn-social" onclick="socialLogin('Apple')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.32.07 2.24.72 3.01.72.78 0 2.26-.89 3.8-.76 1.46.11 2.56.7 3.27 1.76-3.05 1.82-2.55 5.72.42 7.11-.65 1.61-1.5 3.2-2.5 4.05zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+            Apple
+          </button>
+        </div>
+      </div>
+
+      <!-- ── SIGNUP ── -->
+      <div class="form-panel" id="panel-signup">
+        <div id="signup-form-inner">
+          <h2 class="form-title">Create Account</h2>
+          <p class="form-subtitle">Join the department</p>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="s-first">First Name</label>
+              <input type="text" id="s-first" placeholder="Ruth" autocomplete="given-name"/>
+              <div class="field-error" id="s-first-err">Required.</div>
+            </div>
+            <div class="field">
+              <label for="s-last">Last Name</label>
+              <input type="text" id="s-last" placeholder="Hartwell" autocomplete="family-name"/>
+              <div class="field-error" id="s-last-err">Required.</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="s-email">Email Address</label>
+            <input type="email" id="s-email" placeholder="you@example.com" autocomplete="email"/>
+            <div class="field-error" id="s-email-err">Please enter a valid email.</div>
+          </div>
+
+          <div class="field field-pw">
+            <label for="s-pw">Password</label>
+            <input type="password" id="s-pw" placeholder="••••••••" autocomplete="new-password" oninput="checkStrength(this.value)"/>
+            <button class="pw-toggle" type="button" onclick="togglePw('s-pw',this)">👁</button>
+            <div class="field-error" id="s-pw-err">Minimum 8 characters.</div>
+            <div class="pw-strength" id="pw-strength">
+              <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-fill"></div></div>
+              <div class="pw-strength-label" id="pw-label"></div>
+            </div>
+          </div>
+
+          <div class="field field-pw">
+            <label for="s-pw2">Confirm Password</label>
+            <input type="password" id="s-pw2" placeholder="••••••••" autocomplete="new-password"/>
+            <button class="pw-toggle" type="button" onclick="togglePw('s-pw2',this)">👁</button>
+            <div class="field-error" id="s-pw2-err">Passwords do not match.</div>
+          </div>
+
+          <div class="check-row">
+            <input type="checkbox" id="terms"/>
+            <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. The department keeps records. So do we.</label>
+          </div>
+
+          <button class="btn-submit" id="btn-signup" onclick="handleSignup(this)">
+            <span class="btn-text">Create Account</span>
+            <div class="btn-spinner"></div>
+          </button>
+
+          <div class="or-divider"><div class="or-line"></div><span class="or-text">or continue with</span><div class="or-line"></div></div>
+          <div class="social-btns">
+            <button class="btn-social" onclick="socialLogin('Google')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              Google
+            </button>
+            <button class="btn-social" onclick="socialLogin('Apple')">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.32.07 2.24.72 3.01.72.78 0 2.26-.89 3.8-.76 1.46.11 2.56.7 3.27 1.76-3.05 1.82-2.55 5.72.42 7.11-.65 1.61-1.5 3.2-2.5 4.05zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+              Apple
+            </button>
+          </div>
+        </div>
+
+        <div class="success-state" id="signup-success">
+          <div class="success-icon">✓</div>
+          <h3 class="success-title">Account Created.</h3>
+          <p class="success-body">Welcome to the Department.<br>You are now on the record.</p>
+          <a href="index.html" class="btn-go">Browse Objects</a>
+        </div>
+      </div>
+
+      <!-- ── FORGOT ── -->
+      <div class="form-panel" id="panel-forgot">
+        <div id="forgot-form-inner">
+          <button class="back-link" onclick="switchTab('login')">← Back to Sign In</button>
+          <h2 class="form-title">Reset Password</h2>
+          <p class="form-subtitle">We will send a recovery link</p>
+
+          <div class="field">
+            <label for="f-email">Email Address</label>
+            <input type="email" id="f-email" placeholder="you@example.com" autocomplete="email"/>
+            <div class="field-error" id="f-email-err">Please enter a valid email.</div>
+          </div>
+
+          <button class="btn-submit" id="btn-forgot" onclick="handleForgot(this)">
+            <span class="btn-text">Send Reset Link</span>
+            <div class="btn-spinner"></div>
+          </button>
+        </div>
+
+        <div class="success-state" id="forgot-success">
+          <div class="success-icon">✉</div>
+          <h3 class="success-title">Link Sent.</h3>
+          <p class="success-body">Check your inbox.<br>The link expires in 30 minutes.</p>
+          <button class="btn-go" onclick="switchTab('login')">Back to Sign In</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ── Tab switching ──
+    function switchTab(tab) {
+      ['login','signup','forgot'].forEach(t => {
+        document.getElementById('panel-' + t).classList.remove('active');
+        const btn = document.getElementById('tab-' + t);
+        if (btn) btn.classList.remove('active');
+      });
+      document.getElementById('tab-forgot').style.display = tab === 'forgot' ? 'block' : 'none';
+      document.getElementById('panel-' + tab).classList.add('active');
+      const activeBtn = document.getElementById('tab-' + tab);
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+
+    // ── Password toggle ──
+    function togglePw(id, btn) {
+      const inp = document.getElementById(id);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+    }
+
+    // ── Password strength ──
+    function checkStrength(val) {
+      const wrap = document.getElementById('pw-strength');
+      const fill = document.getElementById('pw-fill');
+      const label = document.getElementById('pw-label');
+      wrap.classList.toggle('show', val.length > 0);
+      if (!val) return;
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (val.length >= 12) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      const levels = [
+        { pct:'20%', color:'#c0392b', text:'Very Weak' },
+        { pct:'40%', color:'#e67e22', text:'Weak' },
+        { pct:'60%', color:'#f39c12', text:'Fair' },
+        { pct:'80%', color:'#27ae60', text:'Strong' },
+        { pct:'100%', color:'#1abc9c', text:'Very Strong' },
+      ];
+      const lvl = levels[Math.min(score, 4)];
+      fill.style.width = lvl.pct;
+      fill.style.background = lvl.color;
+      label.textContent = lvl.text;
+      label.style.color = lvl.color;
+    }
+
+    // ── Helpers ──
+    const isEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+    function showErr(id, msg) {
+      const el = document.getElementById(id + '-err');
+      if (msg && el) el.textContent = msg;
+      if (el) el.classList.add('show');
+      const inp = document.getElementById(id);
+      if (inp) inp.classList.add('error');
+    }
+    function clearErr(id) {
+      const el = document.getElementById(id + '-err');
+      if (el) el.classList.remove('show');
+      const inp = document.getElementById(id);
+      if (inp) inp.classList.remove('error');
+    }
+
+    function showToast(msg, dur = 3000) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), dur);
+    }
+
+    function fakeAsync(btn, ms = 1600) {
+      return new Promise(res => {
+        btn.classList.add('loading');
+        setTimeout(() => { btn.classList.remove('loading'); res(); }, ms);
+      });
+    }
+
+    // ── Handlers ──
+    async function handleLogin(btn) {
+      const email = document.getElementById('l-email').value.trim();
+      const pw    = document.getElementById('l-pw').value;
+      ['l-email','l-pw'].forEach(clearErr);
+      let ok = true;
+      if (!isEmail(email)) { showErr('l-email'); ok = false; }
+      if (!pw)             { showErr('l-pw');    ok = false; }
+      if (!ok) return;
+
+      await fakeAsync(btn);
+      showToast('Signed in. Welcome back to the department.');
+      setTimeout(() => window.location.href = 'index.html', 1400);
+    }
+
+    async function handleSignup(btn) {
+      const first = document.getElementById('s-first').value.trim();
+      const last  = document.getElementById('s-last').value.trim();
+      const email = document.getElementById('s-email').value.trim();
+      const pw    = document.getElementById('s-pw').value;
+      const pw2   = document.getElementById('s-pw2').value;
+      const terms = document.getElementById('terms').checked;
+      ['s-first','s-last','s-email','s-pw','s-pw2'].forEach(clearErr);
+
+      let ok = true;
+      if (!first)           { showErr('s-first');                            ok = false; }
+      if (!last)            { showErr('s-last');                             ok = false; }
+      if (!isEmail(email))  { showErr('s-email');                            ok = false; }
+      if (pw.length < 8)    { showErr('s-pw', 'Minimum 8 characters.');     ok = false; }
+      if (pw !== pw2)       { showErr('s-pw2', 'Passwords do not match.');   ok = false; }
+      if (!terms)           { showToast('Please agree to the Terms of Service.'); ok = false; }
+      if (!ok) return;
+
+      await fakeAsync(btn, 1800);
+      document.getElementById('signup-form-inner').style.display = 'none';
+      document.getElementById('signup-success').classList.add('show');
+    }
+
+    async function handleForgot(btn) {
+      const email = document.getElementById('f-email').value.trim();
+      clearErr('f-email');
+      if (!isEmail(email)) { showErr('f-email'); return; }
+
+      await fakeAsync(btn, 1400);
+      document.getElementById('forgot-form-inner').style.display = 'none';
+      document.getElementById('forgot-success').classList.add('show');
+    }
+
+    function socialLogin(provider) {
+      showToast(`Connecting to ${provider}…`);
+      setTimeout(() => showToast(`${provider} sign-in is not wired up yet.`), 1800);
+    }
+
+    // Clear error on input
+    document.querySelectorAll('input').forEach(inp => {
+      inp.addEventListener('input', () => {
+        inp.classList.remove('error');
+        const e = document.getElementById(inp.id + '-err');
+        if (e) e.classList.remove('show');
+      });
+    });
+
+    // Enter key submits active form
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      const active = document.querySelector('.form-panel.active');
+      if (!active) return;
+      const id = active.id.replace('panel-','');
+      if (id === 'login')  document.getElementById('btn-login')  && document.getElementById('btn-login').click();
+      if (id === 'signup') document.getElementById('btn-signup') && document.getElementById('btn-signup').click();
+      if (id === 'forgot') document.getElementById('btn-forgot') && document.getElementById('btn-forgot').click();
+    });
+  </script>
+
+</body>
+</html>
