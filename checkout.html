@@ -354,11 +354,11 @@ function fmtExpiry(el){
 }
 
 // ── PLACE ORDER ──
-function placeOrder(){
+async function placeOrder(){
   const cart=getCart();
   if(cart.length===0){alert('Your cart is empty!');return;}
 
-  // basic validation
+  // validation
   const req=['fname','lname','email','phone','addr1','city','state','pin'];
   for(const id of req){
     if(!document.getElementById(id).value.trim()){
@@ -369,8 +369,52 @@ function placeOrder(){
     }
   }
 
-  // show success
+  // generate order ref
   const ref='DOMO-'+Math.random().toString(36).slice(2,8).toUpperCase();
+
+  // build order summary
+  const sub=cart.reduce((a,b)=>a+b.price,0);
+  const gst=Math.round(sub*0.18);
+  const cod=payMethod==='cod'?99:0;
+  const grand=sub+gst+cod;
+  const itemsList=cart.map(x=>`${x.name} — ₹${x.price.toLocaleString('en-IN')}`).join('\n');
+
+  // disable button while sending
+  const btn=document.querySelector('.btn-place');
+  btn.textContent='Placing Order...';
+  btn.disabled=true;
+
+  try {
+    await fetch('https://formspree.io/f/mqedogbn', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify({
+        order_id: ref,
+        customer_name: document.getElementById('fname').value+' '+document.getElementById('lname').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        address: [
+          document.getElementById('addr1').value,
+          document.getElementById('addr2').value,
+          document.getElementById('city').value,
+          document.getElementById('state').value,
+          document.getElementById('pin').value
+        ].filter(Boolean).join(', '),
+        payment_method: payMethod.toUpperCase(),
+        items: itemsList,
+        subtotal: '₹'+sub.toLocaleString('en-IN'),
+        gst_18pct: '₹'+gst.toLocaleString('en-IN'),
+        cod_fee: cod?'₹99':'—',
+        total: '₹'+grand.toLocaleString('en-IN'),
+        _subject: '🛍️ New DOMO Order — '+ref,
+      })
+    });
+  } catch(e) {
+    // still show success even if email fails — don't block customer
+    console.warn('Formspree error:', e);
+  }
+
+  // show success
   document.getElementById('orderRef').textContent='Order #'+ref;
   document.getElementById('checkoutWrap').style.display='none';
   document.getElementById('successWrap').classList.add('visible');
