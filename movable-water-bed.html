@@ -1,10 +1,18 @@
-<!DOCTYPE html>
+<button class="nav-arrow prev-arrow" id="prev-btn">
+  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="24" cy="24" r="23" stroke="#c1121f" stroke-width="0.5" opacity="0.4"/>
+    <circle cx="24" cy="24" r="23" stroke="#c1121f" stroke-width="0.5" opacity="0.4" class="arrow-ring"/>
+    <path d="M27 14L17 24L27 34" stroke="#d4d4cc" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="17" y1="24" x2="32" y2="24" stroke="#c1121f" stroke-width="0.5" opacity="0.6"/>
+  </svg>
+</button>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="../favicon.png">
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Movable Water Bed — D.O.M.O-044 — DOMO</title>
+  <title>Movable Water Bed â€” D.O.M.O-044 â€” DOMO</title>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Oswald:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
   :root{
@@ -94,7 +102,6 @@
   .w-label{font-family:'Anton',sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--acc2);flex-shrink:0;padding-top:1px;}
   .w-text{font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.04em;color:var(--ink3);line-height:1.9;}
 
-  /* interactive */
   #waterSection{background:var(--bg);padding:56px 48px;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
   #waterSection::before{content:'CONTROL';position:absolute;font-family:'Anton',sans-serif;font-size:220px;color:rgba(255,255,255,.02);top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none;letter-spacing:-.04em;}
   .w-head{display:flex;align-items:flex-start;justify-content:space-between;gap:30px;margin-bottom:22px;position:relative;z-index:2;}
@@ -136,7 +143,6 @@
   .footer-back a{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(122,167,222,.7);text-decoration:none;transition:color .15s;}
   .footer-back a:hover{color:#fff;}
 
-  /* cart drawer (compact) */
   .cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:900;opacity:0;pointer-events:none;transition:opacity .3s;}
   .cart-overlay.open{opacity:1;pointer-events:all;}
   .cart-drawer{position:fixed;top:0;right:0;bottom:0;width:400px;max-width:95vw;background:var(--bg2);z-index:901;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;border-left:1px solid var(--border);}
@@ -180,9 +186,57 @@
     #waterCanvas{height:240px;}
   }
   </style>
-  <link rel="stylesheet" href="mobile-overrides.css">
+  <link rel="stylesheet" href="../mobile-overrides.css">
+<style>
+@keyframes signalBar {
+  0%   { width: 0%; opacity: 1; }
+  85%  { width: 100%; opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+}
+#signal-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 1.5px;
+  width: 0%;
+  background: #c1121f;
+  z-index: 9999;
+  animation: signalBar 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+</style>
+
+<style>
+.nav-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 50;
+  opacity: 0.4;
+  transition: opacity 300ms, transform 300ms;
+  padding: 0;
+}
+.nav-arrow:hover {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.1);
+}
+.prev-arrow { left: 24px; }
+.next-arrow { right: 24px; }
+.arrow-ring {
+  stroke-dasharray: 145;
+  stroke-dashoffset: 145;
+  transition: stroke-dashoffset 400ms ease;
+}
+.nav-arrow:hover .arrow-ring {
+  stroke-dashoffset: 0;
+}
+</style>
 </head>
 <body>
+<div id="signal-bar"></div>
 
 <script>
 const PRODUCT={
@@ -200,18 +254,24 @@ const PRODUCT={
 
 <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
 <div class="cart-drawer" id="cartDrawer">
-  <div class="cart-header"><div class="cart-header-title">Cart</div><button class="cart-close" onclick="closeCart()">✕</button></div>
+  <div class="cart-header"><div class="cart-header-title">Cart</div><button class="cart-close" onclick="closeCart()">âœ•</button></div>
   <div class="cart-body" id="cartBody">
     <div class="cart-empty" id="cartEmpty"><div class="empty-big">Empty</div><div class="empty-sm">Nothing yet</div></div>
   </div>
   <div class="cart-footer" id="cartFooter" style="display:none">
-    <div class="cart-subtotal"><span class="lbl">Subtotal</span><span class="val" id="cartSubtotal">₹0</span></div>
-    <a href="checkout.html" class="btn-checkout-link">Checkout →</a>
+    <div class="cart-subtotal"><span class="lbl">Subtotal</span><span class="val" id="cartSubtotal">â‚¹0</span></div>
+    <a href="checkout.html" class="btn-checkout-link">Checkout â†’</a>
   </div>
 </div>
 
-<a href="division-bell.html" class="obj-nav prev"><div class="obj-nav-arrow">←</div></a>
-<a href="sun.html" class="obj-nav next"><div class="obj-nav-arrow">→</div></a>
+<!-- REMOVED: broken prev link to division-bell.html -->
+<button class="nav-arrow next-arrow" id="next-btn">
+  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="24" cy="24" r="23" stroke="#c1121f" stroke-width="0.5" opacity="0.4"/>
+    <path d="M21 14L31 24L21 34" stroke="#d4d4cc" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="16" y1="24" x2="31" y2="24" stroke="#c1121f" stroke-width="0.5" opacity="0.6"/>
+  </svg>
+</button>
 
 <nav>
   <a href="index.html" class="brand">DOMO<sub>Department of Miscellaneous Objects</sub></a>
@@ -228,7 +288,7 @@ const PRODUCT={
 <div class="product-wrap">
   <div class="product-top">
     <div class="col-left">
-      <div class="cat-tag">Climate Control — Private Edition</div>
+      <div class="cat-tag">Climate Control â€” Private Edition</div>
       <h1 class="obj-title">Movable<br><span class="outline">Water</span><br>Bed</h1>
       <p class="obj-model">Model No. D.O.M.O-044</p>
       <div class="water-rule"></div>
@@ -249,8 +309,8 @@ const PRODUCT={
     </div>
 
     <div class="col-right">
-      <div class="ticker"><span class="ticker-inner">CONTROL THE WATER BENEATH YOU &nbsp;◆&nbsp; TEMPERATURE &nbsp;◆&nbsp; PRESSURE &nbsp;◆&nbsp; DEPTH &nbsp;◆&nbsp; SEALED &nbsp;◆&nbsp; DOMESTICATED &nbsp;◆&nbsp;</span></div>
-      <div class="ticker-btm"><span class="ticker-inner">THE CONTROLLED VERSION &nbsp;◆&nbsp; THE FLOOD VERSION &nbsp;◆&nbsp; WATER HAS NO LOYALTY &nbsp;◆&nbsp;</span></div>
+      <div class="ticker"><span class="ticker-inner">CONTROL THE WATER BENEATH YOU &nbsp;â—†&nbsp; TEMPERATURE &nbsp;â—†&nbsp; PRESSURE &nbsp;â—†&nbsp; DEPTH &nbsp;â—†&nbsp; SEALED &nbsp;â—†&nbsp; DOMESTICATED &nbsp;â—†&nbsp;</span></div>
+      <div class="ticker-btm"><span class="ticker-inner">THE CONTROLLED VERSION &nbsp;â—†&nbsp; THE FLOOD VERSION &nbsp;â—†&nbsp; WATER HAS NO LOYALTY &nbsp;â—†&nbsp;</span></div>
       <div class="bed-stage">
         <svg id="bedSvg" viewBox="0 0 260 320" xmlns="http://www.w3.org/2000/svg">
           <defs>
@@ -272,7 +332,7 @@ const PRODUCT={
 
         <div class="stats-strip">
           <div class="stat"><div class="stat-k">Contain</div><div class="stat-v" id="statContain">OK</div></div>
-          <div class="stat"><div class="stat-k">Temp</div><div class="stat-v" id="statTemp">28°</div></div>
+          <div class="stat"><div class="stat-k">Temp</div><div class="stat-v" id="statTemp">28Â°</div></div>
           <div class="stat"><div class="stat-k">Depth</div><div class="stat-v" id="statDepth">5</div></div>
           <div class="stat"><div class="stat-k">Pressure</div><div class="stat-v" id="statPress">Soft</div></div>
         </div>
@@ -283,27 +343,27 @@ const PRODUCT={
   <div class="price-strip">
     <div class="price-left">
       <div class="price-label">Price</div>
-      <div class="price-num"><sup>₹</sup>200</div>
+      <div class="price-num"><sup>â‚¹</sup>200</div>
       <div class="price-sub">One quiet, controlled tide</div>
     </div>
     <div class="price-right">
-      <div class="stock-line"><span class="stock-dot"></span>&nbsp;In Stock — Water, domesticated</div>
+      <div class="stock-line"><span class="stock-dot"></span>&nbsp;In Stock â€” Water, domesticated</div>
       <button class="btn-cart-main" id="addCartBtn" onclick="addToCart()">Add to Cart</button>
-      <button class="btn-save" id="wishBtn" onclick="toggleWishlist()">Save for Later ♡</button>
+      <button class="btn-save" id="wishBtn" onclick="toggleWishlist()">Save for Later â™¡</button>
     </div>
   </div>
 
   <div class="warning-strip">
-    <div class="w-label">⚠ Reminder</div>
+    <div class="w-label">âš  Reminder</div>
     <div class="w-text">This product is not a solution. It is a miniature. A sealed private simulation of a planet-scale problem.</div>
   </div>
 
   <div id="waterSection">
     <div class="w-head">
       <div>
-        <div class="w-eyebrow">◆ Interactive</div>
+        <div class="w-eyebrow">â—† Interactive</div>
         <div class="w-title">Domesticate<br>Water</div>
-        <div class="w-sub">Dial the bed exactly how you want it. Watch the water obey. Then read the line that doesn’t.</div>
+        <div class="w-sub">Dial the bed exactly how you want it. Watch the water obey. Then read the line that doesnâ€™t.</div>
       </div>
       <div class="w-panel">
         <div class="w-panel-top"><div class="w-dot" id="wDot"></div><div class="w-panel-lbl">Containment Report</div></div>
@@ -319,7 +379,7 @@ const PRODUCT={
 
       <div class="w-controls">
         <div class="ctl">
-          <div class="ctl-k"><span>Temperature</span><span class="ctl-v" id="tempVal">28°C</span></div>
+          <div class="ctl-k"><span>Temperature</span><span class="ctl-v" id="tempVal">28Â°C</span></div>
           <input id="temp" type="range" min="15" max="40" value="28"/>
         </div>
         <div class="ctl">
@@ -345,23 +405,23 @@ const PRODUCT={
       <p>You control the water beneath you. The temperature. The pressure. The exact depth. The precise containment of every liter inside a sealed membrane that will never leak, never overflow, never rise unpredictably against your body in the night.</p>
       <p>You have domesticated water. Turned the most powerful and uncontrollable force in the natural world into furniture.</p>
       <p>Meanwhile in Bangladesh seventeen million people are displaced by flooding every decade.</p>
-      <p>In Pakistan the 2022 floods submerged one third of the entire country — thirty three million people displaced, two million homes destroyed, crops that fed entire regions washed away in weeks.</p>
-      <p>In Jakarta the city is sinking — literally descending into the sea at a rate of twenty five centimeters per year because groundwater extraction has collapsed the land beneath it and the ocean is rising to meet the subsidence.</p>
+      <p>In Pakistan the 2022 floods submerged one third of the entire country â€” thirty three million people displaced, two million homes destroyed, crops that fed entire regions washed away in weeks.</p>
+      <p>In Jakarta the city is sinking â€” literally descending into the sea at a rate of twenty five centimeters per year because groundwater extraction has collapsed the land beneath it and the ocean is rising to meet the subsidence.</p>
       <p>The water bed is the controlled version. The flood is what water looks like when the control belongs to nobody.</p>
       <p>And the distance between those two experiences is the precise measurement of what climate change actually means for the human beings living at different coordinates on a map that is being redrawn by water every single year.</p>
     </div>
   </div>
 
   <footer>
-    <div class="footer-brand">DOMO<small>Department of Miscellaneous Objects © 2024</small></div>
-    <div class="footer-back"><a href="index.html#objects">← Back to all objects</a></div>
+    <div class="footer-brand">DOMO<small>Department of Miscellaneous Objects Â© 2024</small></div>
+    <div class="footer-back"><a href="index.html#objects">â† Back to all objects</a></div>
   </footer>
 </div>
 
 <script>
 function getCart(){try{return JSON.parse(localStorage.getItem('domo_cart'))||[];}catch{return[];}}
 function saveCart(c){localStorage.setItem('domo_cart',JSON.stringify(c));window.dispatchEvent(new Event('cartUpdated'));}
-function fmtPrice(n){return '₹'+n.toLocaleString('en-IN');}
+function fmtPrice(n){return 'â‚¹'+n.toLocaleString('en-IN');}
 function openCart(){document.getElementById('cartDrawer').classList.add('open');document.getElementById('cartOverlay').classList.add('open');document.body.style.overflow='hidden';}
 function closeCart(){document.getElementById('cartDrawer').classList.remove('open');document.getElementById('cartOverlay').classList.remove('open');document.body.style.overflow='';}
 
@@ -387,7 +447,7 @@ function renderCart(){
         <div class="drawer-item-meta">Model ${item.model}</div>
         <div class="drawer-item-price">${fmtPrice(item.price)}</div>
       </div>
-      <button class="drawer-item-remove" onclick="removeFromCart(${i})" title="Remove">✕</button>
+      <button class="drawer-item-remove" onclick="removeFromCart(${i})" title="Remove">âœ•</button>
     `;
     body.insertBefore(div, empty);
   });
@@ -404,17 +464,16 @@ function addToCart(){
   cart.push(PRODUCT);
   saveCart(cart);
   renderCart();
-  btn.textContent='Added ✓';
+  btn.textContent='Added âœ“';
   setTimeout(()=>btn.textContent='Add to Cart',1200);
 }
 function toggleWishlist(){
   const b=document.getElementById('wishBtn');
   const on=b.dataset.on==='1';
   b.dataset.on=on?'0':'1';
-  b.textContent=on?'Save for Later ♡':'Saved ✓';
+  b.textContent=on?'Save for Later â™¡':'Saved âœ“';
 }
 
-// water interactive
 (function(){
   const temp=document.getElementById('temp');
   const depth=document.getElementById('depth');
@@ -432,7 +491,6 @@ function toggleWishlist(){
   const wLine=document.getElementById('wLine');
   const wDot=document.getElementById('wDot');
   const waterPath=document.getElementById('waterPath');
-
   const canvas=document.getElementById('waterCanvas');
   const ctx=canvas.getContext('2d');
   let pressure='Soft';
@@ -443,98 +501,146 @@ function toggleWishlist(){
     let idx = 92 - Math.abs(T-28)*1.1 - (D-5)*2.2 - P*8;
     return Math.max(18, Math.min(98, Math.round(idx)));
   }
-
   function updateText(){
     const T=+temp.value, D=+depth.value, idx=containmentIndex();
-    tempVal.textContent=T+'°C';
-    depthVal.textContent=D+'/10';
-    pressVal.textContent=pressure;
-    statTemp.textContent=T+'°';
-    statDepth.textContent=String(D);
-    statPress.textContent=pressure;
+    tempVal.textContent=T+'Â°C'; depthVal.textContent=D+'/10'; pressVal.textContent=pressure;
+    statTemp.textContent=T+'Â°'; statDepth.textContent=String(D); statPress.textContent=pressure;
     wCaption.textContent='Containment Index: '+idx;
-    const ok = idx >= 60;
-    statContain.textContent = ok ? 'OK' : 'RISK';
-    wDot.style.background = ok ? 'rgba(105,179,255,.75)' : 'rgba(255,106,106,.85)';
-
-    if(idx >= 80){
-      wReport.innerHTML = '<strong>SEALED.</strong> Your water is polite. It stays where you put it. It does not migrate.';
-      wLine.innerHTML = 'You have domesticated water for <strong>one square meter</strong>.';
-    } else if(idx >= 60){
-      wReport.innerHTML = '<strong>STABLE.</strong> The membrane holds. The water obeys. Outside, water does what water does.';
-      wLine.innerHTML = 'Your comfort is a <strong>controlled version</strong> of a global force.';
+    const ok=idx>=60;
+    statContain.textContent=ok?'OK':'RISK';
+    wDot.style.background=ok?'rgba(105,179,255,.75)':'rgba(255,106,106,.85)';
+    if(idx>=80){
+      wReport.innerHTML='<strong>SEALED.</strong> Your water is polite. It stays where you put it. It does not migrate.';
+      wLine.innerHTML='You have domesticated water for <strong>one square meter</strong>.';
+    } else if(idx>=60){
+      wReport.innerHTML='<strong>STABLE.</strong> The membrane holds. The water obeys. Outside, water does what water does.';
+      wLine.innerHTML='Your comfort is a <strong>controlled version</strong> of a global force.';
     } else {
-      wReport.innerHTML = '<strong>UNSTABLE.</strong> The water wants to move. You are practicing control on a substance built to ignore you.';
-      wLine.innerHTML = 'The flood is water when the control belongs to <strong>nobody</strong>.';
+      wReport.innerHTML='<strong>UNSTABLE.</strong> The water wants to move. You are practicing control on a substance built to ignore you.';
+      wLine.innerHTML='The flood is water when the control belongs to <strong>nobody</strong>.';
     }
   }
-
   function setPressure(p){
     pressure=p;
-    pSoft.classList.toggle('active', p==='Soft');
-    pFirm.classList.toggle('active', p==='Firm');
+    pSoft.classList.toggle('active',p==='Soft');
+    pFirm.classList.toggle('active',p==='Firm');
     updateText();
   }
-
   function draw(){
-    const W=canvas.width, H=canvas.height;
-    t += 0.016;
+    const W=canvas.width,H=canvas.height;
+    t+=0.016;
     const idx=containmentIndex();
     const D=+depth.value;
-    const amp = (pressure==='Soft'? 26: 16) + (D-5)*2 + (80-idx)*0.18;
-
-    // bg
+    const amp=(pressure==='Soft'?26:16)+(D-5)*2+(80-idx)*0.18;
     ctx.clearRect(0,0,W,H);
     const g=ctx.createLinearGradient(0,0,0,H);
     g.addColorStop(0,'rgba(105,179,255,0.12)');
     g.addColorStop(1,'rgba(6,22,44,0)');
-    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-
-    // waves
-    ctx.save();
-    ctx.translate(0, H*0.56);
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    ctx.save();ctx.translate(0,H*0.56);
     ctx.fillStyle='rgba(47,123,255,0.20)';
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
+    ctx.beginPath();ctx.moveTo(0,0);
     for(let x=0;x<=W;x+=12){
-      const y = Math.sin((x/W)*Math.PI*2*1.4 + t*1.8) * amp
-              + Math.sin((x/W)*Math.PI*2*3.2 - t*1.2) * (amp*0.35);
-      ctx.lineTo(x, y);
+      const y=Math.sin((x/W)*Math.PI*2*1.4+t*1.8)*amp+Math.sin((x/W)*Math.PI*2*3.2-t*1.2)*(amp*0.35);
+      ctx.lineTo(x,y);
     }
-    ctx.lineTo(W, H);
-    ctx.lineTo(0, H);
-    ctx.closePath();
-    ctx.fill();
+    ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
     ctx.restore();
-
-    // tiny highlight line
-    ctx.save();
-    ctx.translate(0, H*0.56);
-    ctx.strokeStyle='rgba(105,179,255,0.55)';
-    ctx.lineWidth=2;
-    ctx.beginPath();
-    for(let x=0;x<=W;x+=14){
-      const y = Math.sin((x/W)*Math.PI*2*1.4 + t*1.8) * amp*0.55;
-      ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-    ctx.restore();
-
-    // update svg water a bit too
-    const a2 = Math.max(6, Math.min(18, amp*0.28));
-    const yA = 150 - a2;
-    const yB = 154 + a2*0.35;
-    waterPath.setAttribute('d', `M70 ${yB} C90 ${yA}, 105 ${yB+a2}, 125 ${yB} C145 ${yA}, 160 ${yB+a2}, 180 ${yB} C190 ${yB-a2*0.2}, 194 ${yB-a2*0.2}, 194 ${yB-a2*0.2} L194 198 L70 198 Z`);
-
+    const a2=Math.max(6,Math.min(18,amp*0.28));
+    const yA=150-a2,yB=154+a2*0.35;
+    waterPath.setAttribute('d',`M70 ${yB} C90 ${yA}, 105 ${yB+a2}, 125 ${yB} C145 ${yA}, 160 ${yB+a2}, 180 ${yB} C190 ${yB-a2*0.2}, 194 ${yB-a2*0.2}, 194 ${yB-a2*0.2} L194 198 L70 198 Z`);
     requestAnimationFrame(draw);
   }
+  temp.addEventListener('input',updateText);
+  depth.addEventListener('input',updateText);
+  pSoft.addEventListener('click',()=>setPressure('Soft'));
+  pFirm.addEventListener('click',()=>setPressure('Firm'));
+  updateText();draw();
+})();
+</script>
+<script>
+(function() {
+  var bar = document.getElementById('signal-bar');
+  if (!bar) return;
+  bar.addEventListener('animationend', function() {
+    bar.remove();
+  });
+})();
+</script>
+<script>
+(function() {
+  var PREV = 'blue-toilet.html';
+  var NEXT = 'crocodile.html';
+  var NEXT_COLOR = '#040c04';
+  var PREV_COLOR = '#0e1f3d';
 
-  temp.addEventListener('input', updateText);
-  depth.addEventListener('input', updateText);
-  pSoft.addEventListener('click', ()=>setPressure('Soft'));
-  pFirm.addEventListener('click', ()=>setPressure('Firm'));
-  updateText();
-  draw();
+  function doTransition(destination, color) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = [
+      'position:fixed', 'inset:0', 'background:' + color,
+      'z-index:9999', 'transform:scaleY(0)', 'transform-origin:center',
+      'pointer-events:all'
+    ].join(';');
+
+    var logoImg = document.createElement('img');
+    logoImg.src = 'favicon.png';
+    logoImg.style.cssText = [
+      'position:absolute', 'top:50%', 'left:50%',
+      'transform:translate(-50%,-50%)', 'height:32px', 'width:auto',
+      'opacity:0', 'transition:opacity 200ms'
+    ].join(';');
+
+    overlay.appendChild(logoImg);
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(function() {
+      overlay.style.transition = 'transform 280ms cubic-bezier(0.76,0,0.24,1)';
+      overlay.style.transform = 'scaleY(1)';
+    });
+
+    setTimeout(function() {
+      logoImg.style.opacity = '0.6';
+      setTimeout(function() { logoImg.style.opacity = '0'; }, 200);
+    }, 150);
+
+    setTimeout(function() {
+      window.location.href = destination;
+    }, 300);
+  }
+
+  var prevBtn = document.getElementById('prev-btn');
+  var nextBtn = document.getElementById('next-btn');
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      doTransition(PREV, PREV_COLOR);
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      doTransition(NEXT, NEXT_COLOR);
+    });
+  }
+
+  // Entry reveal transition
+  var entry = document.createElement('div');
+  entry.style.cssText = [
+    'position:fixed', 'inset:0', 'background:#0d0d0b',
+    'z-index:9999', 'transform:scaleY(1)', 'transform-origin:top',
+    'pointer-events:none', 'transition:transform 280ms cubic-bezier(0.76,0,0.24,1)'
+  ].join(';');
+  document.body.appendChild(entry);
+
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      entry.style.transform = 'scaleY(0)';
+    });
+  });
+
+  setTimeout(function() { entry.remove(); }, 300);
 })();
 </script>
 </body>

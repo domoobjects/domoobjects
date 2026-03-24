@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="favicon.png">
+
+
+
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sad Gargoyle (Red) ?" DOMO</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Oswald:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#fff;color:#0a0a0a;font-family:'Anton',sans-serif;min-height:100vh;overflow-x:hidden;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:#fff;border-bottom:3px solid #0a0a0a;}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:.08em;color:#0a0a0a;text-decoration:none;line-height:1;}
+.brand sub{font-family:'Space Mono',monospace;font-size:9px;display:block;letter-spacing:.3em;color:#888;text-transform:uppercase;}
+.nav-links{display:flex;gap:32px;list-style:none;align-items:center;}
+.nav-links a{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#0a0a0a;text-decoration:none;font-weight:700;transition:color .15s;}
+.nav-links a:hover{color:#888;}
+.obj-nav{position:fixed;top:50%;transform:translateY(-50%);z-index:200;text-decoration:none;opacity:.7;transition:opacity .2s;}
+.obj-nav:hover{opacity:1;}
+.obj-nav.prev{left:12px;} .obj-nav.next{right:12px;}
+.obj-nav-arrow{width:44px;height:44px;border:3px solid #0a0a0a;display:flex;align-items:center;justify-content:center;font-size:20px;background:#fff;transition:background .15s,color .15s;}
+.obj-nav:hover .obj-nav-arrow{background:#888;color:#fff;border-color:#888;}
+.breadcrumb{padding:88px 48px 0;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#999;font-weight:700;}
+.breadcrumb a{color:#999;text-decoration:none;} .breadcrumb a:hover{color:#888;}
+.product-wrap{padding-top:28px;}
+.product-top{display:grid;grid-template-columns:1fr 1fr;border-top:3px solid #0a0a0a;border-bottom:3px solid #0a0a0a;min-height:calc(100vh - 160px);}
+.col-left{padding:48px 52px 48px 48px;border-right:3px solid #0a0a0a;display:flex;flex-direction:column;}
+.cat-tag{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:#888;margin-bottom:16px;}
+.obj-title{font-family:'Anton',sans-serif;font-size:clamp(64px,8vw,118px);line-height:.88;letter-spacing:-.02em;color:#0a0a0a;text-transform:uppercase;}
+.obj-title .acc{color:#ffeaee;}
+.obj-model{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.25em;color:#bbb;text-transform:uppercase;margin-top:12px;margin-bottom:40px;}
+.acc-rule{width:80px;height:6px;background:#b10f1d;margin-bottom:36px;}
+.obj-desc{font-family:'Oswald',sans-serif;font-size:21px;font-weight:700;line-height:1.4;color:#1a1a1a;text-transform:uppercase;margin-bottom:12px;max-width:480px;}
+.obj-desc-body{font-family:'Space Mono',monospace;font-size:12px;line-height:1.9;color:#555;max-width:480px;margin-bottom:36px;font-weight:400;letter-spacing:.02em;}
+.specs-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:2px solid #0a0a0a;margin-top:auto;}
+.spec{padding:14px 0;border-bottom:1px solid #e0e0e0;}
+.spec:nth-child(odd){border-right:1px solid #e0e0e0;padding-right:16px;} .spec:nth-child(even){padding-left:16px;}
+.spec-k{font-family:'Space Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:#aaa;margin-bottom:3px;}
+.spec-v{font-family:'Anton',sans-serif;font-size:17px;color:#0a0a0a;letter-spacing:.02em;}
+
+/* RIGHT COLUMN ?" red themed */
+.col-right{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 40px;background:radial-gradient(600px 260px at 30% 25%, rgba(255,255,255,.08), transparent 60%), linear-gradient(180deg,#2a0006,#140002);overflow:hidden;}
+.bg-num{position:absolute;font-family:'Anton',sans-serif;font-size:300px;color:rgba(0,0,0,.04);line-height:1;bottom:-30px;right:-10px;user-select:none;pointer-events:none;letter-spacing:-.05em;}
+
+/* coin slot detail top-right */
+.coin-slot-label{position:absolute;top:32px;right:32px;font-family:'Space Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:#aaa;writing-mode:vertical-rl;transform:rotate(180deg);}
+
+.main-img-wrap{width:100%;max-width:420px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;}
+.main-img-wrap svg{width:72%;height:72%;animation:float 5s ease-in-out infinite;filter:drop-shadow(0 20px 40px rgba(0,0,0,.18));}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+
+/* coin animation */
+.coin{animation:coinDrop 3s ease-in-out infinite;}
+@keyframes coinDrop{0%,100%{transform:translateY(-8px);opacity:0}20%{opacity:1}60%{transform:translateY(2px);opacity:1}80%,100%{transform:translateY(0);opacity:0}}
+
+.thumbs{display:flex;gap:10px;margin-top:20px;position:relative;z-index:1;}
+.thumb{width:58px;height:58px;border:2px solid #ddd;background:#fff;display:flex;align-items:center;justify-content:center;padding:8px;cursor:pointer;transition:border-color .15s;}
+.thumb:first-child{border-color:#888;}
+.thumb:hover{border-color:#0a0a0a;}
+.thumb svg{width:100%;height:100%;}
+
+/* PRICE STRIP */
+.price-strip{display:grid;grid-template-columns:1fr 1fr;border-bottom:3px solid #0a0a0a;}
+.price-left{padding:40px 52px 40px 48px;border-right:3px solid #0a0a0a;display:flex;flex-direction:column;justify-content:center;}
+.price-label{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:#aaa;margin-bottom:4px;}
+.price-num{font-family:'Anton',sans-serif;font-size:clamp(72px,9vw,130px);line-height:.9;color:#0a0a0a;letter-spacing:-.02em;}
+.price-num sup{font-size:.38em;vertical-align:super;color:#888;}
+.price-sub{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#aaa;margin-top:10px;}
+.price-right{padding:40px 48px;display:flex;flex-direction:column;justify-content:center;gap:14px;}
+.stock-line{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#0a0a0a;display:flex;align-items:center;gap:8px;}
+.stock-dot{width:8px;height:8px;border-radius:50%;background:#888;display:inline-block;}
+.btn-cart{background:#0a0a0a;color:#fff;border:none;padding:20px 40px;font-family:'Anton',sans-serif;font-size:28px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:background .15s;width:100%;}
+.btn-cart:hover{background:#888;}
+.btn-save{background:transparent;border:3px solid #0a0a0a;padding:14px;font-family:'Anton',sans-serif;font-size:22px;cursor:pointer;color:#0a0a0a;transition:background .15s,color .15s;width:100%;letter-spacing:.05em;text-transform:uppercase;}
+.btn-save:hover{background:#0a0a0a;color:#fff;}
+
+/* STORY */
+.story{display:grid;grid-template-columns:260px 1fr;border-bottom:3px solid #0a0a0a;}
+.story-tag{padding:52px 40px 52px 48px;border-right:3px solid #0a0a0a;display:flex;align-items:flex-start;}
+.story-tag span{font-family:'Anton',sans-serif;font-size:44px;line-height:.9;color:#888;text-transform:uppercase;writing-mode:vertical-rl;transform:rotate(180deg);}
+.story-body{padding:52px 52px 52px 48px;}
+.story-body h3{font-family:'Anton',sans-serif;font-size:34px;color:#0a0a0a;text-transform:uppercase;letter-spacing:.02em;margin-bottom:20px;line-height:1;}
+.story-body p{font-family:'Space Mono',monospace;font-size:12px;font-weight:400;line-height:1.9;color:#444;letter-spacing:.02em;max-width:640px;}
+.story-body p+p{margin-top:16px;}
+
+/* WARNING STRIP */
+.warning-strip{background:#0a0a0a;color:#fff;padding:18px 48px;display:flex;align-items:center;gap:24px;border-bottom:3px solid #0a0a0a;}
+.warning-strip .w-label{font-family:'Anton',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#888;flex-shrink:0;}
+.warning-strip .w-text{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;color:#666;line-height:1.6;}
+
+footer{display:flex;align-items:center;justify-content:space-between;padding:28px 48px;background:#0a0a0a;}
+.footer-brand{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.1em;color:#fff;}
+.footer-brand small{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.2em;color:#555;display:block;text-transform:uppercase;}
+.footer-back a{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#666;text-decoration:none;transition:color .15s;}
+.footer-back a:hover{color:#888;}
+
+/* CART SIDEBAR */
+.cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;opacity:0;pointer-events:none;transition:opacity .3s;}
+.cart-overlay.open{opacity:1;pointer-events:all;}
+.cart-drawer{position:fixed;top:0;right:0;bottom:0;width:420px;max-width:95vw;background:#fff;z-index:901;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;border-left:3px solid #0a0a0a;}
+.cart-drawer.open{transform:translateX(0);}
+.cart-header{display:flex;align-items:center;justify-content:space-between;padding:24px 28px;border-bottom:3px solid #0a0a0a;flex-shrink:0;}
+.cart-header-title{font-family:'Anton',sans-serif;font-size:28px;letter-spacing:.02em;text-transform:uppercase;}
+.cart-close{background:none;border:2px solid #0a0a0a;width:36px;height:36px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;}
+.cart-close:hover{background:#0a0a0a;color:#fff;}
+.cart-body{flex:1;overflow-y:auto;padding:0 28px;}
+.cart-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;text-align:center;}
+.cart-empty .empty-big{font-family:'Anton',sans-serif;font-size:52px;color:#e0e0e0;text-transform:uppercase;}
+.cart-empty .empty-sm{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#ccc;}
+.drawer-item{display:flex;gap:14px;padding:18px 0;border-bottom:1px solid #e8e8e8;align-items:center;}
+.drawer-item-img{width:58px;height:58px;border:2px solid #e8e8e8;background:#f8f8f8;display:flex;align-items:center;justify-content:center;padding:7px;flex-shrink:0;}
+.drawer-item-img img{width:100%;height:100%;object-fit:contain;}
+.drawer-item-info{flex:1;min-width:0;}
+.drawer-item-name{font-family:'Anton',sans-serif;font-size:15px;letter-spacing:.02em;text-transform:uppercase;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.drawer-item-meta{font-family:'Space Mono',monospace;font-size:8px;color:#aaa;letter-spacing:.1em;text-transform:uppercase;margin-top:2px;}
+.drawer-item-price{font-family:'Anton',sans-serif;font-size:16px;letter-spacing:.02em;white-space:nowrap;margin-top:4px;}
+.drawer-item-remove{background:none;border:none;cursor:pointer;font-size:14px;color:#ccc;transition:color .15s;flex-shrink:0;}
+.drawer-item-remove:hover{color:#cc0000;}
+
+/* ── SAD GARGOYLE (RED) ?" THEME OVERRIDES ───────────────────────── */
+:root{
+  --sg-red:#b10f1d;
+  --sg-red2:#62000a;
+  --sg-red3:#2a0006;
+  --sg-white:#fff6f7;
+  --sg-mute:rgba(255,246,247,.72);
+  --sg-mute2:rgba(255,246,247,.48);
+  --sg-line:rgba(255,246,247,.78);
+  --sg-line-soft:rgba(255,246,247,.18);
+}
+body{background:var(--sg-red3) !important;color:var(--sg-white) !important;}
+nav{background:rgba(42,0,6,.92) !important;border-bottom:3px solid var(--sg-line) !important;backdrop-filter:blur(12px);}
+.nav-links a{color:var(--sg-white) !important;}
+.nav-links a:hover{color:var(--sg-mute) !important;}
+.breadcrumb{color:var(--sg-mute2) !important;}
+.breadcrumb a{color:var(--sg-mute2) !important;}
+.breadcrumb a:hover{color:var(--sg-mute) !important;}
+.product-top{border-top:3px solid var(--sg-line) !important;border-bottom:3px solid var(--sg-line) !important;}
+.col-left{border-right:3px solid var(--sg-line) !important;}
+.cat-tag{color:var(--sg-mute) !important;}
+.obj-title{color:var(--sg-white) !important;}
+.obj-model{color:rgba(255,246,247,.38) !important;}
+.obj-desc{color:var(--sg-white) !important;}
+.obj-desc-body{color:var(--sg-mute) !important;}
+.specs-grid{border-top:2px solid var(--sg-line) !important;}
+.spec{border-bottom:1px solid var(--sg-line-soft) !important;}
+.spec:nth-child(odd){border-right:1px solid var(--sg-line-soft) !important;}
+.spec-k{color:rgba(255,246,247,.46) !important;}
+.spec-v{color:var(--sg-white) !important;}
+.coin-slot-label{color:rgba(255,246,247,.38) !important;}
+.bg-num{color:rgba(255,246,247,.06) !important;}
+.thumb{background:rgba(255,246,247,.08) !important;border-color:rgba(255,246,247,.18) !important;}
+.thumb:hover{border-color:var(--sg-line) !important;}
+.price-strip{border-bottom:3px solid var(--sg-line) !important;}
+.price-left{border-right:3px solid var(--sg-line) !important;}
+.price-label,.price-sub{color:rgba(255,246,247,.48) !important;}
+.price-num{color:var(--sg-white) !important;}
+.price-num sup{color:rgba(255,246,247,.60) !important;}
+.stock-line{color:var(--sg-white) !important;}
+.stock-dot{background:var(--sg-red) !important;}
+.btn-cart{background:var(--sg-red) !important;color:var(--sg-white) !important;}
+.btn-cart:hover{background:#d4142a !important;}
+.btn-save{border-color:var(--sg-line) !important;color:var(--sg-white) !important;}
+.btn-save:hover{background:rgba(255,246,247,.10) !important;color:var(--sg-white) !important;}
+.warning-strip{background:#140002 !important;border-bottom:3px solid var(--sg-line) !important;}
+.warning-strip .w-label{color:rgba(255,246,247,.55) !important;}
+.warning-strip .w-text{color:rgba(255,246,247,.55) !important;}
+.story{border-bottom:3px solid var(--sg-line) !important;}
+.story-tag{border-right:3px solid var(--sg-line) !important;}
+.story-tag span{color:rgba(255,246,247,.45) !important;}
+.story-body h3{color:var(--sg-white) !important;}
+.story-body p{color:var(--sg-mute) !important;}
+footer{background:#140002 !important;}
+.footer-back a{color:rgba(255,246,247,.55) !important;}
+.footer-back a:hover{color:var(--sg-white) !important;}
+.obj-nav-arrow{border-color:var(--sg-line) !important;background:rgba(255,246,247,.06) !important;color:var(--sg-white) !important;}
+.obj-nav:hover .obj-nav-arrow{background:var(--sg-red) !important;color:var(--sg-white) !important;border-color:var(--sg-red) !important;}
+.cart-footer{padding:20px 28px;border-top:3px solid #0a0a0a;flex-shrink:0;}
+.cart-subtotal{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.cart-subtotal .lbl{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:#666;}
+.cart-subtotal .val{font-family:'Anton',sans-serif;font-size:22px;letter-spacing:.02em;}
+.btn-checkout{display:block;background:#0a0a0a;color:#fff;border:none;padding:18px;font-family:'Anton',sans-serif;font-size:24px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;width:100%;transition:background .15s;text-align:center;text-decoration:none;}
+.btn-checkout:hover{background:#888;}
+.cart-icon-btn{background:none;border:3px solid #0a0a0a;padding:8px 14px;cursor:pointer;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;display:flex;align-items:center;gap:8px;transition:background .15s,color .15s;position:relative;}
+.cart-icon-btn:hover{background:#0a0a0a;color:#fff;}
+.cart-badge{background:#888;color:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;position:absolute;top:-8px;right:-8px;}
+.cart-badge.hidden{display:none;}
+
+@media(max-width:860px){
+  .product-top,.price-strip,.story{grid-template-columns:1fr;}
+  .col-left,.col-right,.price-left,.price-right,.story-tag,.story-body{border-right:none!important;border-bottom:3px solid #0a0a0a;}
+  .story-tag span{writing-mode:horizontal-tb;transform:none;font-size:32px;}
+  .obj-nav{display:none;} nav{padding:16px 22px;} .breadcrumb{padding:80px 22px 0;}
+  .col-left,.price-left,.story-body,footer{padding-left:22px;padding-right:22px;}
+  .col-right,.price-right{padding:36px 22px;}
+  .warning-strip{padding:16px 22px;}
+}
+
+/* ── DOMO NAV AVATAR ── */
+.nav-avatar-btn{cursor:pointer;display:flex;align-items:center;}
+.nav-avatar-circle{width:30px;height:30px;border-radius:50%;background:var(--accent,#e82010);display:flex;align-items:center;justify-content:center;font-family:"Space Mono",monospace;font-size:11px;font-weight:700;color:#fff;border:1.5px solid rgba(255,255,255,.2);transition:box-shadow .2s;}
+.nav-avatar-circle:hover{box-shadow:0 0 0 3px rgba(255,255,255,.15);}
+.nav-dropdown{display:none;flex-direction:column;position:absolute;top:calc(100% + 10px);right:0;min-width:200px;background:#0a0a0a;border:1px solid rgba(255,255,255,.1);z-index:500;padding:0;}
+.nav-dropdown-top{padding:14px 16px 10px;border-bottom:1px solid rgba(255,255,255,.07);}
+.nav-avatar-name{font-family:"Anton",sans-serif;font-size:15px;color:#fff;text-transform:uppercase;letter-spacing:.03em;}
+.nav-avatar-email{font-family:"Space Mono",monospace;font-size:8px;color:rgba(255,255,255,.35);letter-spacing:.05em;margin-top:2px;word-break:break-all;}
+.nav-dd-link{display:block;padding:11px 16px;font-family:"Space Mono",monospace;font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.6);text-decoration:none;transition:background .15s,color .15s;border-bottom:1px solid rgba(255,255,255,.05);}
+.nav-dd-link:hover{background:rgba(255,255,255,.06);color:#fff;}
+.nav-dd-signout{display:block;width:100%;padding:11px 16px;font-family:"Space Mono",monospace;font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,80,60,.7);background:none;border:none;cursor:pointer;text-align:left;transition:background .15s,color .15s;}
+.nav-dd-signout:hover{background:rgba(255,60,40,.08);color:#ff4030;}
+
+.brand{text-decoration:none;display:flex;align-items:center;}
+.brand-logo{height:58px;width:auto;display:block;}
+</style>
+
+<link rel="stylesheet" href="mobile-overrides.css">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400&family=Playfair+Display:wght@400;700;900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+@keyframes signalBar {
+  0%   { width: 0%; opacity: 1; }
+  85%  { width: 100%; opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+}
+#signal-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 1.5px;
+  width: 0%;
+  background: #c1121f;
+  z-index: 9999;
+  animation: signalBar 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+</style>
+
+<style>
+.nav-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 50;
+  opacity: 0.4;
+  transition: opacity 300ms, transform 300ms;
+  padding: 0;
+}
+.nav-arrow:hover {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.1);
+}
+.prev-arrow { left: 24px; }
+.next-arrow { right: 24px; }
+.arrow-ring {
+  stroke-dasharray: 145;
+  stroke-dashoffset: 145;
+  transition: stroke-dashoffset 400ms ease;
+}
+.nav-arrow:hover .arrow-ring {
+  stroke-dashoffset: 0;
+}
+</style>
+</head>
+<body>
+<div id="signal-bar"></div></div><div class="nav-dropdown"><div class="nav-dropdown-top"><div class="nav-avatar-name">Name</div><div class="nav-avatar-email">email</div></div><a href="profile.html" class="nav-dd-link">&#9654; My Profile</a><button class="nav-dd-signout" onclick="doSignOut()">Sign Out</button></div></li>
+    </ul>
+    <button class="nav-cart" onclick="openCart()">Cart <span class="cart-badge hidden" id="cartBadge">0</span></button>
+  </nav>
+
+  <!-- NAV PANEL -->
+    <button class="panel-close" onclick="closePanel()">Close</button>
+
+    <!-- Left column -->
+    <div class="panel-left">
+      <nav class="panel-links">
+        <a href="domo-times.html" class="panel-link">
+          <span class="panel-idx">01</span>DOMO Times
+        </a>
+        <a href="inside-the-box.html" class="panel-link">
+          <span class="panel-idx">02</span>Inside The Box
+        </a>
+      </nav>
+      <p class="panel-footer-text">Dept. of Misc. Objects</p>
+    </div>
+
+    <!-- Right column -->
+    <div class="panel-right">
+      <!-- Top cell: DOMO Times -->
+      <div class="panel-cell cell-times">
+        <span class="cell-eyebrow">Vol. 07 &#8212; Field Dispatch</span>
+        <div class="cell-redline"></div>
+        <h2 class="cell-title">DOMO<br>Times</h2>
+        <p class="cell-article">Object #447 found in estate sale</p>
+        <p class="cell-article">The last known cursed mirror</p>
+        <p class="cell-article">Inventory drop &#8212; March 2026</p>
+        <a href="domo-times.html" class="cell-arrow">&#8594;</a>
+      </div>
+      <!-- Bottom cell: Inside the Box -->
+      <div class="panel-cell cell-box" id="cellBox">
+        <div class="cell-content">
+          <span class="cell-eyebrow">Classified Archive</span>
+          <div class="cell-redline" style="background:#1e1e1c;"></div>
+          <h2 class="cell-title">Inside<br>The Box</h2>
+          <p class="cell-article">access_level / unknown</p>
+          <p class="cell-article">contents / [redacted]</p>
+          <p class="cell-article">authorised / pending</p>
+          <a href="inside-the-box.html" class="cell-arrow">&#8594;</a>
+        </div>
+        <div class="cell-overlay" id="cellOverlay"></div>
+      </div>
+    </div>
+  </div>
+<button class="nav-arrow prev-arrow" id="prev-btn">
+  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="24" cy="24" r="23" stroke="#c1121f" stroke-width="0.5" opacity="0.4"/>
+    <circle cx="24" cy="24" r="23" stroke="#c1121f" stroke-width="0.5" opacity="0.4" class="arrow-ring"/>
+    <path d="M27 14L17 24L27 34" stroke="#d4d4cc" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="17" y1="24" x2="32" y2="24" stroke="#c1121f" stroke-width="0.5" opacity="0.6"/>
+  </svg>
+</button>
+<button class="nav-arrow next-arrow" id="next-btn">
+  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="24" cy="24" r="23" stroke="#c1121f" stroke-width="0.5" opacity="0.4"/>
+    <path d="M21 14L31 24L21 34" stroke="#d4d4cc" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="16" y1="24" x2="31" y2="24" stroke="#c1121f" stroke-width="0.5" opacity="0.6"/>
+  </svg>
+</button>
+
+<script>
+const PRODUCT={slug:'sad-gargoyle',name:'Sad Gargoyle (Red)',model:'D.O.M.O-041',price:318,accent:'#b10f1d',img:'data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23b10f1d%22%20stroke-width%3D%223.2%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M22%2036%20Q34%2018%2050%2018%20Q66%2018%2078%2036%22/%3E%3Cpath%20d%3D%22M26%2036%20Q34%2042%2050%2042%20Q66%2042%2074%2036%22/%3E%3Cpath%20d%3D%22M30%2042%20Q30%2068%2050%2084%20Q70%2068%2070%2042%22/%3E%3Cpath%20d%3D%22M36%2054%20Q40%2050%2044%2054%22/%3E%3Cpath%20d%3D%22M56%2054%20Q60%2050%2064%2054%22/%3E%3Cpath%20d%3D%22M40%2068%20Q50%2074%2060%2068%22/%3E%3Cpath%20d%3D%22M28%2058%20Q20%2062%2018%2070%22/%3E%3Cpath%20d%3D%22M72%2058%20Q80%2062%2082%2070%22/%3E%3Cpath%20d%3D%22M36%2028%20Q30%2024%2026%2018%22/%3E%3Cpath%20d%3D%22M64%2028%20Q70%2024%2074%2018%22/%3E%3C/g%3E%3C/svg%3E'};
+</script>
+
+<!-- CART -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <div class="cart-header-title">Cart</div>
+    <button class="cart-close" onclick="closeCart()">o</button>
+  </div>
+  <div class="cart-body" id="cartBody">
+    <div class="cart-empty" id="cartEmpty">
+      <div class="empty-big">Empty</div>
+      <div class="empty-sm">Nothing added yet</div>
+    </div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-subtotal">
+      <span class="lbl">Subtotal</span>
+      <span class="val" id="cartSubtotal">₹0</span>
+    </div>
+    <a href="checkout.html" class="btn-checkout">Checkout '</a>
+  </div>
+</div>
+
+  <!-- NAV PANEL -->
+    <button class="panel-close" onclick="closePanel()">Close</button>
+
+    <!-- Left column -->
+    <div class="panel-left">
+      <p class="panel-footer-text">Dept. of Misc. Objects</p>
+    </div>
+
+    <!-- Right column -->
+    <div class="panel-right">
+      <!-- Top cell: DOMO Times -->
+      <div class="panel-cell cell-times">
+        <span class="cell-eyebrow">Vol. 07 &#8212; Field Dispatch</span>
+        <div class="cell-redline"></div>
+        <h2 class="cell-title">DOMO<br>Times</h2>
+        <p class="cell-article">Object #447 found in estate sale</p>
+        <p class="cell-article">The last known cursed mirror</p>
+        <p class="cell-article">Inventory drop &#8212; March 2026</p>
+        <a href="domo-times.html" class="cell-arrow">&#8594;</a>
+      </div>
+      <!-- Bottom cell: Inside the Box -->
+      <div class="panel-cell cell-box" id="cellBox">
+        <div class="cell-content">
+          <span class="cell-eyebrow">Classified Archive</span>
+          <div class="cell-redline" style="background:#1e1e1c;"></div>
+          <h2 class="cell-title">Inside<br>The Box</h2>
+          <p class="cell-article">access_level / unknown</p>
+          <p class="cell-article">contents / [redacted]</p>
+          <p class="cell-article">authorised / pending</p>
+          <a href="inside-the-box.html" class="cell-arrow">&#8594;</a>
+        </div>
+        <div class="cell-overlay" id="cellOverlay"></div>
+      </div>
+    </div>
+  </div>
+
+<div class="breadcrumb"><a href="index.html">Home</a> / <a href="index.html#objects">Objects</a> / Sad Gargoyle (Red)</div>
+
+<div class="product-wrap">
+  <div class="product-top">
+
+    <!-- LEFT -->
+    <div class="col-left">
+      <div class="cat-tag">Architectural Sentinels ?" Since Cathedrals Needed Someone Outside</div>
+      <h1 class="obj-title">Sad<br><span class="acc">Gargoyle<br>(Red)</span></h1>
+      <p class="obj-model">Model No. D.O.M.O-041</p>
+      <div class="acc-rule"></div>
+      <div class="obj-desc">Built to protect the inside. Built to stay outside.</div>
+      <div class="obj-desc-body">The Sad Gargoyle was carved into a contract: stand at the edge of everything, take the weather first, keep the warmth behind you safe. It guards the light and never steps into it.<br><br>The red is not anger. It’s a wound that lasted long enough to become a color ?" decades of exposure, centuries of being the thing between everyone else and the storm while nobody ever built a roof over the thing doing the protecting.</div>
+      <div class="specs-grid">
+        <div class="spec"><div class="spec-k">Era</div><div class="spec-v">Since the First Roof Was Built</div></div>
+        <div class="spec"><div class="spec-k">Material</div><div class="spec-v">Stone · painted wound‑red</div></div>
+        <div class="spec"><div class="spec-k">Condition</div><div class="spec-v">Weathered. Still standing.</div></div>
+        <div class="spec"><div class="spec-k">Origin</div><div class="spec-v">Cathedral ledge, perpetual rain</div></div>
+        <div class="spec"><div class="spec-k">Dimensions</div><div class="spec-v">Small enough to ignore</div></div>
+        <div class="spec"><div class="spec-k">Stock</div><div class="spec-v">Plentiful. Still unprotected.</div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="col-right">
+      <div class="bg-num">41</div>
+      <div class="coin-slot-label">Outside. Always.</div>
+      <div class="main-img-wrap">
+        <!-- Hand-drawn SVG sad gargoyle (red) -->
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <g fill="none" stroke="#ffeaee" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round">
+            <!-- ledge -->
+            <path d="M34 150 H166" opacity=".75"/>
+            <!-- wings / shoulders -->
+            <path d="M58 84 Q38 96 34 120 Q32 136 46 138" opacity=".9"/>
+            <path d="M142 84 Q162 96 166 120 Q168 136 154 138" opacity=".9"/>
+            <!-- torso -->
+            <path d="M72 92 Q72 132 100 152 Q128 132 128 92" />
+            <!-- head -->
+            <path d="M66 82 Q78 58 100 58 Q122 58 134 82" />
+            <path d="M74 82 Q84 90 100 90 Q116 90 126 82" opacity=".85"/>
+            <!-- horns -->
+            <path d="M82 66 Q72 58 66 46" opacity=".8"/>
+            <path d="M118 66 Q128 58 134 46" opacity=".8"/>
+            <!-- eyes -->
+            <path d="M86 104 Q94 96 102 104" opacity=".9"/>
+            <path d="M98 104 Q106 96 114 104" opacity=".9"/>
+            <!-- mouth -->
+            <path d="M86 126 Q100 134 114 126" opacity=".9"/>
+            <!-- rain marks -->
+            <path d="M56 44 v18" opacity=".22"/>
+            <path d="M80 40 v22" opacity=".22"/>
+            <path d="M104 38 v24" opacity=".22"/>
+            <path d="M128 40 v22" opacity=".22"/>
+            <path d="M152 44 v18" opacity=".22"/>
+          </g>
+          <g fill="none" stroke="#b10f1d" stroke-width="10" opacity=".18" stroke-linecap="round">
+            <path d="M70 90 Q76 122 70 152"/>
+            <path d="M130 90 Q124 122 130 152"/>
+          </g>
+        </svg>
+      </div>
+      <div class="thumbs">
+        <!-- angle views (gargoyle moods) -->
+        <div class="thumb" onclick="switchView(0)">
+          <svg viewBox="0 0 60 60"><path d="M12 46 H48" stroke="#ffeaee" stroke-width="2" opacity=".7"/><path d="M20 22 Q30 10 40 22" stroke="#ffeaee" stroke-width="2" fill="none"/><path d="M24 24 Q24 40 30 46 Q36 40 36 24" stroke="#ffeaee" stroke-width="2" fill="none"/><path d="M24 34 Q30 38 36 34" stroke="#ffeaee" stroke-width="2" fill="none"/></svg>
+        </div>
+        <div class="thumb" onclick="switchView(1)">
+          <svg viewBox="0 0 60 60"><path d="M14 46 H46" stroke="#ffeaee" stroke-width="2" opacity=".7"/><path d="M22 22 Q30 12 38 22" stroke="#ffeaee" stroke-width="2" fill="none"/><path d="M24 24 Q24 38 30 44 Q36 38 36 24" stroke="#ffeaee" stroke-width="2" fill="none"/><path d="M22 28 Q16 32 14 40" stroke="#ffeaee" stroke-width="2" fill="none" opacity=".75"/><path d="M38 28 Q44 32 46 40" stroke="#ffeaee" stroke-width="2" fill="none" opacity=".75"/></svg>
+        </div>
+        <div class="thumb" onclick="switchView(2)">
+          <svg viewBox="0 0 60 60"><path d="M16 46 H44" stroke="#ffeaee" stroke-width="2" opacity=".7"/><path d="M22 20 Q30 8 38 20" stroke="#ffeaee" stroke-width="2" fill="none"/><path d="M24 22 Q24 38 30 44 Q36 38 36 22" stroke="#ffeaee" stroke-width="2" fill="none"/><path d="M24 30 v8" stroke="#ffeaee" stroke-width="2" opacity=".22"/><path d="M30 28 v12" stroke="#ffeaee" stroke-width="2" opacity=".22"/><path d="M36 30 v8" stroke="#ffeaee" stroke-width="2" opacity=".22"/></svg>
+        </div>
+        <div class="thumb" onclick="switchView(3)">
+          <svg viewBox="0 0 60 60"><path d="M16 46 H44" stroke="#ffeaee" stroke-width="2" opacity=".7"/><path d="M22 22 Q30 10 38 22" stroke="#ffeaee" stroke-width="2" fill="none"/><path d="M24 24 Q24 40 30 46 Q36 40 36 24" stroke="#ffeaee" stroke-width="2" fill="none"/><path d="M24 34 Q30 30 36 34" stroke="#ffeaee" stroke-width="2" fill="none"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICE STRIP -->
+  <div class="price-strip">
+    <div class="price-left">
+      <div class="price-label">Price of Product</div>
+      <div class="price-num"><sup>₹</sup>318</div>
+      <div class="price-sub">Free shipping · Comes with weather</div>
+    </div>
+    <div class="price-right">
+      <div class="stock-line"><span class="stock-dot"></span>&nbsp;In stock ?" still outside</div>
+      <button class="btn-cart" id="addCartBtn" onclick="addToCart()">Add to Cart</button>
+      <button class="btn-save" id="wishBtn" onclick="toggleWishlist()">Save for Later ♡</button>
+    </div>
+  </div>
+
+  <!-- WARNING STRIP -->
+  <div class="warning-strip">
+    <div class="w-label">⚠ Disclaimer</div>
+    <div class="w-text">DOMO is not responsible for any sudden recognition of your caretaker patterns. This product will not fix them. It will only name them.</div>
+  </div>
+
+  <!-- STORY -->
+  <!-- ── SAD GARGOYLE ?" INTERACTIVE ── -->
+  <div id="gargoyleSection" style="background:#140002;padding:56px 48px;border-bottom:3px solid rgba(255,246,247,.78);position:relative;overflow:hidden;">
+    <div style="position:absolute;font-family:'Anton',sans-serif;font-size:200px;color:rgba(255,246,247,.06);top:50%;left:50%;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none;letter-spacing:-.04em;">THE EDGE</div>
+
+    <!-- header -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:44px;gap:36px;position:relative;z-index:2;">
+      <div>
+        <div style="font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,246,247,.55);margin-bottom:10px;">◆ Interactive</div>
+        <div style="font-family:'Anton',sans-serif;font-size:clamp(34px,4.5vw,58px);color:#fff6f7;text-transform:uppercase;line-height:.88;">Build<br>A Roof<br>For It</div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;line-height:1.9;color:rgba(255,246,247,.68);max-width:380px;margin-top:14px;letter-spacing:.03em;">Drag the <strong style="color:#fff6f7;">roof panel</strong> onto the gargoyle.<br><br>It was placed outside to protect everyone inside. See what happens when you try to protect the protector.</div>
+      </div>
+
+      <!-- status panel -->
+      <div style="flex-shrink:0;width:280px;border:3px solid rgba(255,246,247,.78);background:rgba(255,246,247,.05);display:flex;flex-direction:column;">
+        <div style="padding:12px 16px 10px;border-bottom:2px solid rgba(255,246,247,.24);display:flex;align-items:center;gap:10px;">
+          <div id="sgDot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,246,247,.42);flex-shrink:0;transition:background .3s;"></div>
+          <div style="font-family:'Space Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,246,247,.55);">Status</div>
+        </div>
+        <div id="sgPanel" style="padding:16px;font-family:'Space Mono',monospace;font-size:10px;line-height:1.85;color:rgba(255,246,247,.72);letter-spacing:.025em;flex:1;">
+          Inside is warm. Outside is wet.<br><br>Move the roof. Watch who gets it by default.
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE -->
+    <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:22px;">
+      <div id="sgScene" style="position:relative;width:min(860px,100%);height:320px;border:2px solid rgba(255,246,247,.20);background:linear-gradient(180deg, rgba(255,246,247,.05), rgba(255,246,247,.02));border-radius:18px;overflow:hidden;box-shadow:0 22px 60px rgba(0,0,0,.30);">
+        <!-- rain overlay -->
+        <div id="sgRain" style="position:absolute;inset:0;pointer-events:none;opacity:.55;background-image:linear-gradient(115deg, rgba(255,246,247,.08) 0 1px, transparent 1px 14px);background-size:14px 14px;mix-blend-mode:screen;"></div>
+
+        <!-- inside -->
+        <div id="sgInside" style="position:absolute;left:0;top:0;bottom:0;width:50%;display:flex;align-items:flex-end;justify-content:center;padding:26px;background:radial-gradient(420px 260px at 55% 55%, rgba(255,246,247,.10), rgba(20,0,2,0) 62%);">
+          <div style="position:absolute;top:28px;left:28px;font-family:'Space Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,246,247,.55);">Inside</div>
+          <div id="sgWindow" style="width:140px;height:190px;border-radius:10px;background:radial-gradient(90px 130px at 50% 45%, rgba(255,246,247,.28), rgba(177,15,29,.18) 55%, rgba(20,0,2,.12) 100%);border:1px solid rgba(255,246,247,.22);box-shadow:0 30px 80px rgba(177,15,29,.18) inset, 0 26px 80px rgba(0,0,0,.35);position:relative;overflow:hidden;"></div>
+        </div>
+
+        <!-- outside -->
+        <div id="sgOutside" style="position:absolute;right:0;top:0;bottom:0;width:50%;display:flex;align-items:flex-end;justify-content:center;padding:26px;background:radial-gradient(520px 320px at 45% 45%, rgba(177,15,29,.22), rgba(20,0,2,0) 62%);">
+          <div style="position:absolute;top:28px;right:28px;font-family:'Space Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,246,247,.55);text-align:right;">Outside</div>
+          <div id="sgLedge" style="position:absolute;bottom:64px;left:0;right:0;height:10px;background:rgba(255,246,247,.10);border-top:1px solid rgba(255,246,247,.16);border-bottom:1px solid rgba(255,246,247,.08);"></div>
+          <div id="sgGargoyleTarget" style="width:190px;height:220px;position:relative;border-radius:18px;border:1px solid rgba(255,246,247,.14);background:linear-gradient(180deg, rgba(255,246,247,.06), rgba(255,246,247,.02));display:flex;align-items:center;justify-content:center;transition:box-shadow .2s,border-color .2s;">
+            <svg viewBox="0 0 200 200" width="86%" height="86%" aria-hidden="true">
+              <g fill="none" stroke="#fff6f7" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity=".92">
+                <path d="M34 150 H166" opacity=".65"/>
+                <path d="M58 84 Q38 96 34 120 Q32 136 46 138" opacity=".9"/>
+                <path d="M142 84 Q162 96 166 120 Q168 136 154 138" opacity=".9"/>
+                <path d="M72 92 Q72 132 100 152 Q128 132 128 92" />
+                <path d="M66 82 Q78 58 100 58 Q122 58 134 82" />
+                <path d="M86 104 Q94 96 102 104" />
+                <path d="M98 104 Q106 96 114 104" />
+                <path d="M86 126 Q100 134 114 126" />
+                <path d="M82 66 Q72 58 66 46" opacity=".8"/>
+                <path d="M118 66 Q128 58 134 46" opacity=".8"/>
+              </g>
+              <g fill="none" stroke="#b10f1d" stroke-width="10" opacity=".22" stroke-linecap="round">
+                <path d="M70 90 Q76 122 70 152"/>
+                <path d="M130 90 Q124 122 130 152"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- movable roof panel -->
+        <div id="sgRoof" style="position:absolute;top:26px;left:calc(50% - 110px);width:220px;height:46px;border-radius:999px;border:2px solid rgba(255,246,247,.78);background:linear-gradient(180deg, rgba(255,246,247,.18), rgba(255,246,247,.10));box-shadow:0 24px 70px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;gap:10px;cursor:grab;user-select:none;touch-action:none;">
+          <div style="width:18px;height:18px;border-radius:4px;background:rgba(255,246,247,.24);border:1px solid rgba(255,246,247,.26);"></div>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#fff6f7;">Roof Panel</div>
+        </div>
+      </div>
+
+      <div id="sgMsg" style="display:none;font-family:'Anton',sans-serif;font-size:18px;letter-spacing:.06em;text-transform:uppercase;color:#fff6f7;border-top:2px solid rgba(255,246,247,.35);padding-top:16px;text-align:center;max-width:720px;line-height:1.25;"></div>
+      <button id="sgResetBtn" type="button" style="display:none;margin-top:6px;border:2px solid rgba(255,246,247,.78);background:rgba(255,246,247,.06);color:#fff6f7;border-radius:999px;padding:10px 14px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;">Try again</button>
+    </div>
+  </div>
+
+  <style>
+  /* ── GREY PIGGY BANK ?" INTERACTION (v3) ───────────────────────── */
+  #coinSection .coin-grid{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(120px, 1fr));
+    gap:14px;
+    width:min(760px, 100%);
+    padding:2px;
+  }
+  @media (max-width: 760px){
+    #coinSection .coin-grid{grid-template-columns:repeat(2, minmax(140px, 1fr));}
+  }
+
+  #coinSection .coin-card{
+    appearance:none;
+    border:none;
+    width:100%;
+    text-align:left;
+    cursor:grab;
+    border-radius:16px;
+    padding:12px;
+    background:
+      radial-gradient(120px 60px at 20% 20%, rgba(255,255,255,.95), rgba(255,255,255,0) 62%),
+      linear-gradient(180deg, rgba(255,255,255,.92), rgba(240,240,240,.90) 55%, rgba(216,216,216,.92));
+    box-shadow:0 10px 26px rgba(0,0,0,.14);
+    border:1px solid rgba(10,10,10,.14);
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, filter .18s ease;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    user-select:none;
+    touch-action:none;
+  }
+  #coinSection .coin-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 18px 44px rgba(0,0,0,.18);
+    border-color:rgba(10,10,10,.40);
+    filter:saturate(1.05);
+  }
+  #coinSection .coin-card:focus{
+    outline:none;
+    box-shadow:0 18px 44px rgba(0,0,0,.18), 0 0 0 2px rgba(10,10,10,.45), 0 0 0 7px rgba(200,168,74,.18);
+  }
+  #coinSection .coin-card[disabled]{
+    opacity:.38;
+    cursor:not-allowed;
+    transform:none;
+  }
+  #coinSection .coin-card.is-chosen{
+    opacity:.60;
+    cursor:default;
+    transform:scale(.98);
+    border-color:rgba(10,10,10,.28);
+  }
+  #coinSection .coin-card.is-dragging{
+    opacity:.35;
+    transform:translateY(-2px);
+    filter:saturate(1.1);
+    cursor:grabbing;
+  }
+  #coinSection .coin-ico{
+    width:44px;height:44px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(10,10,10,.06);
+    border:1px solid rgba(10,10,10,.10);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+    font-size:22px;
+    flex-shrink:0;
+  }
+  #coinSection .coin-meta{min-width:0;flex:1;}
+  #coinSection .coin-title{
+    font-family:'Anton',sans-serif;
+    font-size:16px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:#0a0a0a;
+    line-height:1.05;
+    margin-bottom:3px;
+  }
+  #coinSection .coin-sub{
+    font-family:'Space Mono',monospace;
+    font-size:8px;
+    font-weight:700;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:rgba(10,10,10,.50);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  /* drag ghost + drop target */
+  #coinSection #coinFlyLayer{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:10;
+  }
+  #coinSection .drag-ghost{
+    position:absolute;
+    width:132px;height:76px;border-radius:18px;
+    display:flex;align-items:center;justify-content:center;
+    background:
+      radial-gradient(180px 90px at 20% 18%, rgba(255,255,255,.96), rgba(255,255,255,0) 62%),
+      linear-gradient(180deg, rgba(255,255,255,.92), rgba(238,238,238,.86) 55%, rgba(214,214,214,.90));
+    border:1px solid rgba(10,10,10,.16);
+    box-shadow:0 34px 90px rgba(0,0,0,.28);
+    transform:translate(-50%,-50%) rotate(-6deg) scale(1.02);
+    will-change: transform, left, top;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  #coinSection .drag-ghost .g{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:12px;
+    padding:12px;
+  }
+  #coinSection .drag-ghost .g .i{
+    width:44px;height:44px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(10,10,10,.06);
+    border:1px solid rgba(10,10,10,.10);
+    font-size:22px;
+    flex-shrink:0;
+  }
+  #coinSection .drag-ghost .g .t{
+    font-family:'Anton',sans-serif;
+    font-size:16px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:#0a0a0a;
+    line-height:1.05;
+  }
+  #coinSection .drag-ghost.snap{
+    transition: transform .18s ease, left .18s ease, top .18s ease, opacity .18s ease;
+    transform:translate(-50%,-50%) rotate(0deg) scale(.66);
+    opacity:.06;
+  }
+  #coinSection #slotTarget.is-ready{
+    box-shadow: 0 0 0 2px rgba(10,10,10,1), 0 0 0 7px rgba(200,168,74,.22), 0 0 28px rgba(0,0,0,.25) !important;
+  }
+  #coinSection .impact{
+    animation:impactPulse .55s ease forwards;
+  }
+  @keyframes impactPulse{
+    0%{transform:translateY(0);}
+    35%{transform:translateY(-2px);}
+    100%{transform:translateY(0);}
+  }
+  #coinSection .pig-shake{
+    animation:pigShake .55s cubic-bezier(.2,.8,.2,1) both;
+    transform-origin: 50% 55%;
+  }
+  @keyframes pigShake{
+    0%{transform:translateX(0) rotate(0deg);}
+    18%{transform:translateX(-3px) rotate(-1deg);}
+    36%{transform:translateX(3px) rotate(1deg);}
+    55%{transform:translateX(-2px) rotate(-.6deg);}
+    72%{transform:translateX(2px) rotate(.6deg);}
+    100%{transform:translateX(0) rotate(0deg);}
+  }
+
+  /* grey in ' grey out animation */
+  #coinSection #coinInside{
+    border:2px solid #888 !important;
+    background:linear-gradient(140deg,#d6d6d6,#8c8c8c) !important;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,.35) !important;
+  }
+  #coinSection #coinInside.through{
+    opacity:1 !important;
+    animation:coinThrough .78s ease-in-out forwards;
+  }
+  @keyframes coinThrough{
+    0%{transform:translate(-50%,-50%) translateY(-26px) scale(.96); filter:blur(0);}
+    55%{transform:translate(-50%,-50%) translateY(20px) scale(1.02); filter:blur(.2px);}
+    100%{transform:translate(-50%,-50%) translateY(58px) scale(.92); filter:blur(.6px); opacity:0;}
+  }
+  #coinSection #coinOut.show{
+    opacity:1 !important;
+    transform:translateY(0) scale(1) !important;
+  }
+  
+/* DOMO INTERACTION REFRESH (auto) v2
+   Scope: interaction sections only (ids ending with "Section"), melt slider section, and Handcuff "Buy Freedom" block.
+   Behavior untouched; visuals only. */
+
+/* shared tokens */
+[id$="Section"], .melt-section, .freedom-wrap{
+  --int-ink: #0a0a0a;
+  --int-paper: #fbfaf7;
+  --int-paper-2: #f4f1e8;
+  --int-accent: #c8a84a;
+  --int-accent-2: #7b6cff;
+  --int-radius: 18px;
+  --int-radius-sm: 12px;
+  --int-shadow: 0 22px 60px rgba(0,0,0,.16);
+  --int-shadow-soft: 0 10px 26px rgba(0,0,0,.12);
+  --int-ring: 0 0 0 2px rgba(200,168,74,.28), 0 0 0 6px rgba(200,168,74,.10);
+}
+
+/* make the interaction itself look like a “module” */
+[id$="Section"], .melt-section{
+  border-radius: var(--int-radius) !important;
+  box-shadow: var(--int-shadow) !important;
+  overflow: hidden;
+}
+
+/* subtle texture so it’s visibly different */
+[id$="Section"]::before,
+.melt-section::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(900px 260px at 18% 18%, rgba(200,168,74,.18), transparent 60%),
+    radial-gradient(700px 240px at 85% 22%, rgba(123,108,255,.10), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,.10), transparent 40%);
+  mix-blend-mode:multiply;
+  opacity:.85;
+}
+
+/* keep content above the overlay */
+[id$="Section"] > * ,
+.melt-section > *{
+  position:relative;
+  z-index:1;
+}
+
+/* panels: “glass card” */
+[id$="Section"] [id$="Panel"],
+[id$="Section"] [style*="border:3px solid"],
+[id$="Section"] [style*="border: 3px solid"]{
+  border-radius: var(--int-radius) !important;
+  box-shadow: var(--int-shadow-soft) !important;
+}
+
+/* buttons: more graphical + obvious */
+[id$="Section"] button,
+.melt-section button,
+.freedom-wrap a.btn-freedom{
+  border-radius: 999px !important;
+  box-shadow: 0 18px 45px rgba(0,0,0,.18) !important;
+  transform: translateZ(0);
+  position:relative;
+  overflow:hidden;
+}
+[id$="Section"] button::after,
+.melt-section button::after,
+.freedom-wrap a.btn-freedom::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
+  transform: translateX(-120%);
+  transition: transform .55s ease;
+  pointer-events:none;
+}
+[id$="Section"] button:hover::after,
+.melt-section button:hover::after,
+.freedom-wrap a.btn-freedom:hover::after{
+  transform: translateX(120%);
+}
+[id$="Section"] button:focus,
+[id$="Section"] textarea:focus,
+[id$="Section"] input:focus,
+.melt-section input:focus,
+.melt-section button:focus,
+.freedom-wrap a.btn-freedom:focus{
+  outline: none !important;
+  box-shadow: 0 18px 45px rgba(0,0,0,.18), var(--int-ring) !important;
+}
+
+/* text inputs */
+[id$="Section"] textarea,
+[id$="Section"] input{
+  border-radius: var(--int-radius-sm) !important;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.06) !important;
+}
+
+/* Grey Piggy Bank: make coins look like “cards” not circles */
+#coinSection .coin-card{
+  border-radius: 16px !important;
+  background:
+    radial-gradient(90px 55px at 20% 20%, rgba(255,255,255,.92), rgba(255,255,255,0) 60%),
+    linear-gradient(160deg, rgba(255,255,255,.92), rgba(235,235,235,.90) 50%, rgba(210,210,210,.92)) !important;
+  border: 1px solid rgba(10,10,10,.18) !important;
+}
+#coinSection .coin-card:hover{
+  transform: translateY(-6px) scale(1.03) !important;
+  border-color: rgba(10,10,10,.55) !important;
+}
+#coinSection #slotTarget{
+  border-radius: 9px !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.22) !important;
+}
+
+/* Paper Boat: river should feel “premium” */
+#riverSection #riverCanvas{
+  border-radius: var(--int-radius) !important;
+  box-shadow: var(--int-shadow) !important;
+}
+
+/* Scream: stronger presence */
+#screamSection button{
+  box-shadow: 0 22px 60px rgba(0,0,0,.40) !important;
+}
+
+/* Melt slider */
+.melt-section input[type="range"]{
+  accent-color: var(--int-accent);
+}
+
+/* Handcuff: Buy Freedom block becomes an obvious interaction module */
+.freedom-wrap{
+  border-radius: var(--int-radius) !important;
+  box-shadow: var(--int-shadow) !important;
+}
+</style>
+
+  <script>
+  (function(){
+    const coinRow = document.getElementById('coinRow');
+    if(!coinRow) return;
+    const slotPanel = document.getElementById('slotPanel');
+    const slotDot = document.getElementById('slotDot');
+    const bankStatus = document.getElementById('bankStatus');
+    const coinInside = document.getElementById('coinInside');
+    const fullMsg = document.getElementById('fullMsg');
+    const slotTarget = document.getElementById('slotTarget');
+    const coinSection = document.getElementById('coinSection');
+    const exitSlot = document.getElementById('exitSlot');
+    const coinOut = document.getElementById('coinOut');
+    const resetBtn = document.getElementById('coinResetBtn');
+
+    let busy = false;
+
+    // layer for drag ghost (kept inside the interaction only)
+    let flyLayer = document.getElementById('coinFlyLayer');
+    if(!flyLayer){
+      flyLayer = document.createElement('div');
+      flyLayer.id = 'coinFlyLayer';
+      coinSection.appendChild(flyLayer);
+    }
+
+    const pigBody = (function(){
+      return coinSection.querySelector('#slotTarget')?.nextElementSibling || null;
+    })();
+
+    function reset(){
+      busy = false;
+      coinOut.classList.remove('show');
+      coinInside.classList.remove('through');
+      coinInside.style.opacity = '0';
+      slotDot.style.background = '#888';
+      bankStatus.textContent = 'SLOT: EMPTY';
+      bankStatus.style.color = '#888';
+      slotPanel.innerHTML = `Status: empty. One coin. One route. One outcome.<br><br>Try to “clean” it by sending it through the pig. Watch what comes out.`;
+      fullMsg.style.display = 'none';
+      fullMsg.innerHTML = '';
+      resetBtn.style.display = 'none';
+      buildCoin();
+    }
+
+    function withinDropZone(clientX, clientY){
+      const r = slotTarget.getBoundingClientRect();
+      const cx = (r.left + r.right) / 2;
+      const cy = (r.top + r.bottom) / 2;
+      const dx = clientX - cx;
+      const dy = clientY - cy;
+      return Math.hypot(dx, dy) < 56;
+    }
+
+    function snapGhostToSlot(ghost){
+      const b = slotTarget.getBoundingClientRect();
+      const c = coinSection.getBoundingClientRect();
+      const endX = (b.left + b.right)/2 - c.left;
+      const endY = (b.top + b.bottom)/2 - c.top + 8;
+      ghost.classList.add('snap');
+      ghost.style.left = endX + 'px';
+      ghost.style.top  = endY + 'px';
+      setTimeout(()=>ghost.remove(), 220);
+    }
+
+    function runVerdict(){
+      busy = true;
+
+      slotDot.style.background = '#0a0a0a';
+      bankStatus.textContent = 'SLOT: PROCESSING';
+      bankStatus.style.color = '#0a0a0a';
+
+      slotPanel.innerHTML = `
+        <div style="font-family:'Anton',sans-serif;font-size:18px;color:#0a0a0a;text-transform:uppercase;letter-spacing:.04em;line-height:1.05;">Attempt: Laundering</div>
+        <div style="margin-top:8px;font-family:'Space Mono',monospace;font-size:10px;line-height:1.85;color:#666;letter-spacing:.02em;">
+          The system promises transformation. This object refuses it.
+          <br><br>
+          Grey money enters. Grey money exits. The trail still exists.
+        </div>
+      `;
+
+      coinInside.textContent = '';
+      coinInside.style.opacity = '1';
+      coinInside.classList.remove('through');
+      void coinInside.offsetWidth; // restart animation
+      coinInside.classList.add('through');
+
+      setTimeout(()=>{
+        coinOut.classList.add('show');
+        bankStatus.textContent = 'SLOT: VERDICT';
+        bankStatus.style.color = '#0a0a0a';
+
+        fullMsg.style.display = 'block';
+        fullMsg.innerHTML = `Grey in. Grey out.<br><span style="font-size:13px;color:#666;font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">No loopholes. No clean ending.</span>`;
+
+        resetBtn.style.display = 'inline-block';
+        busy = false;
+      }, 760);
+    }
+
+    function buildCoin(){
+      coinRow.innerHTML = '';
+      const card = document.createElement('div');
+      card.className = 'coin-card';
+      card.id = 'coin_grey';
+      card.setAttribute('role','button');
+      card.setAttribute('tabindex','0');
+      card.setAttribute('aria-label', `Drag the grey coin into the slot`);
+      card.innerHTML = `<div class="coin-ico" aria-hidden="true">◯</div><div class="coin-meta"><div class="coin-title">Grey Coin</div><div class="coin-sub">Drag to slot</div></div>`;
+
+      function startDrag(ev){
+        if(busy) return;
+        card.classList.add('is-dragging');
+
+        const ghost = document.createElement('div');
+        ghost.className = 'drag-ghost';
+        ghost.innerHTML = `<div class="g"><div class="i" aria-hidden="true">◯</div><div class="t">Grey Coin</div></div>`;
+        flyLayer.appendChild(ghost);
+
+        const secRect = coinSection.getBoundingClientRect();
+        function move(clientX, clientY){
+          ghost.style.left = (clientX - secRect.left) + 'px';
+          ghost.style.top  = (clientY - secRect.top) + 'px';
+          const ok = withinDropZone(clientX, clientY);
+          slotTarget.classList.toggle('is-ready', ok);
+          ghost.style.transform = ok
+            ? 'translate(-50%,-50%) rotate(0deg) scale(1.04)'
+            : 'translate(-50%,-50%) rotate(-6deg) scale(1.02)';
+        }
+
+        const startX = ev.clientX ?? (ev.touches && ev.touches[0] && ev.touches[0].clientX);
+        const startY = ev.clientY ?? (ev.touches && ev.touches[0] && ev.touches[0].clientY);
+        if(typeof startX === 'number' && typeof startY === 'number'){ move(startX, startY); }
+
+        function onMove(e){
+          const x = e.clientX ?? (e.touches && e.touches[0] && e.touches[0].clientX);
+          const y = e.clientY ?? (e.touches && e.touches[0] && e.touches[0].clientY);
+          if(typeof x === 'number' && typeof y === 'number'){ move(x, y); }
+        }
+        function cleanup(){
+          window.removeEventListener('pointermove', onMove);
+          window.removeEventListener('pointerup', onUp);
+          window.removeEventListener('touchmove', onMove);
+          window.removeEventListener('touchend', onUp);
+        }
+        function onUp(e){
+          const x = e.clientX ?? (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].clientX);
+          const y = e.clientY ?? (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].clientY);
+          const ok = typeof x === 'number' && typeof y === 'number' && withinDropZone(x, y);
+          cleanup();
+          slotTarget.classList.remove('is-ready');
+          card.classList.remove('is-dragging');
+
+          if(ok && !busy){
+            busy = true;
+            coinRow.innerHTML = '';
+
+            snapGhostToSlot(ghost);
+            slotTarget.classList.add('impact');
+            setTimeout(()=>slotTarget.classList.remove('impact'), 560);
+            if(pigBody){
+              pigBody.classList.add('pig-shake');
+              setTimeout(()=>pigBody.classList.remove('pig-shake'), 560);
+            }
+            if(exitSlot){
+              exitSlot.classList.add('impact');
+              setTimeout(()=>exitSlot.classList.remove('impact'), 560);
+            }
+
+            setTimeout(()=>runVerdict(), 280);
+          }else{
+            ghost.remove();
+          }
+        }
+
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        window.addEventListener('touchmove', onMove, { passive:true });
+        window.addEventListener('touchend', onUp);
+      }
+
+      card.addEventListener('pointerdown', (e)=>{
+        e.preventDefault();
+        startDrag(e);
+      });
+
+      card.addEventListener('keydown', (e)=>{
+        if(busy) return;
+        if(e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        busy = true;
+        coinRow.innerHTML = '';
+
+        slotTarget.classList.add('impact');
+        setTimeout(()=>slotTarget.classList.remove('impact'), 560);
+        if(pigBody){
+          pigBody.classList.add('pig-shake');
+          setTimeout(()=>pigBody.classList.remove('pig-shake'), 560);
+        }
+        if(exitSlot){
+          exitSlot.classList.add('impact');
+          setTimeout(()=>exitSlot.classList.remove('impact'), 560);
+        }
+        setTimeout(()=>runVerdict(), 280);
+      });
+
+      coinRow.appendChild(card);
+    }
+
+    resetBtn.addEventListener('click', reset);
+    buildCoin();
+  })();
+  </script>
+
+  <script>
+  (function(){
+    const scene = document.getElementById('sgScene');
+    const roof  = document.getElementById('sgRoof');
+    const target = document.getElementById('sgGargoyleTarget');
+    const inside = document.getElementById('sgInside');
+    const windowEl = document.getElementById('sgWindow');
+    const dot = document.getElementById('sgDot');
+    const panel = document.getElementById('sgPanel');
+    const msg = document.getElementById('sgMsg');
+    const resetBtn = document.getElementById('sgResetBtn');
+    if(!scene || !roof || !target || !inside || !windowEl || !dot || !panel || !msg || !resetBtn) return;
+
+    let locked = false;
+
+    function centerRect(el){
+      const r = el.getBoundingClientRect();
+      return { x:(r.left+r.right)/2, y:(r.top+r.bottom)/2, r };
+    }
+    function within(el, x, y, radius=88){
+      const c = centerRect(el);
+      return Math.hypot(x-c.x, y-c.y) < radius;
+    }
+    function setRoofTransform(dx, dy){
+      roof.style.transform = `translate(${dx}px, ${dy}px)`;
+    }
+    function reset(){
+      locked = false;
+      roof.classList.remove('snap','is-dragging');
+      setRoofTransform(0,0);
+      roof.style.opacity = '1';
+      roof.style.pointerEvents = 'auto';
+      target.classList.remove('is-ready');
+      inside.classList.remove('dim');
+      windowEl.classList.remove('dim');
+      msg.style.display = 'none';
+      msg.innerHTML = '';
+      resetBtn.style.display = 'none';
+      dot.style.background = 'rgba(255,246,247,.42)';
+      panel.innerHTML = `Inside is warm. Outside is wet.<br><br>Move the roof. Watch who gets it by default.`;
+    }
+
+    resetBtn.addEventListener('click', reset);
+    reset();
+
+    roof.addEventListener('pointerdown', (e)=>{
+      if(locked) return;
+      e.preventDefault();
+      roof.setPointerCapture(e.pointerId);
+      roof.classList.add('is-dragging');
+
+      const start = { x:e.clientX, y:e.clientY };
+      const sceneRect = scene.getBoundingClientRect();
+
+      function onMove(ev){
+        if(locked) return;
+        const dx = ev.clientX - start.x;
+        const dy = ev.clientY - start.y;
+        setRoofTransform(dx, dy);
+        target.classList.toggle('is-ready', within(target, ev.clientX, ev.clientY));
+      }
+      function onUp(ev){
+        roof.releasePointerCapture(e.pointerId);
+        roof.classList.remove('is-dragging');
+        const ok = within(target, ev.clientX, ev.clientY);
+        target.classList.remove('is-ready');
+
+        if(!ok){
+          roof.classList.add('snap');
+          setRoofTransform(0,0);
+          setTimeout(()=>roof.classList.remove('snap'), 280);
+          return;
+        }
+
+        locked = true;
+        dot.style.background = '#fff6f7';
+        panel.innerHTML = `You tried to cover the gargoyle.<br><br>The architecture doesn’t know how to do that.`;
+
+        const t = centerRect(target).r;
+        const roofC = roof.getBoundingClientRect();
+        const roofCenter = { x:(roofC.left+roofC.right)/2, y:(roofC.top+roofC.bottom)/2 };
+        const endCenter = { x:(t.left+t.right)/2, y:t.top+12 };
+        const dxToTarget = endCenter.x - roofCenter.x;
+        const dyToTarget = endCenter.y - roofCenter.y;
+
+        roof.classList.add('snap');
+        setRoofTransform(dxToTarget, dyToTarget);
+
+        setTimeout(()=>{
+          inside.classList.add('dim');
+          windowEl.classList.add('dim');
+          panel.innerHTML = `Inside dims the moment you try to help the outside.<br><br>So the roof goes back where it was always meant to go.`;
+        }, 420);
+
+        setTimeout(()=>{
+          const win = centerRect(windowEl).r;
+          const roofNow = roof.getBoundingClientRect();
+          const roofNowCenter = { x:(roofNow.left+roofNow.right)/2, y:(roofNow.top+roofNow.bottom)/2 };
+          const winEnd = { x:(win.left+win.right)/2, y:win.top+12 };
+          const dxBack = winEnd.x - roofNowCenter.x;
+          const dyBack = winEnd.y - roofNowCenter.y;
+          setRoofTransform(dxToTarget + dxBack, dyToTarget + dyBack);
+        }, 980);
+
+        setTimeout(()=>{
+          roof.style.opacity = '.35';
+          roof.style.pointerEvents = 'none';
+          msg.style.display = 'block';
+          msg.innerHTML = `You built a roof.<br>It returned to the people inside.<br><span style="font-size:13px;color:rgba(255,246,247,.72);font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">Nobody is checking on the gargoyle.</span>`;
+          resetBtn.style.display = 'inline-block';
+        }, 1320);
+      }
+
+      roof.addEventListener('pointermove', onMove);
+      roof.addEventListener('pointerup', onUp, { once:true });
+    });
+  })();
+  </script>
+
+  <div class="story">
+    <div class="story-tag"><span>The Story</span></div>
+    <div class="story-body">
+      <h3>It Did the Job. It Paid the Price.</h3>
+      <p>The gargoyle was put on the cathedral to protect everyone inside it. That was the agreement: carved from stone, positioned at the edge of everything, exposed to every storm and every century, standing guard over warmth and light happening behind it while it remained permanently outside of it.</p>
+      <p>It never got to go inside. It protected the congregation from the darkness and nobody ever thought to ask what the darkness was doing to the gargoyle.</p>
+      <p>This is the biography of the caretaker who never received care ?" the parent who held everyone together while quietly dissolving, the friend you called at 2am who never called anyone because calling felt like betraying the role they accepted without knowing they were accepting it.</p>
+      <p>The red is not anger. It is the color of a wound left open long enough to become permanent ?" decades of weather, of exposure, of being the thing between everyone else and the storm without anyone ever building a roof over the thing doing the protecting. One billion people globally live with a mental health condition. Most of them are standing at an edge, in the rain, making sure everyone inside is okay.</p>
+      <p style="font-style:italic;color:rgba(255,246,247,.55);margin-top:24px;">"It succeeded completely. That’s why it’s sad." ?" DOMO Product Brief, Internal Document, Do Not Share (We Are Sharing It)</p>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-brand">DOMO<small>Department of Miscellaneous Objects  2024</small></div>
+    <div class="footer-back"><a href="index.html">? Back to all objects</a></div>
+  </footer>
+</div>
+
+<script>
+// CART
+function getCart(){try{return JSON.parse(localStorage.getItem('domo_cart'))||[];}catch{return[];}}
+function saveCart(c){localStorage.setItem('domo_cart',JSON.stringify(c));window.dispatchEvent(new Event('cartUpdated'));}
+function fmtPrice(n){return '₹'+n.toLocaleString('en-IN');}
+function openCart(){document.getElementById('cartDrawer').classList.add('open');document.getElementById('cartOverlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeCart(){document.getElementById('cartDrawer').classList.remove('open');document.getElementById('cartOverlay').classList.remove('open');document.body.style.overflow='';}
+
+function renderCart(){
+  const cart=getCart();
+  const body=document.getElementById('cartBody');
+  const footer=document.getElementById('cartFooter');
+  const empty=document.getElementById('cartEmpty');
+  const badge=document.getElementById('cartBadge');
+  body.querySelectorAll('.drawer-item').forEach(el=>el.remove());
+  if(badge){if(cart.length>0){badge.textContent=cart.length;badge.classList.remove('hidden');}else{badge.classList.add('hidden');}}
+  if(cart.length===0){empty.style.display='flex';footer.style.display='none';return;}
+  empty.style.display='none';footer.style.display='block';
+  let sub=0;
+  cart.forEach((item,i)=>{
+    sub+=item.price;
+    const div=document.createElement('div');
+    div.className='drawer-item';
+    div.innerHTML=`<div class="drawer-item-img"><img src="${item.img}" alt="${item.name}"/></div><div class="drawer-item-info"><div class="drawer-item-name">${item.name}</div><div class="drawer-item-meta">${item.model}</div><div class="drawer-item-price">${fmtPrice(item.price)}</div></div><button class="drawer-item-remove" onclick="removeFromCart(${i})" title="Remove">o</button>`;
+    body.insertBefore(div,empty);
+  });
+  document.getElementById('cartSubtotal').textContent=fmtPrice(sub);
+}
+function removeFromCart(i){const cart=getCart();cart.splice(i,1);saveCart(cart);renderCart();}
+window.addEventListener('cartUpdated',renderCart);
+document.addEventListener('DOMContentLoaded',renderCart);
+
+// ADD TO CART
+function addToCart(){
+  const btn=document.getElementById('addCartBtn');
+  const cart=getCart();
+  if(cart.find(x=>x.slug===PRODUCT.slug)){btn.textContent='Already in Cart';openCart();return;}
+  cart.push(PRODUCT);
+  saveCart(cart);
+  renderCart();
+  btn.textContent='Added o"';
+  btn.style.background='#888';
+  setTimeout(()=>openCart(),300);
+}
+
+// THUMBNAIL VIEWS
+const views=[
+  `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#ffeaee" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"><path d="M34 150 H166" opacity=".75"/><path d="M58 84 Q38 96 34 120 Q32 136 46 138" opacity=".9"/><path d="M142 84 Q162 96 166 120 Q168 136 154 138" opacity=".9"/><path d="M72 92 Q72 132 100 152 Q128 132 128 92"/><path d="M66 82 Q78 58 100 58 Q122 58 134 82"/><path d="M86 104 Q94 96 102 104"/><path d="M98 104 Q106 96 114 104"/><path d="M86 126 Q100 134 114 126"/><path d="M82 66 Q72 58 66 46" opacity=".8"/><path d="M118 66 Q128 58 134 46" opacity=".8"/></g></svg>`,
+  `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#ffeaee" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"><path d="M34 150 H166" opacity=".75"/><path d="M72 92 Q72 132 100 152 Q128 132 128 92"/><path d="M66 82 Q78 58 100 58 Q122 58 134 82"/><path d="M74 82 Q84 90 100 90 Q116 90 126 82" opacity=".85"/><path d="M28 102 Q18 112 16 130" opacity=".75"/><path d="M172 102 Q182 112 184 130" opacity=".75"/><path d="M86 126 Q100 134 114 126"/></g></svg>`,
+  `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#ffeaee" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"><path d="M34 150 H166" opacity=".75"/><path d="M72 92 Q72 132 100 152 Q128 132 128 92"/><path d="M66 82 Q78 58 100 58 Q122 58 134 82"/><path d="M56 44 v18" opacity=".22"/><path d="M80 40 v22" opacity=".22"/><path d="M104 38 v24" opacity=".22"/><path d="M128 40 v22" opacity=".22"/><path d="M152 44 v18" opacity=".22"/></g></svg>`,
+  `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#ffeaee" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"><path d="M34 150 H166" opacity=".75"/><path d="M72 92 Q72 132 100 152 Q128 132 128 92"/><path d="M66 82 Q78 58 100 58 Q122 58 134 82"/><path d="M86 104 Q94 96 102 104"/><path d="M98 104 Q106 96 114 104"/><path d="M88 126 Q100 120 112 126"/></g></svg>`
+];
+const mainWrap=document.querySelector('.main-img-wrap');
+function switchView(i){
+  mainWrap.innerHTML=views[i];
+  document.querySelectorAll('.thumb').forEach((t,idx)=>{t.style.borderColor=idx===i?'rgba(255,246,247,.90)':'rgba(255,246,247,.18)';});
+}
+
+// NAV
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')window.location.href='melting-skull.html';if(e.key==='ArrowRight')window.location.href='paper-boat.html';});
+</script>
+
+
+
+
+
+
+<script type="module">
+import{initializeApp,getApps}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+import{getFirestore,doc,setDoc,deleteDoc,getDoc,addDoc,collection,serverTimestamp}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+const _cfg={"apiKey":"AIzaSyA6_5oWBRKZLnZhTsjtfepm2NleAEEsrPA","authDomain":"domo-8cfe1.firebaseapp.com","projectId":"domo-8cfe1","storageBucket":"domo-8cfe1.firebasestorage.app","messagingSenderId":"47790816831","appId":"1:47790816831:web:0a92e160fc595d5a9c428a"};
+const _app=getApps().length?getApps()[0]:initializeApp(_cfg);
+const _auth=getAuth(_app);
+const _db=getFirestore(_app);
+let _currentUser=null;
+
+// NAV AVATAR
+function initNav(u){
+  const loginLi=document.getElementById('navLoginLink');
+  const avatarLi=document.getElementById('navAvatar');
+  if(!loginLi||!avatarLi)return;
+  if(u){
+    loginLi.style.display='none';
+    avatarLi.style.display='flex';
+    const init=(u.displayName||u.email||'?')[0].toUpperCase();
+    const el=avatarLi.querySelector('.nav-avatar-initial');
+    const nm=avatarLi.querySelector('.nav-avatar-name');
+    const em=avatarLi.querySelector('.nav-avatar-email');
+    if(el)el.textContent=init;
+    if(nm)nm.textContent=u.displayName||u.email.split('@')[0];
+    if(em)em.textContent=u.email;
+  }else{
+    loginLi.style.display='';
+    avatarLi.style.display='none';
+  }
+}
+
+onAuthStateChanged(_auth,async u=>{
+  _currentUser=u||null;
+  initNav(u);
+  if(!u)return;
+  // Page view tracking
+  try{await addDoc(collection(_db,'users',u.uid,'pageViews'),{page:"Sad Gargoyle (Red)",slug:"sad-gargoyle",timestamp:serverTimestamp()});}catch(e){}
+  // Check wishlist state
+  try{
+    const ws=await getDoc(doc(_db,'users',u.uid,'wishlist','sad-gargoyle'));
+    const btn=document.getElementById('wishBtn');
+    if(btn&&ws.exists()){btn.textContent='Saved \u2665';btn.style.opacity='0.6';}
+  }catch(e){}
+});
+
+// SIGN OUT
+window.doSignOut=async()=>{await signOut(_auth);window.location.href='login.html';};
+
+// WISHLIST TOGGLE
+window.toggleWishlist=async()=>{
+  const u=_auth.currentUser;
+  const btn=document.getElementById('wishBtn');
+  if(!u){window.location.href='login.html';return;}
+  try{
+    const ref=doc(_db,'users',u.uid,'wishlist','sad-gargoyle');
+    const snap=await getDoc(ref);
+    if(snap.exists()){
+      await deleteDoc(ref);
+      if(btn){btn.textContent='Save for Later \u2661';btn.style.opacity='';}
+    }else{
+      const p={...PRODUCT};
+      p.img='';p.savedAt=serverTimestamp();
+      await setDoc(ref,p);
+      if(btn){btn.textContent='Saved \u2665';btn.style.opacity='0.6';}
+    }
+  }catch(e){console.error('wishlist',e);}
+};
+
+// PAPER BOAT message save
+window.saveBoatMessage=async(text)=>{
+  const u=_auth.currentUser;
+  if(!u||!text.trim())return;
+  try{await addDoc(collection(_db,'users',u.uid,'messages'),{text:text.trim(),source:'paper-boat',timestamp:serverTimestamp()});}catch(e){}
+};
+</script>
+<script>
+(function() {
+  var bar = document.getElementById('signal-bar');
+  if (!bar) return;
+  bar.addEventListener('animationend', function() {
+    bar.remove();
+  });
+})();
+</script>
+<script>
+(function() {
+  var PREV = 'raven-skull.html';
+  var NEXT = 'key.html';
+  var NEXT_COLOR = '#080600';
+  var PREV_COLOR = '#080808';
+
+  function doTransition(destination, color) {
+    var overlay = document.createElement('div');
+    overlay.style.cssText = [
+      'position:fixed', 'inset:0', 'background:' + color,
+      'z-index:9999', 'transform:scaleY(0)', 'transform-origin:center',
+      'pointer-events:all'
+    ].join(';');
+
+    var logoImg = document.createElement('img');
+    logoImg.src = 'favicon.png';
+    logoImg.style.cssText = [
+      'position:absolute', 'top:50%', 'left:50%',
+      'transform:translate(-50%,-50%)', 'height:32px', 'width:auto',
+      'opacity:0', 'transition:opacity 200ms'
+    ].join(';');
+
+    overlay.appendChild(logoImg);
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(function() {
+      overlay.style.transition = 'transform 280ms cubic-bezier(0.76,0,0.24,1)';
+      overlay.style.transform = 'scaleY(1)';
+    });
+
+    setTimeout(function() {
+      logoImg.style.opacity = '0.6';
+      setTimeout(function() { logoImg.style.opacity = '0'; }, 200);
+    }, 150);
+
+    setTimeout(function() {
+      window.location.href = destination;
+    }, 300);
+  }
+
+  var prevBtn = document.getElementById('prev-btn');
+  var nextBtn = document.getElementById('next-btn');
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      doTransition(PREV, PREV_COLOR);
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      doTransition(NEXT, NEXT_COLOR);
+    });
+  }
+
+  // Entry reveal transition
+  var entry = document.createElement('div');
+  entry.style.cssText = [
+    'position:fixed', 'inset:0', 'background:#0d0d0b',
+    'z-index:9999', 'transform:scaleY(1)', 'transform-origin:top',
+    'pointer-events:none', 'transition:transform 280ms cubic-bezier(0.76,0,0.24,1)'
+  ].join(';');
+  document.body.appendChild(entry);
+
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      entry.style.transform = 'scaleY(0)';
+    });
+  });
+
+  setTimeout(function() { entry.remove(); }, 300);
+})();
+</script>
+</body>
+</html>

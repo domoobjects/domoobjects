@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Record - DOMO</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #0d0d0b; overflow: hidden; }
+    body { display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; }
+    #crtCanvas { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; opacity: 0.18; }
+    #scanlines { position: fixed; inset: 0; z-index: 1; background: repeating-linear-gradient(to bottom, transparent 0px, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px); pointer-events: none; }
+    #vignette { position: fixed; inset: 0; z-index: 2; background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%); pointer-events: none; }
+    #blueTint { position: fixed; inset: 0; z-index: 3; background: rgba(26,107,193,0.12); opacity: 0; pointer-events: none; }
+    #glitchLine { position: fixed; left: 0; width: 100vw; height: 1px; background: rgba(255,255,255,0.15); z-index: 4; opacity: 0; pointer-events: none; transform: scaleX(0); transform-origin: left center; }
+    #blackCover { position: fixed; inset: 0; background: #0d0d0b; z-index: 20; opacity: 0; pointer-events: none; }
+    #loginCard { position: relative; z-index: 10; width: 380px; padding: 52px 48px; background: rgba(10,10,9,0.72); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 0.5px solid rgba(255,255,255,0.07); overflow-y: auto; max-height: 98vh; }
+    .card-logo { display: block; height: 32px; width: auto; opacity: 0.5; margin: 0 auto 32px; }
+    .card-heading { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 6px; color: #d4d4cc; text-align: center; display: block; margin-bottom: 6px; }
+    .card-sub { font-size: 9px; letter-spacing: 2px; color: #3a3a38; text-align: center; display: block; margin-bottom: 40px; font-family: 'IBM Plex Mono', monospace; }
+    .field { width: 100%; background: rgba(255,255,255,0.03); border: 0.5px solid #1e1e1c; color: #d4d4cc; font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 14px 16px; outline: none; border-radius: 0; display: block; }
+    .field::placeholder { color: #2a2a28; }
+    .field:focus { border-color: #3a3a38; }
+    .field + .field { margin-top: 12px; }
+    #errorMsg { font-size: 9px; letter-spacing: 1px; color: #1a6bc1; margin-top: 10px; display: none; font-family: 'IBM Plex Mono', monospace; min-height: 14px; }
+    #submitBtn { display: block; width: 100%; margin-top: 32px; background: #1a6bc1; color: #ffffff; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 4px; padding: 14px; border: none; border-radius: 0; cursor: pointer; transition: background 0.15s, transform 0.1s; }
+    #submitBtn:hover { background: #1f7fd4; }
+    #submitBtn:active { transform: scale(0.98); }
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 0.5px; background: #1e1e1c; }
+    .divider span { font-family: 'IBM Plex Mono', monospace; font-size: 8px; color: #2a2a28; flex-shrink: 0; }
+    #google-btn { display: block; width: 100%; background: #ffffff; color: #0d0d0b; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 14px; border: 0.5px solid #1e1e1c; border-radius: 0; cursor: pointer; transition: background 0.15s; }
+    #google-btn:hover { background: #f5f5f5; }
+    .card-footer { font-size: 8px; letter-spacing: 1px; color: #2a2a28; text-align: center; margin-top: 20px; display: block; font-family: 'IBM Plex Mono', monospace; }
+    .return-link { color: #3a3a38; text-decoration: none; transition: color 0.15s; }
+    .return-link:hover { color: #d4d4cc; }
+
+    /* ── Voicemail cinematic ── */
+    #voicemailCinematic {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #0d0d0b;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 1; transition: opacity 800ms ease;
+    }
+    .answer-machine {
+      width: 320px; height: 180px;
+      background: #1a1a18; border: 0.5px solid #2a2a28; border-radius: 8px;
+      position: relative; padding: 18px 20px 14px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .am-top { display: flex; align-items: flex-start; justify-content: space-between; }
+    .am-tape-deck {
+      width: 88px; height: 44px; background: #111110;
+      border: 0.5px solid #2a2a28; border-radius: 3px;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    .am-tape-deck::before {
+      content: '';
+      position: absolute; top: 50%; left: 10px;
+      transform: translateY(-50%);
+      width: 24px; height: 24px;
+      border: 1.5px solid #2a2a28; border-radius: 50%;
+    }
+    .am-tape-deck::after {
+      content: '';
+      position: absolute; top: 50%; right: 10px;
+      transform: translateY(-50%);
+      width: 24px; height: 24px;
+      border: 1.5px solid #2a2a28; border-radius: 50%;
+    }
+    .am-led {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #c1121f;
+      box-shadow: 0 0 6px rgba(193,18,31,0.8);
+      animation: ledBlink 800ms ease-in-out infinite;
+    }
+    @keyframes ledBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .am-label {
+      font-family: 'IBM Plex Mono', monospace; font-size: 7px;
+      color: #3a3a38; letter-spacing: 2px; text-align: center;
+      margin-top: 6px;
+    }
+    .am-buttons { display: flex; gap: 8px; justify-content: flex-end; }
+    .am-btn {
+      width: 28px; height: 12px; background: #2a2a28; border-radius: 2px;
+    }
+    .vm-text-wrap {
+      margin-top: 48px; text-align: center; max-width: 480px;
+    }
+    .vm-line {
+      font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+      color: #d4d4cc; line-height: 2; text-align: center;
+      display: block;
+    }
+    .vm-final {
+      font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+      color: #3a3a38; letter-spacing: 3px; text-align: center;
+      display: block; margin-top: 16px;
+      opacity: 0; transition: opacity 600ms ease;
+    }
+  </style>
+<style>
+@keyframes signalBar {
+  0%   { width: 0%; opacity: 1; }
+  85%  { width: 100%; opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+}
+#signal-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 1.5px;
+  width: 0%;
+  background: #c1121f;
+  z-index: 9999;
+  animation: signalBar 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div id="signal-bar"></div>
+<canvas id="crtCanvas"></canvas>
+<div id="scanlines"></div>
+<div id="vignette"></div>
+<div id="blueTint"></div>
+<div id="glitchLine"></div>
+<div id="blackCover"></div>
+<div id="loginCard">
+  <img src="favicon.png" class="card-logo" alt="DOMO"/>
+  <span class="card-heading">Access Terminal</span>
+  <span class="card-sub">file not found &mdash; create your record</span>
+  <form id="signupForm" onsubmit="return handleSubmit(event)">
+    <input id="nameField"    class="field" type="text"     placeholder="your name"      autocomplete="off"/>
+    <input id="emailField"   class="field" type="text"     placeholder="identifier"     autocomplete="off"/>
+    <input id="passwordField" class="field" type="password" placeholder="create passkey"  autocomplete="off"/>
+    <input id="confirmField" class="field" type="password" placeholder="confirm passkey" autocomplete="off"/>
+    <div id="errorMsg"></div>
+    <button id="submitBtn" type="submit">OPEN MY FILE</button>
+    <div class="divider"><span>or</span></div>
+    <button id="google-btn" type="button">Continue with Google</button>
+  </form>
+  <span class="card-footer">already have clearance? <a href="door.html" class="return-link">return to the door</a></span>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script>
+/* ── CRT CANVAS ── */
+var canvas = document.getElementById('crtCanvas');
+var ctx = canvas.getContext('2d');
+var blueTint = document.getElementById('blueTint');
+var W, H, imgData;
+var state = 'CALM';
+var noiseMax = 80, targetMax = 80;
+var canvasOpacity = 0.18, targetOpacity = 0.18;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  imgData = ctx.createImageData(W, H);
+}
+resize();
+window.addEventListener('resize', resize);
+
+function drawNoise() {
+  var data = imgData.data;
+  var max = noiseMax | 0;
+  for (var i = 0; i < data.length; i += 4) {
+    var v = (Math.random() * max) | 0;
+    data[i] = data[i+1] = data[i+2] = v;
+    data[i+3] = 255;
+  }
+  ctx.putImageData(imgData, 0, 0);
+}
+
+function loop() {
+  requestAnimationFrame(loop);
+  if (Math.abs(noiseMax - targetMax) > 0.3) noiseMax += (targetMax - noiseMax) * 0.04;
+  else noiseMax = targetMax;
+  if (Math.abs(canvasOpacity - targetOpacity) > 0.002) {
+    canvasOpacity += (targetOpacity - canvasOpacity) * 0.06;
+    canvas.style.opacity = canvasOpacity.toFixed(3);
+  }
+  drawNoise();
+}
+requestAnimationFrame(loop);
+
+function setChaos() {
+  if (state === 'CLEARING') return;
+  state = 'CHAOS';
+  targetMax = 255; targetOpacity = 0.65;
+  canvas.style.filter = 'contrast(1.4)';
+  blueTint.style.transition = 'none';
+  blueTint.style.opacity = '1';
+  setTimeout(function() { blueTint.style.transition = 'opacity 400ms ease'; blueTint.style.opacity = '0'; }, 800);
+  setTimeout(function() { state = 'CALM'; targetMax = typingMax(); targetOpacity = 0.18; canvas.style.filter = ''; }, 1200);
+}
+
+function setClearing() {
+  state = 'CLEARING';
+  targetOpacity = 0; targetMax = 0;
+  canvas.style.filter = '';
+  var sl = document.getElementById('scanlines');
+  var vg = document.getElementById('vignette');
+  sl.style.transition = vg.style.transition = 'opacity 1200ms ease';
+  sl.style.opacity = vg.style.opacity = '0';
+  var card = document.getElementById('loginCard');
+  setTimeout(function() { card.style.transition = 'opacity 400ms ease'; card.style.opacity = '0'; }, 1200);
+  var cover = document.getElementById('blackCover');
+  cover.style.pointerEvents = 'all';
+  setTimeout(function() { cover.style.transition = 'opacity 300ms ease'; cover.style.opacity = '1'; }, 1600);
+}
+
+var charCount = 0, typingTimer = null, driftTimer = null;
+function typingMax() { return Math.max(40, 80 - charCount * 1.5); }
+
+function onType() {
+  charCount++;
+  if (state === 'CALM') targetMax = typingMax();
+  document.getElementById('errorMsg').style.display = 'none';
+  clearTimeout(typingTimer); clearInterval(driftTimer);
+  typingTimer = setTimeout(function() {
+    var start = noiseMax, end = 80, steps = 60, step = 0;
+    driftTimer = setInterval(function() {
+      step++;
+      targetMax = start + (end - start) * (step / steps);
+      if (step >= steps) { clearInterval(driftTimer); charCount = 0; }
+    }, 2000 / steps);
+  }, 3000);
+}
+document.getElementById('nameField').addEventListener('input', onType);
+document.getElementById('emailField').addEventListener('input', onType);
+document.getElementById('passwordField').addEventListener('input', onType);
+document.getElementById('confirmField').addEventListener('input', onType);
+
+function scheduleFlicker() {
+  setTimeout(function() {
+    document.body.style.transition = 'opacity 40ms ease';
+    document.body.style.opacity = '0.92';
+    setTimeout(function() {
+      document.body.style.opacity = '1';
+      setTimeout(function() { document.body.style.transition = ''; scheduleFlicker(); }, 80);
+    }, 40);
+  }, 4000 + Math.random() * 4000);
+}
+scheduleFlicker();
+
+var gl = document.getElementById('glitchLine');
+function scheduleGlitch() {
+  setTimeout(function() {
+    gl.style.top = (Math.random() * window.innerHeight) + 'px';
+    gl.style.transition = 'none';
+    gl.style.opacity = '1';
+    gl.style.transform = 'scaleX(0)';
+    requestAnimationFrame(function() { requestAnimationFrame(function() {
+      gl.style.transition = 'transform 200ms linear';
+      gl.style.transform = 'scaleX(1)';
+      setTimeout(function() {
+        gl.style.transition = 'opacity 200ms ease';
+        gl.style.opacity = '0';
+        setTimeout(scheduleGlitch, 300);
+      }, 200);
+    }); });
+  }, 6000 + Math.random() * 6000);
+}
+scheduleGlitch();
+
+/* ── FIREBASE + SIGNUP LOGIC ── */
+var firebaseConfig = {
+  apiKey: "AIzaSyA6_5oWBRKZLnZhTsjtfepm2NleAEEsrPA",
+  authDomain: "domo-8cfe1.firebaseapp.com",
+  projectId: "domo-8cfe1",
+  storageBucket: "domo-8cfe1.firebasestorage.app",
+  messagingSenderId: "47790816831",
+  appId: "1:47790816831:web:0a92e160fc595d5a9c428a",
+  measurementId: "G-JD9B01Q5QN"
+};
+firebase.initializeApp(firebaseConfig);
+var auth = firebase.auth();
+var db = firebase.firestore();
+
+/* ── Validation helpers ── */
+function showError(msg) {
+  var el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+/* ── Email/password signup ── */
+function handleSubmit(e) {
+  e.preventDefault();
+  var name    = document.getElementById('nameField').value.trim();
+  var email   = document.getElementById('emailField').value.trim();
+  var pw      = document.getElementById('passwordField').value;
+  var confirm = document.getElementById('confirmField').value;
+
+  if (!name)            { showError('department requires a name'); setChaos(); return false; }
+  if (!email)           { showError('no identifier provided'); setChaos(); return false; }
+  if (pw !== confirm)   { showError('passkeys do not match'); setChaos(); return false; }
+  if (pw.length < 6)    { showError('passkey too weak \u2014 minimum 6 characters'); setChaos(); return false; }
+
+  auth.createUserWithEmailAndPassword(email, pw)
+    .then(function(cred) {
+      return cred.user.updateProfile({ displayName: name }).then(function() {
+        return db.collection('users').doc(cred.user.uid).set({
+          name: name,
+          email: email,
+          photoURL: null,
+          lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+          isNewUser: true
+        }, { merge: true });
+      });
+    })
+    .then(function() {
+      triggerVoicemail();
+    })
+    .catch(function(error) {
+      if (error.code === 'auth/email-already-in-use') {
+        showError('this identifier is already in the system \u2014 return to the door and enter');
+      } else {
+        showError('Access denied \u2014 try again');
+      }
+      setChaos();
+    });
+  return false;
+}
+
+/* ── Google signup ── */
+document.getElementById('google-btn').addEventListener('click', function() {
+  var provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider).then(function(result) {
+    var isNew = result.additionalUserInfo && result.additionalUserInfo.isNewUser;
+    var user = result.user;
+    var db = firebase.firestore();
+    db.collection('users').doc(user.uid).set({
+      name: user.displayName,
+      email: user.email,
+      photoURL: user.photoURL,
+      lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+      isNewUser: isNew
+    }, { merge: true }).then(function() {
+      if (isNew) {
+        localStorage.setItem('domo-new-member', 'true');
+        triggerVoicemail();
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+  }).catch(function(error) {
+    if (error.code !== 'auth/popup-closed-by-user') {
+      showError('signal lost \u2014 google access failed');
+    }
+  });
+});
+
+/* ── Voicemail cinematic ── */
+function triggerVoicemail() {
+  /* fade out the form first via setClearing visuals */
+  setClearing();
+
+  /* wait for blackout then launch cinematic */
+  setTimeout(function() {
+    var cin = document.createElement('div');
+    cin.id = 'voicemailCinematic';
+
+    /* answering machine */
+    var machine = document.createElement('div');
+    machine.className = 'answer-machine';
+    machine.innerHTML =
+      '<div class="am-top">' +
+        '<div class="am-tape-deck"></div>' +
+        '<div class="am-led"></div>' +
+      '</div>' +
+      '<div class="am-label">D.O.M.O ANSWERING SYSTEM</div>' +
+      '<div class="am-buttons"><div class="am-btn"></div><div class="am-btn"></div></div>';
+    cin.appendChild(machine);
+
+    /* text container */
+    var textWrap = document.createElement('div');
+    textWrap.className = 'vm-text-wrap';
+    cin.appendChild(textWrap);
+
+    document.body.appendChild(cin);
+
+    var lines = [
+      'you have reached the department of miscellaneous objects.',
+      'we have received your file.',
+      'we cannot tell you what happens next.',
+      'we suggest you look around.',
+      'some of the objects already know you are here.'
+    ];
+
+    var lineIndex = 0;
+
+    function typeLine(text, callback) {
+      var lineEl = document.createElement('span');
+      lineEl.className = 'vm-line';
+      textWrap.appendChild(lineEl);
+      var i = 0;
+      var timer = setInterval(function() {
+        lineEl.textContent += text[i];
+        i++;
+        if (i >= text.length) {
+          clearInterval(timer);
+          setTimeout(callback, 600);
+        }
+      }, 55);
+    }
+
+    function typeNext() {
+      if (lineIndex < lines.length) {
+        typeLine(lines[lineIndex], function() {
+          lineIndex++;
+          typeNext();
+        });
+      } else {
+        /* all lines done */
+        setTimeout(function() {
+          var finalEl = document.createElement('span');
+          finalEl.className = 'vm-final';
+          finalEl.textContent = '[ transmission ended ]';
+          textWrap.appendChild(finalEl);
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() { finalEl.style.opacity = '1'; });
+          });
+          /* 600ms fade + 1000ms pause = 1600ms, then fade out cinematic */
+          setTimeout(function() {
+            cin.style.opacity = '0';
+            setTimeout(function() {
+              localStorage.setItem('domo-new-member', 'true');
+              window.location.href = 'index.html';
+            }, 800);
+          }, 1600);
+        }, 1200);
+      }
+    }
+
+    typeNext();
+  }, 2000);
+}
+</script>
+<script>
+(function() {
+  var bar = document.getElementById('signal-bar');
+  if (!bar) return;
+  bar.addEventListener('animationend', function() {
+    bar.remove();
+  });
+})();
+</script>
+</body>
+</html>

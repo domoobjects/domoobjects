@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DOMO</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #0d0d0b; overflow: hidden; }
+    body { display: flex; align-items: center; justify-content: center; }
+
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .domo-logo {
+      display: block;
+      height: 36px;
+      width: auto;
+      opacity: 0.5;
+      margin: 0 auto 48px;
+    }
+
+    .doors {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+    }
+
+    .door-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .door {
+      position: relative;
+      width: 120px;
+      height: 280px;
+      border-radius: 0;
+      border: none;
+      cursor: pointer;
+      transition: box-shadow 300ms ease, filter 300ms ease;
+    }
+
+    .door-knob {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+    }
+
+    /* Red door */
+    .door-red {
+      background: #c1121f;
+      box-shadow: inset 4px 0 8px rgba(0, 0, 0, 0.3);
+    }
+    .door-red:hover {
+      filter: brightness(1.12);
+      box-shadow:
+        inset 4px 0 8px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(193, 18, 31, 0.5),
+        0 0 60px rgba(193, 18, 31, 0.2);
+    }
+
+    /* Blue door */
+    .door-blue {
+      background: #1a3a6b;
+      box-shadow: inset 4px 0 8px rgba(0, 0, 0, 0.3);
+    }
+    .door-blue:hover {
+      filter: brightness(1.12);
+      box-shadow:
+        inset 4px 0 8px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(26, 58, 107, 0.8),
+        0 0 60px rgba(26, 107, 193, 0.3);
+    }
+
+    .door-label {
+      margin-top: 16px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 3px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .door-label-red  { color: #c1121f; }
+    .door-label-blue { color: #1a6bc1; }
+  </style>
+<style>
+@keyframes signalBar {
+  0%   { width: 0%; opacity: 1; }
+  85%  { width: 100%; opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+}
+#signal-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 1.5px;
+  width: 0%;
+  background: #c1121f;
+  z-index: 9999;
+  animation: signalBar 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div id="signal-bar"></div>
+
+<div class="stage">
+  <img src="favicon.png" class="domo-logo" alt="DOMO"/>
+
+  <div class="doors">
+
+    <div class="door-wrap">
+      <div class="door door-red" id="doorRed">
+        <div class="door-knob"></div>
+      </div>
+      <div class="door-label door-label-red">I Have Clearance</div>
+    </div>
+
+    <div class="door-wrap">
+      <div class="door door-blue" id="doorBlue">
+        <div class="door-knob"></div>
+      </div>
+      <div class="door-label door-label-blue">New to the Department</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function floodAndRedirect(color, dest) {
+  var flood = document.createElement('div');
+  flood.style.cssText = [
+    'position:fixed',
+    'inset:0',
+    'z-index:999',
+    'background:' + color,
+    'opacity:0',
+    'pointer-events:all',
+    'transition:opacity 400ms ease'
+  ].join(';');
+  document.body.appendChild(flood);
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      flood.style.opacity = '1';
+      setTimeout(function() {
+        window.location.href = dest;
+      }, 400);
+    });
+  });
+}
+
+document.getElementById('doorRed').addEventListener('click', function() {
+  floodAndRedirect('#c1121f', 'login.html');
+});
+
+document.getElementById('doorBlue').addEventListener('click', function() {
+  floodAndRedirect('#1a3a6b', 'signup.html');
+});
+</script>
+
+<script>
+(function() {
+  var bar = document.getElementById('signal-bar');
+  if (!bar) return;
+  bar.addEventListener('animationend', function() {
+    bar.remove();
+  });
+})();
+</script>
+</body>
+</html>
