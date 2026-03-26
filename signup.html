@@ -136,13 +136,20 @@
   <img src="favicon.png" class="card-logo" alt="DOMO"/>
   <span class="card-heading">Access Terminal</span>
   <span class="card-sub">file not found &mdash; create your record</span>
-  <form id="signupForm" onsubmit="return handleSubmit(event)">
+  <form id="signup-form">
     <input id="nameField"    class="field" type="text"     placeholder="your name"      autocomplete="off"/>
     <input id="emailField"   class="field" type="text"     placeholder="identifier"     autocomplete="off"/>
     <input id="passwordField" class="field" type="password" placeholder="create passkey"  autocomplete="off"/>
+    <div id="password-requirements" style="font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1px;color:#3a3a38;line-height:1.9;margin-top:6px;margin-bottom:6px;">
+      passkey must contain:<br>
+      &middot; <span id="req-length">minimum 8 characters</span><br>
+      &middot; <span id="req-upper">at least one uppercase letter</span><br>
+      &middot; <span id="req-number">at least one number</span><br>
+      &middot; <span id="req-special">at least one special character ( ! @ # $ % )</span>
+    </div>
     <input id="confirmField" class="field" type="password" placeholder="confirm passkey" autocomplete="off"/>
-    <div id="errorMsg"></div>
-    <button id="submitBtn" type="submit">OPEN MY FILE</button>
+    <div id="errorMsg" style="display:none"></div>
+    <button id="submitBtn" type="submit">GET ME IN</button>
     <div class="divider"><span>or</span></div>
     <button id="google-btn" type="button">Continue with Google</button>
   </form>
@@ -287,30 +294,59 @@ firebase.initializeApp(firebaseConfig);
 var auth = firebase.auth();
 var db = firebase.firestore();
 
-/* ── Validation helpers ── */
-function showError(msg) {
+/* ── Helpers ── */
+function showError(message) {
   var el = document.getElementById('errorMsg');
-  el.textContent = msg;
-  el.style.display = 'block';
+  if (el) { el.textContent = message; el.style.display = 'block'; el.style.opacity = '1'; }
+}
+function hideError() {
+  var el = document.getElementById('errorMsg');
+  if (el) { el.style.display = 'none'; el.style.opacity = '0'; el.textContent = ''; }
+}
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+function validatePassword(password) {
+  var minLength  = password.length >= 8;
+  var hasUpper   = /[A-Z]/.test(password);
+  var hasNumber  = /[0-9]/.test(password);
+  var hasSpecial = /[!@#$%^&*]/.test(password);
+  return minLength && hasUpper && hasNumber && hasSpecial;
 }
 
-/* ── Email/password signup ── */
-function handleSubmit(e) {
+/* ── Real-time password requirement hints ── */
+document.getElementById('passwordField').addEventListener('input', function() {
+  var pw = this.value;
+  var rl = document.getElementById('req-length');
+  var ru = document.getElementById('req-upper');
+  var rn = document.getElementById('req-number');
+  var rs = document.getElementById('req-special');
+  if (rl) rl.style.color = pw.length >= 8        ? '#1a5a1a' : '#3a3a38';
+  if (ru) ru.style.color = /[A-Z]/.test(pw)      ? '#1a5a1a' : '#3a3a38';
+  if (rn) rn.style.color = /[0-9]/.test(pw)      ? '#1a5a1a' : '#3a3a38';
+  if (rs) rs.style.color = /[!@#$%^&*]/.test(pw) ? '#1a5a1a' : '#3a3a38';
+});
+
+/* ── Email / password signup ── */
+document.getElementById('signup-form').addEventListener('submit', function(e) {
   e.preventDefault();
-  var name    = document.getElementById('nameField').value.trim();
-  var email   = document.getElementById('emailField').value.trim();
-  var pw      = document.getElementById('passwordField').value;
-  var confirm = document.getElementById('confirmField').value;
+  var name     = document.getElementById('nameField').value.trim();
+  var email    = document.getElementById('emailField').value.trim();
+  var password = document.getElementById('passwordField').value;
+  var confirm  = document.getElementById('confirmField').value;
 
-  if (!name)            { showError('department requires a name'); setChaos(); return false; }
-  if (!email)           { showError('no identifier provided'); setChaos(); return false; }
-  if (pw !== confirm)   { showError('passkeys do not match'); setChaos(); return false; }
-  if (pw.length < 6)    { showError('passkey too weak \u2014 minimum 6 characters'); setChaos(); return false; }
+  hideError();
 
-  auth.createUserWithEmailAndPassword(email, pw)
-    .then(function(cred) {
-      return cred.user.updateProfile({ displayName: name }).then(function() {
-        return db.collection('users').doc(cred.user.uid).set({
+  if (!name)    { showError('department requires a name'); setChaos(); return; }
+  if (!email)   { showError('no identifier provided'); setChaos(); return; }
+  if (!isValidEmail(email)) { showError('identifier is not valid \u2014 use a real email address'); setChaos(); return; }
+  if (password !== confirm)        { showError('passkeys do not match'); setChaos(); return; }
+  if (!validatePassword(password)) { showError('passkey does not meet requirements \u2014 check the rules above'); setChaos(); return; }
+
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(function(result) {
+      return result.user.updateProfile({ displayName: name }).then(function() {
+        return firebase.firestore().collection('users').doc(result.user.uid).set({
           name: name,
           email: email,
           photoURL: null,
@@ -320,46 +356,61 @@ function handleSubmit(e) {
       });
     })
     .then(function() {
+      localStorage.setItem('domo-new-member', 'true');
       triggerVoicemail();
     })
     .catch(function(error) {
-      if (error.code === 'auth/email-already-in-use') {
-        showError('this identifier is already in the system \u2014 return to the door and enter');
-      } else {
-        showError('Access denied \u2014 try again');
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          showError('this identifier is already in the system \u2014 return to the door and enter');
+          break;
+        case 'auth/invalid-email':
+          showError('identifier is not valid \u2014 use a real email address');
+          break;
+        case 'auth/weak-password':
+          showError('passkey too weak \u2014 check the requirements above');
+          break;
+        case 'auth/network-request-failed':
+          showError('signal lost \u2014 no network connection detected');
+          break;
+        default:
+          showError('signal lost \u2014 please try again');
+          break;
       }
       setChaos();
     });
-  return false;
-}
+});
 
 /* ── Google signup ── */
 document.getElementById('google-btn').addEventListener('click', function() {
+  hideError();
   var provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(provider).then(function(result) {
-    var isNew = result.additionalUserInfo && result.additionalUserInfo.isNewUser;
-    var user = result.user;
-    var db = firebase.firestore();
-    db.collection('users').doc(user.uid).set({
-      name: user.displayName,
-      email: user.email,
-      photoURL: user.photoURL,
-      lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-      isNewUser: isNew
-    }, { merge: true }).then(function() {
-      if (isNew) {
-        localStorage.setItem('domo-new-member', 'true');
-        triggerVoicemail();
-      } else {
-        window.location.href = 'index.html';
+  firebase.auth().signInWithPopup(provider)
+    .then(function(result) {
+      var isNew = result.additionalUserInfo && result.additionalUserInfo.isNewUser;
+      var user = result.user;
+      firebase.firestore().collection('users').doc(user.uid).set({
+        name: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+        isNewUser: isNew
+      }, { merge: true }).then(function() {
+        if (isNew) {
+          localStorage.setItem('domo-new-member', 'true');
+          triggerVoicemail();
+        } else {
+          window.location.href = 'index.html';
+        }
+      });
+    })
+    .catch(function(error) {
+      if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+        showError('signal lost — google access failed');
       }
     });
-  }).catch(function(error) {
-    if (error.code !== 'auth/popup-closed-by-user') {
-      showError('signal lost \u2014 google access failed');
-    }
-  });
 });
+
 
 /* ── Voicemail cinematic ── */
 function triggerVoicemail() {

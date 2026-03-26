@@ -74,7 +74,7 @@
   <img src="favicon.png" class="card-logo" alt="DOMO"/>
   <span class="card-heading">Access Terminal</span>
   <span class="card-sub">Enter credentials to continue</span>
-  <form id="loginForm" onsubmit="return handleSubmit(event)">
+  <form id="loginForm">
     <input id="emailField" class="field" type="text" placeholder="identifier" autocomplete="off"/>
     <input id="passwordField" class="field" type="password" placeholder="password" autocomplete="off"/>
     <div id="errorMsg">Signal rejected &mdash; try again</div>
@@ -175,13 +175,7 @@ function onType() {
 document.getElementById('emailField').addEventListener('input', onType);
 document.getElementById('passwordField').addEventListener('input', onType);
 
-function handleSubmit(e) {
-  e.preventDefault();
-  var pw = document.getElementById('passwordField').value;
-  if (pw === 'domo2024') { setClearing(); }
-  else { setChaos(); document.getElementById('errorMsg').style.display = 'block'; }
-  return false;
-}
+
 
 function scheduleFlicker() {
   setTimeout(function() {
@@ -217,7 +211,7 @@ scheduleGlitch();
 </script>
 
 <script>
-/* ── FIREBASE + GOOGLE AUTH ── */
+/* ── FIREBASE + AUTH ── */
 var firebaseConfig = {
   apiKey: "AIzaSyA6_5oWBRKZLnZhTsjtfepm2NleAEEsrPA",
   authDomain: "domo-8cfe1.firebaseapp.com",
@@ -231,29 +225,60 @@ firebase.initializeApp(firebaseConfig);
 var auth = firebase.auth();
 var db = firebase.firestore();
 
-/* Handle return from Google redirect */
-auth.getRedirectResult().then(function(result) {
-  if (result && result.user) {
-    var user = result.user;
-    db.collection('users').doc(user.uid).set({
-      name: user.displayName,
-      email: user.email,
-      photoURL: user.photoURL,
-      lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true }).then(function() {
-      setClearing();
+/* ── Helpers ── */
+function showError(message) {
+  var el = document.getElementById('errorMsg');
+  if (el) { el.textContent = message; el.style.display = 'block'; el.style.opacity = '1'; }
+}
+function hideError() {
+  var el = document.getElementById('errorMsg');
+  if (el) { el.style.display = 'none'; el.style.opacity = '0'; el.textContent = ''; }
+}
+function triggerClearingAnimation() { setClearing(); }
+
+/* ── Email / password login ── */
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var email    = document.getElementById('emailField').value.trim();
+  var password = document.getElementById('passwordField').value;
+  if (!email || !password) return;
+  hideError();
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(function(result) {
+      triggerClearingAnimation();
+    })
+    .catch(function(error) {
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        showError('Signal rejected — credentials not recognised');
+      } else {
+        showError('Signal rejected — ' + error.message);
+      }
+      setChaos();
     });
-  }
-}).catch(function(error) {
-  if (error && error.code) {
-    document.getElementById('googleErrorMsg').style.display = 'block';
-  }
 });
 
+/* ── Google login ── */
 document.getElementById('googleBtn').addEventListener('click', function() {
-  document.getElementById('googleErrorMsg').style.display = 'none';
   var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithRedirect(provider);
+  firebase.auth().signInWithPopup(provider)
+    .then(function(result) {
+      var isNew = result.additionalUserInfo && result.additionalUserInfo.isNewUser;
+      var user = result.user;
+      db.collection('users').doc(user.uid).set({
+        name: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+        isNewUser: isNew
+      }, { merge: true }).then(function() {
+        triggerClearingAnimation();
+      });
+    })
+    .catch(function(error) {
+      if (error.code !== 'auth/popup-closed-by-user') {
+        showError('signal lost — google access failed');
+      }
+    });
 });
 </script>
 <script>
