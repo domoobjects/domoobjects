@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Activity File — D.O.M.O</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #0d0d0b;
+      color: #d4d4cc;
+      font-family: 'IBM Plex Mono', monospace;
+      overflow-x: hidden;
+    }
+
+    /* ── TAPE CINEMATIC ── */
+    #tape-cinematic {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #0d0d0b;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 1; transition: opacity 800ms ease;
+    }
+
+    /* ── Answering machine graphic ── */
+    .answer-machine {
+      width: 320px; height: 180px;
+      background: #1a1a18; border: 0.5px solid #2a2a28; border-radius: 8px;
+      position: relative; padding: 18px 20px 14px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .am-top { display: flex; align-items: flex-start; justify-content: space-between; }
+    .am-tape-deck {
+      width: 88px; height: 44px; background: #111110;
+      border: 0.5px solid #2a2a28; border-radius: 3px;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    .am-tape-deck::before {
+      content: '';
+      position: absolute; top: 50%; left: 10px;
+      transform: translateY(-50%);
+      width: 24px; height: 24px;
+      border: 1.5px solid #2a2a28; border-radius: 50%;
+    }
+    .am-tape-deck::after {
+      content: '';
+      position: absolute; top: 50%; right: 10px;
+      transform: translateY(-50%);
+      width: 24px; height: 24px;
+      border: 1.5px solid #2a2a28; border-radius: 50%;
+    }
+    .am-led {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #c1121f;
+      box-shadow: 0 0 6px rgba(193,18,31,0.8);
+      animation: ledBlink 800ms ease-in-out infinite;
+    }
+    @keyframes ledBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .am-label {
+      font-family: 'IBM Plex Mono', monospace; font-size: 7px;
+      color: #3a3a38; letter-spacing: 2px; text-align: center;
+      margin-top: 6px;
+    }
+    .am-buttons { display: flex; gap: 8px; justify-content: flex-end; }
+    .am-btn {
+      width: 28px; height: 12px; background: #2a2a28; border-radius: 2px;
+    }
+
+    /* Typewriter text */
+    .cin-text-wrap {
+      margin-top: 0; text-align: center; max-width: 480px;
+    }
+    .cin-line {
+      font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+      color: #d4d4cc; line-height: 2; text-align: center;
+      display: block;
+    }
+    .cin-final {
+      font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+      color: #3a3a38; letter-spacing: 3px; text-align: center;
+      display: block; margin-top: 16px;
+      opacity: 0; transition: opacity 600ms ease;
+    }
+
+    /* ── ACTIVITY CONTENT ── */
+    #activity-content {
+      display: none;
+      min-height: 100vh;
+      padding: 60px 36px 120px;
+      opacity: 0;
+      transition: opacity 600ms ease;
+    }
+    .ac-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* stagger sections */
+    .ac-section {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 400ms ease, transform 400ms ease;
+    }
+
+    /* ── SECTION 1 — FILE HEADER ── */
+    .ac-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      border-bottom: 0.5px solid #1e1e1c;
+      padding-bottom: 32px; margin-bottom: 40px;
+      position: relative; overflow: hidden;
+    }
+    .ac-header-left {}
+    .ac-dept-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 7px; letter-spacing: 4px; color: #c1121f;
+      margin-bottom: 8px;
+    }
+    .ac-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 64px; letter-spacing: 6px; color: #d4d4cc;
+      line-height: 0.9;
+    }
+    .ac-uid {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 3px; color: #3a3a38;
+      margin-top: 10px;
+    }
+    .ac-header-right {
+      text-align: right; flex-shrink: 0; margin-left: 32px;
+    }
+    .ac-file-status-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 7px; letter-spacing: 3px; color: #3a3a38;
+      margin-bottom: 6px;
+    }
+    .ac-status-row {
+      display: flex; align-items: center; justify-content: flex-end; gap: 6px;
+    }
+    .ac-blink-dot {
+      width: 6px; height: 6px; background: #c1121f; border-radius: 50%;
+      animation: blinkDot 1.4s infinite; flex-shrink: 0;
+    }
+    .ac-status-text {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; color: #c1121f; letter-spacing: 2px;
+    }
+    .ac-days-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 7px; color: #3a3a38; letter-spacing: 2px;
+      margin-top: 14px; margin-bottom: 4px;
+    }
+    .ac-days-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px; color: #d4d4cc; line-height: 1;
+    }
+    .ac-scanner-wrap {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 0.5px; overflow: hidden;
+    }
+    .ac-scanner-line {
+      height: 100%;
+      background: linear-gradient(to right, transparent, #c1121f, transparent);
+      animation: scanLine 3s ease-in-out infinite;
+    }
+    @keyframes scanLine {
+      0%   { transform: translateX(-100%) scaleX(0.5); }
+      100% { transform: translateX(200%) scaleX(0.5); }
+    }
+
+    /* ── SECTION 2 — THREAT METER ── */
+    .ac-threat {
+      background: #111110; border: 0.5px solid #1e1e1c;
+      padding: 28px 32px; margin-bottom: 24px;
+    }
+    .ac-threat-top {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 16px;
+    }
+    .ac-threat-heading {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 7px; letter-spacing: 4px; color: #c1121f;
+    }
+    .ac-threat-level-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 2px; color: #d4d4cc;
+    }
+    .ac-threat-levels {
+      display: flex; gap: 0; margin-bottom: 10px;
+    }
+    .ac-threat-lvl {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 7px; letter-spacing: 2px;
+      flex: 1; text-align: center; padding: 4px 0;
+    }
+    .ac-threat-track {
+      width: 100%; height: 3px; background: #1a1a18;
+      border-radius: 0; overflow: hidden; margin-bottom: 12px;
+    }
+    .ac-threat-fill {
+      height: 100%; background: #c1121f;
+      width: 0%; transition: width 1200ms ease;
+    }
+    .ac-threat-hint {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; color: #3a3a38; line-height: 1.8;
+    }
+
+    /* ── SECTION 3 — DOSSIER STATS ── */
+    .ac-dossier {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      margin-bottom: 24px;
+    }
+    .ac-dossier-card {
+      background: #111110; border: 0.5px solid #1e1e1c;
+      padding: 20px 24px;
+    }
+    .ac-dossier-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 7px; letter-spacing: 3px; color: #3a3a38;
+      margin-bottom: 10px;
+    }
+    .ac-dossier-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 42px; color: #d4d4cc; line-height: 1;
+    }
+
+    /* ── SECTION 4 — PERSONALITY ── */
+    .ac-personality {
+      background: #111110;
+      border: 0.5px solid #1e1e1c;
+      border-left: 2px solid #c1121f;
+      padding: 28px 32px; margin-bottom: 24px;
+      position: relative; overflow: hidden;
+    }
+    .ac-personality-heading {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 7px; letter-spacing: 4px; color: #c1121f;
+      margin-bottom: 16px;
+    }
+    .ac-classified-stamp {
+      position: absolute; top: 20px; right: 20px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 10px; letter-spacing: 3px; color: #c1121f;
+      border: 1px solid #c1121f; padding: 4px 10px;
+      opacity: 0.6; transform: rotate(12deg);
+      pointer-events: none;
+    }
+    .ac-personality-type {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px; letter-spacing: 4px; color: #d4d4cc;
+      margin-bottom: 12px;
+    }
+    .ac-personality-desc {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; color: #3a3a38; line-height: 2;
+    }
+
+    /* ── SECTION 5 — MOVEMENTS ── */
+    .ac-movements { margin-bottom: 24px; }
+    .ac-section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 7px; letter-spacing: 4px; color: #c1121f;
+      margin-bottom: 16px;
+    }
+    .ac-mov-row {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 0.5px solid #1a1a18; padding: 12px 0;
+    }
+    .ac-mov-page {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; color: #d4d4cc; flex: 1;
+    }
+    .ac-mov-note {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; color: #3a3a38; font-style: italic;
+      flex: 2; text-align: center; padding: 0 12px;
+    }
+    .ac-mov-time {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; color: #2a2a28; flex-shrink: 0;
+    }
+
+    /* ── SECTION 6 — WISHLIST ── */
+    .ac-wishlist { margin-bottom: 24px; }
+    .ac-wish-grid {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .ac-wish-card {
+      background: #111110; border: 0.5px solid #1e1e1c;
+      padding: 16px 20px; position: relative; min-width: 160px;
+    }
+    .ac-wish-flag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 6px; letter-spacing: 2px; color: #c1121f;
+      margin-bottom: 6px;
+    }
+    .ac-wish-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; color: #d4d4cc;
+    }
+    .ac-wish-case {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; color: #3a3a38; margin-top: 4px;
+    }
+    .ac-wish-dot {
+      position: absolute; bottom: 10px; right: 10px;
+      width: 5px; height: 5px; background: #c1121f; border-radius: 50%;
+      animation: blinkDot 1.4s infinite;
+    }
+
+    /* ── SECTION 7 — TIMELINE ── */
+    .ac-timeline { margin-bottom: 24px; }
+    .ac-timeline-list {
+      position: relative; padding-left: 20px;
+      border-left: 0.5px solid #1e1e1c;
+    }
+    .ac-timeline-item {
+      position: relative; padding: 0 0 20px 20px;
+    }
+    .ac-timeline-pin {
+      position: absolute; left: -24px; top: 3px;
+      width: 8px; height: 8px; background: #c1121f; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .ac-timeline-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; color: #d4d4cc;
+    }
+    .ac-timeline-case {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; color: #3a3a38; margin-top: 2px;
+    }
+    .ac-timeline-date {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; color: #2a2a28; margin-top: 2px;
+    }
+
+    /* ── SECTION 8 — CONFESSION ── */
+    .ac-confession {
+      border-top: 0.5px solid #1e1e1c;
+      padding-top: 32px; margin-top: 40px;
+    }
+    .ac-confession-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; letter-spacing: 4px; color: #3a3a38;
+      margin-bottom: 16px;
+    }
+    .ac-confession-input {
+      width: 100%; background: transparent; border: none;
+      border-bottom: 0.5px solid #2a2a28;
+      color: #d4d4cc; font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; padding: 10px 0; outline: none;
+      transition: border-color 200ms;
+    }
+    .ac-confession-input:focus { border-bottom-color: #c1121f; }
+    .ac-confession-input::placeholder { color: #2a2a28; }
+    .ac-confession-btn {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; letter-spacing: 3px; color: #3a3a38;
+      border: 0.5px solid #2a2a28; padding: 8px 16px;
+      background: none; cursor: pointer; margin-top: 12px;
+      transition: color 200ms, border-color 200ms;
+    }
+    .ac-confession-btn:hover { color: #d4d4cc; border-color: #888880; }
+    .ac-confession-confirm {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; letter-spacing: 2px;
+      margin-top: 12px; display: none;
+    }
+
+    /* shared */
+    .ac-empty {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; color: #3a3a38; letter-spacing: 1px;
+      padding: 16px 0;
+    }
+
+    /* ── GHOST / UNREGISTERED CONTENT ── */
+    #activity-content.centered {
+      display: none;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+    }
+    .big-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 64px; letter-spacing: 8px; color: #d4d4cc;
+      line-height: 0.9; white-space: pre-line;
+    }
+    .sub-text {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; color: #3a3a38; line-height: 2.2;
+      max-width: 480px; text-align: center;
+      margin-top: 32px;
+    }
+    .blink-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: #c1121f; border-radius: 50%;
+      animation: blinkDot 1.4s infinite;
+      vertical-align: middle; margin-right: 8px;
+    }
+    @keyframes blinkDot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .ghost-signal {
+      margin-top: 24px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; letter-spacing: 2px; color: #3a3a38;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ac-link {
+      display: inline-block; margin-top: 20px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px; letter-spacing: 2px;
+      text-decoration: none;
+      transition: color 200ms;
+    }
+    .ac-links-row {
+      display: flex; gap: 24px; justify-content: center; margin-top: 32px;
+    }
+    .ac-hint {
+      margin-top: 16px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px; letter-spacing: 2px; color: #2a2a28;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      transition: color 200ms;
+    }
+    .ac-hint:hover { color: #f5c518; }
+
+    /* ── EXIT BUTTON ── */
+    #exit-btn {
+      position: fixed; bottom: 28px; left: 36px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; letter-spacing: 4px;
+      color: #888880; border: 0.5px solid #2a2a28;
+      padding: 10px 20px; background: none; cursor: pointer;
+      z-index: 100; transition: color 200ms, border-color 200ms;
+    }
+    #exit-btn:hover { color: #d4d4cc; border-color: #888880; }
+
+    @media (max-width: 640px) {
+      .ac-stats { grid-template-columns: repeat(2, 1fr); }
+      .big-text { font-size: 44px; }
+      #activity-content { padding: 60px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="tape-cinematic"></div>
+  <div id="activity-content"></div>
+  <button id="exit-btn" onclick="window.location.href='index.html'">[ return to department ]</button>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyA6_5oWBRKZLnZhTsjtfepm2NleAEEsrPA",
+      authDomain: "domo-8cfe1.firebaseapp.com",
+      projectId: "domo-8cfe1",
+      storageBucket: "domo-8cfe1.firebasestorage.app",
+      messagingSenderId: "47790816831",
+      appId: "1:47790816831:web:0a92e160fc595d5a9c428a",
+      measurementId: "G-JD9B01Q5QN"
+    };
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    var db = firebase.firestore();
+  </script>
+
+  <script>
+  /* ── SKIP SYSTEM ── */
+  var cinematicTimeouts = [];
+  var _cinematicCallback = null;
+  function ct(fn, delay) { var id = setTimeout(fn, delay); cinematicTimeouts.push(id); return id; }
+  function skipTransmission() {
+    cinematicTimeouts.forEach(function(id) { clearTimeout(id); });
+    cinematicTimeouts = [];
+    var cin = document.getElementById('tape-cinematic');
+    var cb = _cinematicCallback;
+    _cinematicCallback = null;
+    if (cin) {
+      cin.style.opacity = '0';
+      setTimeout(function() {
+        cin.style.display = 'none';
+        if (cb) cb();
+      }, 400);
+    }
+  }
+
+  /* ── LED COLOR ── */
+  var _ledColor = '#c1121f';
+
+  function setLightColor(color) {
+    _ledColor = color;
+    var light = document.querySelector('.machine-light');
+    if (light) {
+      light.style.background = color;
+      light.style.boxShadow = '0 0 6px ' + color + '99';
+    }
+  }
+
+  /* ── ANSWERING MACHINE BUILDER ── */
+  function buildTapeMachine() {
+    var machine = document.createElement('div');
+    machine.className = 'answer-machine';
+    machine.innerHTML =
+      '<div class="am-top">' +
+        '<div class="am-tape-deck"></div>' +
+        '<div class="am-led machine-light"></div>' +
+      '</div>' +
+      '<div class="am-label">D.O.M.O ANSWERING SYSTEM</div>' +
+      '<div class="am-buttons"><div class="am-btn"></div><div class="am-btn"></div></div>';
+    var led = machine.querySelector('.machine-light');
+    if (led) {
+      led.style.background = _ledColor;
+      led.style.boxShadow = '0 0 6px ' + _ledColor + '99';
+    }
+    return machine;
+  }
+
+  /* ── TYPEWRITER ENGINE ── */
+  function runCinematic(lines, finalLine, callback) {
+    var cin = document.getElementById('tape-cinematic');
+    cin.innerHTML = '';
+    cin.style.display = 'flex';
+    cin.style.opacity = '1';
+    _cinematicCallback = callback;
+
+    var machine = buildTapeMachine();
+    cin.appendChild(machine);
+
+    var textWrap = document.createElement('div');
+    textWrap.className = 'cin-text-wrap';
+    cin.appendChild(textWrap);
+
+    /* skip button */
+    var skipBtn = document.createElement('div');
+    skipBtn.id = 'skip-btn';
+    skipBtn.style.cssText = 'position:absolute;bottom:36px;right:36px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-end;gap:8px;z-index:10;';
+    skipBtn.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;">' +
+        '<div id="skip-text" style="font-family:\'IBM Plex Mono\',monospace;font-size:8px;letter-spacing:4px;color:#3a3a38;text-transform:uppercase;transition:color 300ms;">interrupt transmission</div>' +
+        '<div id="skip-line" style="width:24px;height:0.5px;background:#3a3a38;transition:all 300ms;"></div>' +
+      '</div>' +
+      '<div id="skip-box" style="border:0.5px solid #2a2a28;padding:8px 16px;transition:all 300ms;">' +
+        '<span id="skip-label" style="font-family:\'IBM Plex Mono\',monospace;font-size:9px;letter-spacing:3px;color:#3a3a38;text-transform:uppercase;transition:color 300ms;">[ skip ]</span>' +
+      '</div>';
+    skipBtn.addEventListener('mouseenter', function() {
+      document.getElementById('skip-text').style.color = '#d4d4cc';
+      document.getElementById('skip-line').style.background = '#c1121f';
+      document.getElementById('skip-line').style.width = '40px';
+      document.getElementById('skip-box').style.borderColor = '#c1121f';
+      document.getElementById('skip-label').style.color = '#c1121f';
+    });
+    skipBtn.addEventListener('mouseleave', function() {
+      document.getElementById('skip-text').style.color = '#3a3a38';
+      document.getElementById('skip-line').style.background = '#3a3a38';
+      document.getElementById('skip-line').style.width = '24px';
+      document.getElementById('skip-box').style.borderColor = '#2a2a28';
+      document.getElementById('skip-label').style.color = '#3a3a38';
+    });
+    skipBtn.addEventListener('click', skipTransmission);
+    cin.appendChild(skipBtn);
+
+    var lineIndex = 0;
+
+    function typeLine(text, cb) {
+      var lineEl = document.createElement('span');
+      lineEl.className = 'cin-line';
+      textWrap.appendChild(lineEl);
+      var i = 0;
+      var timer = setInterval(function() {
+        lineEl.textContent += text[i];
+        i++;
+        if (i >= text.length) {
+          clearInterval(timer);
+          ct(cb, 600);
+        }
+      }, 55);
+    }
+
+    function typeNext() {
+      if (lineIndex < lines.length) {
+        typeLine(lines[lineIndex], function() {
+          lineIndex++;
+          typeNext();
+        });
+      } else {
+        ct(function() {
+          var finalEl = document.createElement('span');
+          finalEl.className = 'cin-final';
+          finalEl.textContent = finalLine;
+          textWrap.appendChild(finalEl);
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() { finalEl.style.opacity = '1'; });
+          });
+          ct(function() {
+            cin.style.opacity = '0';
+            ct(function() {
+              cin.style.display = 'none';
+              _cinematicCallback = null;
+              callback();
+            }, 800);
+          }, 1600);
+        }, 1000);
+      }
+    }
+
+    typeNext();
+  }
+
+  /* ── FORMAT DATE ── */
+  function fmtDate(ts) {
+    if (!ts) return 'UNKNOWN';
+    var d = (ts.toDate) ? ts.toDate() : new Date(ts);
+    var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    return ('0'+d.getDate()).slice(-2) + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  /* ── PERSONALITY CLASSIFIER ── */
+  function getPersonality(viewedObjects) {
+    var names = viewedObjects.map(function(o) { return (o.objectName || o.name || '').toLowerCase(); });
+    if (names.some(function(n){ return n.includes('gargoyle') || n.includes('guardian'); })) {
+      return { type: 'STRUCTURAL MELANCHOLY', description: 'operative demonstrates awareness of systems that extract labour from the willing. shows empathy toward things placed at edges. likely the person others call at 2am. the department recommends rest. the department knows this recommendation will be ignored.' };
+    }
+    if (names.some(function(n){ return n.includes('piggy') || n.includes('grey'); })) {
+      return { type: 'FINANCIAL CONSCIOUSNESS', description: 'operative has studied the grey architecture. understands that movement is not transformation. likely reads financial investigations for pleasure. the department considers this both impressive and mildly threatening.' };
+    }
+    if (names.some(function(n){ return n.includes('pin') || n.includes('bowling'); })) {
+      return { type: 'SYSTEMIC AWARENESS', description: 'operative recognises the formation for what it is. has likely stood slightly off-formation at least once. the department notes a resistance to standardisation. this is either a strength or a problem depending on which side of the system you are on.' };
+    }
+    if (names.some(function(n){ return n.includes('crocodile'); })) {
+      return { type: 'ADAPTIVE INTELLIGENCE', description: 'operative is drawn to things that have survived longer than they should have. understands that patience is a form of power. the department suspects this operative waits longer than most before deciding anything.' };
+    }
+    if (viewedObjects.length === 0) {
+      return { type: 'UNCLASSIFIED', description: 'operative has not yet revealed their interests to the department. the department is waiting. it is good at waiting. it has been waiting for centuries. it can wait longer than you think.' };
+    }
+    return { type: 'CURIOUS OPERATIVE', description: 'operative demonstrates broad interest in the collection without fixation on any single object. the department classifies this as intellectual curiosity with possible commitment avoidance. the objects have noticed. they are not offended. yet.' };
+  }
+
+  /* ── THREAT LEVEL ── */
+  function getThreatLevel(score) {
+    if (score <= 10)  return { name: 'CIVILIAN',   color: '#3a3a38', idx: 0, min: 0,   max: 10  };
+    if (score <= 30)  return { name: 'OBSERVER',   color: '#888880', idx: 1, min: 11,  max: 30  };
+    if (score <= 60)  return { name: 'OPERATIVE',  color: '#d4d4cc', idx: 2, min: 31,  max: 60  };
+    if (score <= 100) return { name: 'AGENT',      color: '#c1121f', idx: 3, min: 61,  max: 100 };
+    return             { name: 'ARCHIVIST',  color: '#f5c518', idx: 4, min: 101, max: 150 };
+  }
+
+  function getThreatHint(score, objCount, ordCount) {
+    if (score <= 10) {
+      var needObj = Math.max(0, Math.ceil((11 - score) / 3));
+      var needOrd = Math.max(0, Math.ceil((11 - score) / 10));
+      return 'view ' + needObj + ' more object' + (needObj !== 1 ? 's' : '') + ' or place ' + needOrd + ' order' + (needOrd !== 1 ? 's' : '') + ' to reach OBSERVER.';
+    }
+    if (score <= 30)  return 'accumulate ' + (31 - score) + ' more activity points to reach OPERATIVE.';
+    if (score <= 60)  return 'accumulate ' + (61 - score) + ' more activity points to reach AGENT.';
+    if (score <= 100) return 'accumulate ' + (101 - score) + ' more activity points to reach ARCHIVIST.';
+    return 'the department has nothing further to offer. you have reached the highest classification.';
+  }
+
+  /* ── TIMESTAMP FORMATTER ── */
+  function fmtTimestamp(hoursAgo) {
+    var d = new Date(Date.now() - hoursAgo * 3600000);
+    var h = ('0' + d.getHours()).slice(-2);
+    var m = ('0' + d.getMinutes()).slice(-2);
+    return 'TODAY — ' + h + ':' + m;
+  }
+
+  /* ── LOGGED IN CONTENT ── */
+  function showLoggedInContent(user) {
+    var content = document.getElementById('activity-content');
+    content.style.display = 'block';
+    content.style.opacity = '0';
+    content.innerHTML = '';
+
+    var daysActive = 0;
+    try {
+      daysActive = Math.floor((new Date() - new Date(user.metadata.creationTime)) / 86400000);
+    } catch(e) {}
+
+    var inner = document.createElement('div');
+    inner.className = 'ac-inner';
+    var sections = [];
+
+    /* ── S1 FILE HEADER ── */
+    var s1 = document.createElement('div');
+    s1.className = 'ac-section';
+    var hdr = document.createElement('div');
+    hdr.className = 'ac-header';
+
+    var hLeft = document.createElement('div');
+    hLeft.className = 'ac-header-left';
+    var deptLbl = document.createElement('div');
+    deptLbl.className = 'ac-dept-label';
+    deptLbl.textContent = 'DEPARTMENT OF MISCELLANEOUS OBJECTS';
+    var nameEl = document.createElement('div');
+    nameEl.className = 'ac-name';
+    nameEl.textContent = user.displayName || 'OPERATIVE';
+    var uidEl = document.createElement('div');
+    uidEl.className = 'ac-uid';
+    uidEl.textContent = 'OPERATIVE — ' + (user.uid || '').slice(0, 8).toUpperCase();
+    hLeft.appendChild(deptLbl);
+    hLeft.appendChild(nameEl);
+    hLeft.appendChild(uidEl);
+
+    var hRight = document.createElement('div');
+    hRight.className = 'ac-header-right';
+    var fsLbl = document.createElement('div');
+    fsLbl.className = 'ac-file-status-label';
+    fsLbl.textContent = 'FILE STATUS';
+    var sRow = document.createElement('div');
+    sRow.className = 'ac-status-row';
+    var dot = document.createElement('div');
+    dot.className = 'ac-blink-dot';
+    var sTxt = document.createElement('div');
+    sTxt.className = 'ac-status-text';
+    sTxt.textContent = 'ACTIVE';
+    sRow.appendChild(dot);
+    sRow.appendChild(sTxt);
+    var daysLbl = document.createElement('div');
+    daysLbl.className = 'ac-days-label';
+    daysLbl.textContent = 'DAYS IN SYSTEM';
+    var daysVal = document.createElement('div');
+    daysVal.className = 'ac-days-value';
+    daysVal.textContent = isNaN(daysActive) ? 'UNKNOWN' : daysActive;
+    hRight.appendChild(fsLbl);
+    hRight.appendChild(sRow);
+    hRight.appendChild(daysLbl);
+    hRight.appendChild(daysVal);
+
+    var scanWrap = document.createElement('div');
+    scanWrap.className = 'ac-scanner-wrap';
+    var scanLine = document.createElement('div');
+    scanLine.className = 'ac-scanner-line';
+    scanWrap.appendChild(scanLine);
+
+    hdr.appendChild(hLeft);
+    hdr.appendChild(hRight);
+    hdr.appendChild(scanWrap);
+    s1.appendChild(hdr);
+    sections.push(s1);
+    inner.appendChild(s1);
+
+    /* ── S2 THREAT METER (placeholder, updates after Firestore) ── */
+    var s2 = document.createElement('div');
+    s2.className = 'ac-section';
+    var threatDiv = document.createElement('div');
+    threatDiv.className = 'ac-threat';
+    threatDiv.id = 'threat-block';
+    var threatTop = document.createElement('div');
+    threatTop.className = 'ac-threat-top';
+    var tHead = document.createElement('div');
+    tHead.className = 'ac-threat-heading';
+    tHead.textContent = 'THREAT ASSESSMENT';
+    var tName = document.createElement('div');
+    tName.className = 'ac-threat-level-name';
+    tName.id = 'threat-level-name';
+    tName.textContent = '—';
+    threatTop.appendChild(tHead);
+    threatTop.appendChild(tName);
+
+    var levelNames = ['CIVILIAN','OBSERVER','OPERATIVE','AGENT','ARCHIVIST'];
+    var levelsRow = document.createElement('div');
+    levelsRow.className = 'ac-threat-levels';
+    levelNames.forEach(function(ln, i) {
+      var lv = document.createElement('div');
+      lv.className = 'ac-threat-lvl';
+      lv.id = 'threat-lvl-' + i;
+      lv.textContent = ln;
+      lv.style.color = '#2a2a28';
+      levelsRow.appendChild(lv);
+    });
+
+    var track = document.createElement('div');
+    track.className = 'ac-threat-track';
+    var fill = document.createElement('div');
+    fill.className = 'ac-threat-fill';
+    fill.id = 'threat-fill';
+    track.appendChild(fill);
+
+    var hint = document.createElement('div');
+    hint.className = 'ac-threat-hint';
+    hint.id = 'threat-hint';
+    hint.textContent = 'calculating threat level...';
+
+    threatDiv.appendChild(threatTop);
+    threatDiv.appendChild(levelsRow);
+    threatDiv.appendChild(track);
+    threatDiv.appendChild(hint);
+    s2.appendChild(threatDiv);
+    sections.push(s2);
+    inner.appendChild(s2);
+
+    /* ── S3 DOSSIER STATS ── */
+    var s3 = document.createElement('div');
+    s3.className = 'ac-section';
+    var dossier = document.createElement('div');
+    dossier.className = 'ac-dossier';
+
+    function makeDossierCard(label, id, initVal) {
+      var card = document.createElement('div');
+      card.className = 'ac-dossier-card';
+      var lbl = document.createElement('div');
+      lbl.className = 'ac-dossier-label';
+      lbl.textContent = label;
+      var val = document.createElement('div');
+      val.className = 'ac-dossier-value';
+      val.id = id;
+      val.textContent = initVal !== undefined ? initVal : '—';
+      card.appendChild(lbl);
+      card.appendChild(val);
+      return card;
+    }
+
+    dossier.appendChild(makeDossierCard('OBJECTS VIEWED', 'ds-objects', '—'));
+    dossier.appendChild(makeDossierCard('ORDERS PLACED', 'ds-orders', '—'));
+    dossier.appendChild(makeDossierCard('PAGES VISITED', 'ds-pages', '7'));
+    dossier.appendChild(makeDossierCard('DAYS ACTIVE', 'ds-days', isNaN(daysActive) ? '—' : daysActive));
+    s3.appendChild(dossier);
+    sections.push(s3);
+    inner.appendChild(s3);
+
+    /* ── S4 PERSONALITY (placeholder, updates after Firestore) ── */
+    var s4 = document.createElement('div');
+    s4.className = 'ac-section';
+    var pBlock = document.createElement('div');
+    pBlock.className = 'ac-personality';
+    pBlock.id = 'personality-block';
+    var pHead = document.createElement('div');
+    pHead.className = 'ac-personality-heading';
+    pHead.textContent = 'DEPARTMENT PSYCHOLOGICAL ASSESSMENT';
+    var stamp = document.createElement('div');
+    stamp.className = 'ac-classified-stamp';
+    stamp.textContent = 'CLASSIFIED';
+    var pType = document.createElement('div');
+    pType.className = 'ac-personality-type';
+    pType.id = 'personality-type';
+    pType.textContent = 'ANALYSING...';
+    var pDesc = document.createElement('div');
+    pDesc.className = 'ac-personality-desc';
+    pDesc.id = 'personality-desc';
+    pDesc.textContent = 'the department is reviewing the operative\'s record.';
+    pBlock.appendChild(pHead);
+    pBlock.appendChild(stamp);
+    pBlock.appendChild(pType);
+    pBlock.appendChild(pDesc);
+    s4.appendChild(pBlock);
+    sections.push(s4);
+    inner.appendChild(s4);
+
+    /* ── S5 MOVEMENTS ── */
+    var s5 = document.createElement('div');
+    s5.className = 'ac-section ac-movements';
+    var movLbl = document.createElement('div');
+    movLbl.className = 'ac-section-label';
+    movLbl.textContent = 'MOVEMENT LOG';
+    s5.appendChild(movLbl);
+    var movements = [
+      { page: 'department headquarters', note: 'entry logged — signal strong', hoursAgo: 0 },
+      { page: 'the collection', note: 'objects browsed — interest noted', hoursAgo: 1 },
+      { page: 'entry point', note: 'door selection recorded — choice filed', hoursAgo: 2 },
+      { page: 'credential terminal', note: 'identity verified — file updated', hoursAgo: 3 },
+      { page: 'personal file', note: 'operative accessed own record', hoursAgo: 5 },
+      { page: 'identity verification', note: 'card retrieved — department approves', hoursAgo: 8 },
+      { page: 'surveillance system', note: 'operative reviewed own movements', hoursAgo: 12 }
+    ];
+    movements.forEach(function(m) {
+      var row = document.createElement('div');
+      row.className = 'ac-mov-row';
+      var pg = document.createElement('div');
+      pg.className = 'ac-mov-page';
+      pg.textContent = m.page;
+      var note = document.createElement('div');
+      note.className = 'ac-mov-note';
+      note.textContent = m.note;
+      var ts = document.createElement('div');
+      ts.className = 'ac-mov-time';
+      ts.textContent = fmtTimestamp(m.hoursAgo);
+      row.appendChild(pg);
+      row.appendChild(note);
+      row.appendChild(ts);
+      s5.appendChild(row);
+    });
+    sections.push(s5);
+    inner.appendChild(s5);
+
+    /* ── S6 WISHLIST (placeholder, shown/hidden after Firestore) ── */
+    var s6 = document.createElement('div');
+    s6.className = 'ac-section ac-wishlist';
+    s6.id = 'wishlist-section';
+    s6.style.display = 'none';
+    var wLbl = document.createElement('div');
+    wLbl.className = 'ac-section-label';
+    wLbl.textContent = 'FLAGGED OBJECTS — EVIDENCE BOARD';
+    var wGrid = document.createElement('div');
+    wGrid.className = 'ac-wish-grid';
+    wGrid.id = 'wishlist-grid';
+    s6.appendChild(wLbl);
+    s6.appendChild(wGrid);
+    sections.push(s6);
+    inner.appendChild(s6);
+
+    /* ── S7 TIMELINE (placeholder, shown/hidden after Firestore) ── */
+    var s7 = document.createElement('div');
+    s7.className = 'ac-section ac-timeline';
+    s7.id = 'timeline-section';
+    s7.style.display = 'none';
+    var tlLbl = document.createElement('div');
+    tlLbl.className = 'ac-section-label';
+    tlLbl.textContent = 'OBJECTS OF INTEREST — CHRONOLOGICAL RECORD';
+    var tlList = document.createElement('div');
+    tlList.className = 'ac-timeline-list';
+    tlList.id = 'timeline-list';
+    s7.appendChild(tlLbl);
+    s7.appendChild(tlList);
+    sections.push(s7);
+    inner.appendChild(s7);
+
+    /* ── S8 CONFESSION ── */
+    var s8 = document.createElement('div');
+    s8.className = 'ac-section ac-confession';
+    var cLbl = document.createElement('div');
+    cLbl.className = 'ac-confession-label';
+    cLbl.textContent = 'ANYTHING TO ADD TO YOUR FILE?';
+    var cInput = document.createElement('input');
+    cInput.type = 'text';
+    cInput.className = 'ac-confession-input';
+    cInput.placeholder = 'the department is listening.';
+    var cBtn = document.createElement('button');
+    cBtn.className = 'ac-confession-btn';
+    cBtn.textContent = '[ ADD TO FILE ]';
+    var cConfirm = document.createElement('div');
+    cConfirm.className = 'ac-confession-confirm';
+
+    cBtn.addEventListener('click', function() {
+      var text = cInput.value.trim();
+      if (!text) return;
+      var isGuest = localStorage.getItem('domo-guest') === 'true';
+      if (isGuest) {
+        cConfirm.textContent = '[ the department cannot file what it cannot name. enter officially to leave a record. ]';
+        cConfirm.style.color = '#3a3a38';
+        cConfirm.style.display = 'block';
+        return;
+      }
+      // Save to Firestore best-effort
+      try {
+        db.collection('users').doc(user.uid).collection('confessions').add({
+          text: text,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(function(){});
+      } catch(e) {}
+      cInput.value = '';
+      cConfirm.textContent = '[ filed. the department has noted this. ]';
+      cConfirm.style.color = '#c1121f';
+      cConfirm.style.display = 'block';
+      setTimeout(function() { cConfirm.style.display = 'none'; }, 4000);
+    });
+
+    s8.appendChild(cLbl);
+    s8.appendChild(cInput);
+    s8.appendChild(cBtn);
+    s8.appendChild(cConfirm);
+    sections.push(s8);
+    inner.appendChild(s8);
+
+    content.appendChild(inner);
+
+    /* fade in content, then stagger sections */
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        content.style.opacity = '1';
+        sections.forEach(function(sec, i) {
+          if (sec.id === 'wishlist-section' || sec.id === 'timeline-section') return;
+          setTimeout(function() {
+            sec.style.opacity = '1';
+            sec.style.transform = 'translateY(0)';
+          }, i * 150);
+        });
+      });
+    });
+
+    /* ── FIRESTORE DATA ── */
+    var objCount = 0, ordCount = 0;
+
+    function updateThreat(oCount, oOrd) {
+      var score = (oCount * 3) + (oOrd * 10) + (daysActive * 2);
+      var lvl = getThreatLevel(score);
+      var tNameEl = document.getElementById('threat-level-name');
+      if (tNameEl) { tNameEl.textContent = lvl.name; tNameEl.style.color = lvl.color; }
+      levelNames.forEach(function(ln, i) {
+        var el = document.getElementById('threat-lvl-' + i);
+        if (!el) return;
+        if (i < lvl.idx)  { el.style.color = '#c1121f'; }
+        else if (i === lvl.idx) { el.style.color = '#d4d4cc'; }
+        else              { el.style.color = '#2a2a28'; }
+      });
+      var range = lvl.max - lvl.min;
+      var within = Math.min(Math.max(score - lvl.min, 0), range);
+      var pct = lvl.idx === 4 ? 100 : Math.round((within / range) * 100);
+      setTimeout(function() {
+        var fillEl = document.getElementById('threat-fill');
+        if (fillEl) fillEl.style.width = pct + '%';
+      }, 400);
+      var hintEl = document.getElementById('threat-hint');
+      if (hintEl) hintEl.textContent = getThreatHint(score, oCount, oOrd);
+    }
+
+    // Objects viewed
+    db.collection('users').doc(user.uid).collection('viewedObjects').get()
+      .then(function(snap) {
+        objCount = snap.size;
+        var dsObj = document.getElementById('ds-objects');
+        if (dsObj) dsObj.textContent = objCount;
+
+        var viewedArr = [];
+        snap.forEach(function(doc) { viewedArr.push(doc.data()); });
+
+        // Personality
+        var p = getPersonality(viewedArr);
+        var ptEl = document.getElementById('personality-type');
+        var pdEl = document.getElementById('personality-desc');
+        if (ptEl) ptEl.textContent = p.type;
+        if (pdEl) pdEl.textContent = p.description;
+
+        // Timeline
+        if (!snap.empty) {
+          var s7El = document.getElementById('timeline-section');
+          var tlEl = document.getElementById('timeline-list');
+          if (s7El && tlEl) {
+            s7El.style.display = 'block';
+            tlEl.innerHTML = '';
+            snap.forEach(function(doc) {
+              var d = doc.data();
+              var item = document.createElement('div');
+              item.className = 'ac-timeline-item';
+              var pin = document.createElement('div');
+              pin.className = 'ac-timeline-pin';
+              var nm = document.createElement('div');
+              nm.className = 'ac-timeline-name';
+              nm.textContent = d.name || d.objectName || doc.id;
+              var cs = document.createElement('div');
+              cs.className = 'ac-timeline-case';
+              cs.textContent = d.caseNumber || '—';
+              var dt = document.createElement('div');
+              dt.className = 'ac-timeline-date';
+              dt.textContent = d.viewedAt ? fmtDate(d.viewedAt) : 'DATE CLASSIFIED';
+              item.appendChild(pin);
+              item.appendChild(nm);
+              item.appendChild(cs);
+              item.appendChild(dt);
+              tlEl.appendChild(item);
+            });
+            setTimeout(function() {
+              s7El.style.opacity = '1';
+              s7El.style.transform = 'translateY(0)';
+            }, sections.indexOf(s7El) !== -1 ? sections.indexOf(s7El) * 150 : 900);
+          }
+        }
+
+        updateThreat(objCount, ordCount);
+      })
+      .catch(function() {
+        var ptEl = document.getElementById('personality-type');
+        var pdEl = document.getElementById('personality-desc');
+        if (ptEl) ptEl.textContent = 'UNCLASSIFIED';
+        if (pdEl) pdEl.textContent = 'the department was unable to retrieve the operative\'s object history.';
+        updateThreat(0, 0);
+      });
+
+    // Orders
+    db.collection('users').doc(user.uid).collection('orders').get()
+      .then(function(snap) {
+        ordCount = snap.size;
+        var dsOrd = document.getElementById('ds-orders');
+        if (dsOrd) dsOrd.textContent = ordCount;
+        updateThreat(objCount, ordCount);
+      })
+      .catch(function() {
+        updateThreat(objCount, 0);
+      });
+
+    // Wishlist
+    db.collection('users').doc(user.uid).collection('wishlist').get()
+      .then(function(snap) {
+        if (!snap.empty) {
+          var s6El = document.getElementById('wishlist-section');
+          var wgEl = document.getElementById('wishlist-grid');
+          if (s6El && wgEl) {
+            s6El.style.display = 'block';
+            wgEl.innerHTML = '';
+            snap.forEach(function(doc) {
+              var d = doc.data();
+              var card = document.createElement('div');
+              card.className = 'ac-wish-card';
+              var flag = document.createElement('div');
+              flag.className = 'ac-wish-flag';
+              flag.textContent = 'FLAGGED FOR ACQUISITION';
+              var wn = document.createElement('div');
+              wn.className = 'ac-wish-name';
+              wn.textContent = d.name || d.objectName || doc.id;
+              var wc = document.createElement('div');
+              wc.className = 'ac-wish-case';
+              wc.textContent = d.caseNumber || '—';
+              var wd = document.createElement('div');
+              wd.className = 'ac-wish-dot';
+              card.appendChild(flag);
+              card.appendChild(wn);
+              card.appendChild(wc);
+              card.appendChild(wd);
+              wgEl.appendChild(card);
+            });
+            setTimeout(function() {
+              s6El.style.opacity = '1';
+              s6El.style.transform = 'translateY(0)';
+            }, 750);
+          }
+        }
+      })
+      .catch(function() {});
+  }
+
+  /* ── GHOST CONTENT ── */
+  function showGhostContent() {
+    var content = document.getElementById('activity-content');
+    content.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:40px;opacity:0;transition:opacity 600ms ease;';
+    content.innerHTML =
+      '<div class="big-text">THE DEPARTMENT\nHAS NOTHING\nON YOU.</div>'+
+      '<p class="sub-text">which is either very good news or very bad news. the archive has no record of your face, your name, your movements, or your intentions. you passed through without leaving a trace. the department respects this. it also resents it.</p>'+
+      '<div class="ghost-signal"><span class="blink-dot"></span><span>ghost signal active — location unknown</span></div>'+
+      '<a href="door.html" class="ac-link" style="color:#f5c518;" onmouseover="this.style.color=\'#fff\'" onmouseout="this.style.color=\'#f5c518\'">→ enter officially</a>';
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() { content.style.opacity = '1'; });
+    });
+  }
+
+  /* ── NON LOGGED CONTENT ── */
+  function showNonLoggedContent() {
+    var content = document.getElementById('activity-content');
+    content.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:40px;opacity:0;transition:opacity 600ms ease;';
+    content.innerHTML =
+      '<div class="big-text">YOU ARRIVED\nWITHOUT\nKNOCKING.</div>'+
+      '<p class="sub-text">the department has noted your presence. it has no name to attach to it. no file to open. you are currently a data point without context — which is the most unsettling kind. the department suggests you introduce yourself properly. it has three doors. choose carefully. the department is watching regardless.</p>'+
+      '<div class="ac-links-row">'+
+        '<a href="login.html" class="ac-link" style="color:#c1121f;" onmouseover="this.style.color=\'#fff\'" onmouseout="this.style.color=\'#c1121f\'">→ i have clearance</a>'+
+        '<a href="signup.html" class="ac-link" style="color:#1a6bc1;" onmouseover="this.style.color=\'#fff\'" onmouseout="this.style.color=\'#1a6bc1\'">→ i am new</a>'+
+      '</div>'+
+      '<a href="login.html?guest=true" class="ac-hint">or enter as unknown — the department will still be watching.</a>';
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() { content.style.opacity = '1'; });
+    });
+  }
+
+  /* ── PLAY FUNCTIONS ── */
+  function playLoggedInCinematic(user) {
+    setLightColor('#c1121f');
+    var lines = [
+      "the department has been tracking your movements.",
+      "every page you visited. every object you viewed.",
+      "every second you spent on each one.",
+      "this is not a violation of your privacy.",
+      "you entered the department voluntarily.",
+      "the department simply kept notes.",
+      "it always keeps notes."
+    ];
+    runCinematic(lines, "[ file retrieved — displaying now ]", function() {
+      showLoggedInContent(user);
+    });
+  }
+
+  function playGhostCinematic() {
+    setLightColor('#f5c518');
+    var lines = [
+      "the department has been tracking your movements.",
+      "every page you visited. every object you viewed.",
+      "every second you spent on each one.",
+      "this is not a violation of your privacy.",
+      "you entered the department voluntarily.",
+      "the department simply kept notes.",
+      "it always keeps notes."
+    ];
+    runCinematic(lines, "[ file retrieved — displaying now ]", function() {
+      showGhostContent();
+    });
+  }
+
+  function playNonLoggedCinematic() {
+    setLightColor('#888880');
+    var lines = [
+      "the department has been tracking your movements.",
+      "every page you visited. every object you viewed.",
+      "every second you spent on each one.",
+      "this is not a violation of your privacy.",
+      "you entered the department voluntarily.",
+      "the department simply kept notes.",
+      "it always keeps notes."
+    ];
+    runCinematic(lines, "[ file retrieved — displaying now ]", function() {
+      showNonLoggedContent();
+    });
+  }
+
+  /* ── INIT ── */
+  function initActivity() {
+    var isGuest = localStorage.getItem('domo-guest') === 'true';
+
+    if (isGuest) {
+      playGhostCinematic();
+      return;
+    }
+
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        playLoggedInCinematic(user);
+      } else {
+        playNonLoggedCinematic();
+      }
+    });
+  }
+
+  initActivity();
+  </script>
+
+</body>
+</html>
