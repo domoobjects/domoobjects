@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WILDBERRY — D.O.M.O</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #0d0d0b;
+      color: #d4d4cc;
+      font-family: 'IBM Plex Mono', monospace;
+      overflow-x: hidden;
+    }
+
+    /* ── TAPE CINEMATIC (exact from activity/signup pages) ── */
+    #tape-cinematic {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #0d0d0b;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 1; transition: opacity 800ms ease;
+    }
+
+    .answer-machine {
+      width: 320px; height: 180px;
+      background: #1a1a18; border: 0.5px solid #2a2a28; border-radius: 8px;
+      position: relative; padding: 18px 20px 14px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .am-top { display: flex; align-items: flex-start; justify-content: space-between; }
+    .am-tape-deck {
+      width: 88px; height: 44px; background: #111110;
+      border: 0.5px solid #2a2a28; border-radius: 3px;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    .am-tape-deck::before {
+      content: '';
+      position: absolute; top: 50%; left: 10px;
+      transform: translateY(-50%);
+      width: 24px; height: 24px;
+      border: 1.5px solid #2a2a28; border-radius: 50%;
+    }
+    .am-tape-deck::after {
+      content: '';
+      position: absolute; top: 50%; right: 10px;
+      transform: translateY(-50%);
+      width: 24px; height: 24px;
+      border: 1.5px solid #2a2a28; border-radius: 50%;
+    }
+    .am-led {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #5a0a1f;
+      box-shadow: 0 0 6px rgba(90,10,31,0.9);
+      animation: ledBlink 900ms ease-in-out infinite;
+    }
+    @keyframes ledBlink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.25; }
+    }
+    .am-label {
+      font-family: 'IBM Plex Mono', monospace; font-size: 7px;
+      color: #3a3a38; letter-spacing: 2px; text-align: center;
+      margin-top: 6px;
+    }
+    .am-buttons { display: flex; gap: 8px; justify-content: flex-end; }
+    .am-btn { width: 28px; height: 12px; background: #2a2a28; border-radius: 2px; }
+
+    /* Typewriter */
+    .cin-text-wrap {
+      margin-top: 28px; text-align: center; max-width: 440px;
+    }
+    .cin-line {
+      font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+      color: #d4d4cc; line-height: 2.2; text-align: center;
+      display: block; min-height: 1.5em;
+    }
+    .cin-final {
+      font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+      color: #2a2a28; letter-spacing: 3px; text-align: center;
+      display: block; margin-top: 18px;
+      opacity: 0; transition: opacity 600ms ease;
+    }
+
+    /* ── PAGE CONTENT ── */
+    #wildberry-content {
+      min-height: 100vh;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 36px 120px;
+      opacity: 0;
+      transition: opacity 900ms ease;
+    }
+
+    .wb-dept-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 7px; letter-spacing: 4px;
+      color: #1e1e1c; text-transform: uppercase;
+      margin-bottom: 56px;
+    }
+
+    .wb-berry-wrap {
+      margin-bottom: 60px;
+    }
+    .wb-berry-wrap svg {
+      width: 110px; height: auto; display: block;
+      filter: drop-shadow(0 10px 40px rgba(80,8,8,0.55));
+    }
+
+    .wb-consume-btn {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 15px; letter-spacing: 7px;
+      color: #d4d4cc;
+      background: none;
+      border: 0.5px solid #2a2a28;
+      padding: 14px 52px;
+      cursor: pointer;
+      border-radius: 0;
+      outline: none;
+      transition: color 180ms, border-color 180ms;
+    }
+    .wb-consume-btn:hover {
+      color: #7a1a1a;
+      border-color: #3a0808;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cinematic container (shown on load, matches activity/signup pattern exactly) -->
+  <div id="tape-cinematic"></div>
+
+  <!-- Page revealed after cinematic -->
+  <div id="wildberry-content">
+    <div class="wb-dept-label">D.O.M.O &mdash; UNCLASSIFIED</div>
+
+    <div class="wb-berry-wrap">
+      <svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" fill="none" style="shape-rendering:geometricPrecision;">
+        <!-- stem -->
+        <path d="M53 54 Q51 42 49 32 Q47 22 51 16" stroke="#2d1a0e" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <!-- left leaf -->
+        <ellipse cx="45" cy="27" rx="13" ry="5" fill="#1a2e08" transform="rotate(-20 45 27)" opacity="0.8"/>
+        <!-- right leaf -->
+        <ellipse cx="57" cy="21" rx="9" ry="3.5" fill="#162408" transform="rotate(16 57 21)" opacity="0.65"/>
+        <!-- base shadow -->
+        <ellipse cx="50" cy="121" rx="26" ry="7" fill="#160303" opacity="0.88"/>
+        <!-- berry body (slightly left-shifted asymmetry) -->
+        <ellipse cx="49" cy="91" rx="33" ry="36" fill="#4d0808"/>
+        <!-- inner darker tone -->
+        <ellipse cx="53" cy="98" rx="25" ry="27" fill="#3a0606" opacity="0.58"/>
+        <!-- shoulder highlight -->
+        <ellipse cx="35" cy="74" rx="15" ry="11" fill="#7a1212" opacity="0.42"/>
+        <ellipse cx="32" cy="70" rx="8" ry="5.5" fill="#9e1e1e" opacity="0.28"/>
+        <!-- surface dimples (asymmetric, imperfect) -->
+        <circle cx="65" cy="88" r="3.2" fill="#260404" opacity="0.68"/>
+        <circle cx="40" cy="110" r="3.8" fill="#260404" opacity="0.6"/>
+        <circle cx="60" cy="106" r="2" fill="#1e0303" opacity="0.5"/>
+        <!-- faint specular -->
+        <ellipse cx="34" cy="69" rx="4.5" ry="3" fill="#c03030" opacity="0.15"/>
+      </svg>
+    </div>
+
+    <button class="wb-consume-btn" id="consumeBtn">CONSUME</button>
+  </div>
+
+  <script>
+  /* ── CINEMATIC SYSTEM
+     Exact pattern from activity.html / signup.html.
+     Reused verbatim — no modifications to the engine.
+  ── */
+  var cinematicTimeouts = [];
+  var _cinematicCallback = null;
+
+  function ct(fn, delay) {
+    var id = setTimeout(fn, delay);
+    cinematicTimeouts.push(id);
+    return id;
+  }
+
+  function skipTransmission() {
+    cinematicTimeouts.forEach(function(id) { clearTimeout(id); });
+    cinematicTimeouts = [];
+    var cin = document.getElementById('tape-cinematic');
+    var cb  = _cinematicCallback;
+    _cinematicCallback = null;
+    if (cin) {
+      cin.style.opacity = '0';
+      setTimeout(function() {
+        cin.style.display = 'none';
+        if (cb) cb();
+      }, 400);
+    }
+  }
+
+  function buildTapeMachine() {
+    var machine = document.createElement('div');
+    machine.className = 'answer-machine';
+    machine.innerHTML =
+      '<div class="am-top">' +
+        '<div class="am-tape-deck"></div>' +
+        '<div class="am-led"></div>' +
+      '</div>' +
+      '<div class="am-label">D.O.M.O ANSWERING SYSTEM</div>' +
+      '<div class="am-buttons"><div class="am-btn"></div><div class="am-btn"></div></div>';
+    return machine;
+  }
+
+  function runCinematic(lines, finalLine, callback) {
+    var cin = document.getElementById('tape-cinematic');
+    cin.innerHTML = '';
+    cin.style.display = 'flex';
+    cin.style.opacity  = '1';
+    _cinematicCallback = callback;
+
+    var machine = buildTapeMachine();
+    cin.appendChild(machine);
+
+    var textWrap = document.createElement('div');
+    textWrap.className = 'cin-text-wrap';
+    cin.appendChild(textWrap);
+
+    /* skip button */
+    var skipBtn = document.createElement('div');
+    skipBtn.style.cssText = 'position:absolute;bottom:36px;right:36px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-end;gap:8px;z-index:10;';
+    skipBtn.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;">' +
+        '<div id="skip-text" style="font-family:\'IBM Plex Mono\',monospace;font-size:8px;letter-spacing:4px;color:#3a3a38;text-transform:uppercase;transition:color 300ms;">interrupt transmission</div>' +
+        '<div id="skip-line" style="width:24px;height:0.5px;background:#3a3a38;transition:all 300ms;"></div>' +
+      '</div>' +
+      '<div id="skip-box" style="border:0.5px solid #2a2a28;padding:8px 16px;transition:all 300ms;">' +
+        '<span id="skip-label" style="font-family:\'IBM Plex Mono\',monospace;font-size:9px;letter-spacing:3px;color:#3a3a38;text-transform:uppercase;transition:color 300ms;">[ skip ]</span>' +
+      '</div>';
+    skipBtn.addEventListener('mouseenter', function() {
+      document.getElementById('skip-text').style.color = '#d4d4cc';
+      document.getElementById('skip-line').style.background = '#5a0a1f';
+      document.getElementById('skip-line').style.width = '40px';
+      document.getElementById('skip-box').style.borderColor = '#5a0a1f';
+      document.getElementById('skip-label').style.color = '#5a0a1f';
+    });
+    skipBtn.addEventListener('mouseleave', function() {
+      document.getElementById('skip-text').style.color = '#3a3a38';
+      document.getElementById('skip-line').style.background = '#3a3a38';
+      document.getElementById('skip-line').style.width = '24px';
+      document.getElementById('skip-box').style.borderColor = '#2a2a28';
+      document.getElementById('skip-label').style.color = '#3a3a38';
+    });
+    skipBtn.addEventListener('click', skipTransmission);
+    cin.appendChild(skipBtn);
+
+    var lineIndex = 0;
+
+    function typeLine(text, cb) {
+      var lineEl = document.createElement('span');
+      lineEl.className = 'cin-line';
+      textWrap.appendChild(lineEl);
+      if (!text || text.length === 0) {
+        ct(cb, 380);
+        return;
+      }
+      var i = 0;
+      var timer = setInterval(function() {
+        lineEl.textContent += text[i];
+        i++;
+        if (i >= text.length) {
+          clearInterval(timer);
+          ct(cb, 600);
+        }
+      }, 52);
+    }
+
+    function typeNext() {
+      if (lineIndex < lines.length) {
+        typeLine(lines[lineIndex], function() {
+          lineIndex++;
+          typeNext();
+        });
+      } else {
+        ct(function() {
+          var finalEl = document.createElement('span');
+          finalEl.className = 'cin-final';
+          finalEl.textContent = finalLine;
+          textWrap.appendChild(finalEl);
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() { finalEl.style.opacity = '1'; });
+          });
+          ct(function() {
+            cin.style.opacity = '0';
+            ct(function() {
+              cin.style.display = 'none';
+              _cinematicCallback = null;
+              callback();
+            }, 800);
+          }, 1600);
+        }, 1000);
+      }
+    }
+
+    typeNext();
+  }
+
+  /* ── WILDBERRY CINEMATIC MESSAGE ── */
+  var WB_LINES = [
+    'you were not looking for anything',
+    'still, you found it',
+    '',
+    'a berry, growing where nothing should grow',
+    '',
+    'you can leave it',
+    'or you can consume it',
+    '',
+    'most who consume it',
+    'report nothing unusual',
+    '',
+    'they are wrong'
+  ];
+
+  /* ── INIT ── */
+  document.addEventListener('DOMContentLoaded', function() {
+    var content = document.getElementById('wildberry-content');
+
+    runCinematic(WB_LINES, '\u2014 transmission ends \u2014', function() {
+      content.style.display = 'flex';
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          content.style.opacity = '1';
+        });
+      });
+    });
+
+    /* CONSUME — instant redirect, set state */
+    document.getElementById('consumeBtn').addEventListener('click', function() {
+      localStorage.setItem('domo-wildberry-state', 'flicker');
+      localStorage.setItem('domo-wildberry-ts', Date.now().toString());
+      window.location.href = 'index.html';
+    });
+  });
+  </script>
+
+</body>
+</html>

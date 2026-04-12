@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DOMO</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #0d0d0b; overflow: hidden; }
+    body { display: flex; align-items: center; justify-content: center; }
+
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .domo-logo {
+      display: block;
+      height: 36px;
+      width: auto;
+      opacity: 0.5;
+      margin: 0 auto 48px;
+    }
+
+    .doors {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+    }
+
+    .door-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .door {
+      position: relative;
+      width: 120px;
+      height: 280px;
+      border-radius: 0;
+      border: none;
+      cursor: pointer;
+      transition: box-shadow 300ms ease, filter 300ms ease;
+    }
+
+    .door-knob {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+    }
+
+    /* Red door */
+    .door-red {
+      background: #c1121f;
+      box-shadow: inset 4px 0 8px rgba(0, 0, 0, 0.3);
+    }
+    .door-red:hover {
+      filter: brightness(1.12);
+      box-shadow:
+        inset 4px 0 8px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(193, 18, 31, 0.5),
+        0 0 60px rgba(193, 18, 31, 0.2);
+    }
+
+    /* Blue door */
+    .door-blue {
+      background: #1a3a6b;
+      box-shadow: inset 4px 0 8px rgba(0, 0, 0, 0.3);
+    }
+    .door-blue:hover {
+      filter: brightness(1.12);
+      box-shadow:
+        inset 4px 0 8px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(26, 58, 107, 0.8),
+        0 0 60px rgba(26, 107, 193, 0.3);
+    }
+
+    /* Yellow door */
+    .door-yellow {
+      background: #f5c518;
+      box-shadow: inset 4px 0 8px rgba(0, 0, 0, 0.3);
+    }
+    .door-yellow:hover {
+      filter: brightness(1.1);
+      box-shadow:
+        inset 4px 0 8px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(245, 197, 24, 0.5),
+        0 0 60px rgba(245, 197, 24, 0.2);
+    }
+
+    .door-label {
+      margin-top: 16px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 3px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .door-label-red    { color: #c1121f; }
+    .door-label-blue   { color: #1a6bc1; }
+    .door-label-yellow { color: #f5c518; }
+
+    .domo-back-btn {
+      position: fixed;
+      bottom: 28px;
+      left: 36px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 3px;
+      color: #3a3a38;
+      text-transform: uppercase;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 100;
+      transition: color 300ms;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .domo-back-btn:hover { color: #c1121f; }
+    .domo-back-btn::before {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 0.5px;
+      background: currentColor;
+      transition: width 300ms;
+    }
+    .domo-back-btn:hover::before { width: 30px; }
+  </style>
+<style>
+@keyframes signalBar {
+  0%   { width: 0%; opacity: 1; }
+  85%  { width: 100%; opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+}
+#signal-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 1.5px;
+  width: 0%;
+  background: #c1121f;
+  z-index: 9999;
+  animation: signalBar 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div id="signal-bar"></div>
+
+<div class="stage">
+  <img src="favicon.png" class="domo-logo" alt="DOMO"/>
+
+  <div class="doors">
+
+    <div class="door-wrap">
+      <div class="door door-blue" id="doorBlue">
+        <div class="door-knob"></div>
+      </div>
+      <div class="door-label door-label-blue">New to the Department</div>
+    </div>
+
+    <div class="door-wrap">
+      <div class="door door-red" id="doorRed">
+        <div class="door-knob"></div>
+      </div>
+      <div class="door-label door-label-red">I Have Clearance</div>
+    </div>
+
+    <div class="door-wrap">
+      <div class="door door-yellow" id="doorYellow">
+        <div class="door-knob"></div>
+      </div>
+      <div class="door-label door-label-yellow">Enter as Unknown</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function floodAndRedirect(color, dest) {
+  var flood = document.createElement('div');
+  flood.style.cssText = [
+    'position:fixed',
+    'inset:0',
+    'z-index:999',
+    'background:' + color,
+    'opacity:0',
+    'pointer-events:all',
+    'transition:opacity 400ms ease'
+  ].join(';');
+  document.body.appendChild(flood);
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      flood.style.opacity = '1';
+      setTimeout(function() {
+        window.location.href = dest;
+      }, 400);
+    });
+  });
+}
+
+document.getElementById('doorRed').addEventListener('click', function() {
+  floodAndRedirect('#c1121f', 'login.html');
+});
+
+document.getElementById('doorBlue').addEventListener('click', function() {
+  floodAndRedirect('#1a3a6b', 'signup.html');
+});
+
+document.getElementById('doorYellow').addEventListener('click', function() {
+  floodAndRedirect('#f5c518', 'login.html?guest=true');
+});
+</script>
+
+<button class="domo-back-btn" onclick="window.location.href='index.html'">return to department</button>
+
+<script>
+var firebaseConfig = {
+  apiKey: "AIzaSyA6_5oWBRKZLnZhTsjtfepm2NleAEEsrPA",
+  authDomain: "domo-8cfe1.firebaseapp.com",
+  projectId: "domo-8cfe1",
+  storageBucket: "domo-8cfe1.firebasestorage.app",
+  messagingSenderId: "47790816831",
+  appId: "1:47790816831:web:0a92e160fc595d5a9c428a",
+  measurementId: "G-JD9B01Q5QN"
+};
+firebase.initializeApp(firebaseConfig);
+
+function showLoggedInDoor() {
+  var doorsContainer = document.querySelector('.doors');
+  if (!doorsContainer) return;
+
+  doorsContainer.innerHTML = '';
+
+  var wrapper = document.createElement('div');
+  wrapper.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0;';
+
+  var door = document.createElement('div');
+  door.style.cssText = [
+    'width:120px',
+    'height:280px',
+    'background:#f5f4ef',
+    'position:relative',
+    'cursor:pointer',
+    'box-shadow:inset 4px 0 8px rgba(0,0,0,0.15)',
+    'transition:box-shadow 300ms'
+  ].join(';');
+
+  var knob = document.createElement('div');
+  knob.style.cssText = 'position:absolute;right:14px;top:50%;transform:translateY(-50%);width:10px;height:10px;background:rgba(0,0,0,0.2);border-radius:50%;';
+  door.appendChild(knob);
+
+  door.addEventListener('mouseenter', function() {
+    door.style.boxShadow = '0 0 30px rgba(245,244,239,0.3), 0 0 60px rgba(245,244,239,0.1), inset 4px 0 8px rgba(0,0,0,0.15)';
+  });
+  door.addEventListener('mouseleave', function() {
+    door.style.boxShadow = 'inset 4px 0 8px rgba(0,0,0,0.15)';
+  });
+
+  door.addEventListener('click', function() {
+    var flood = document.createElement('div');
+    flood.style.cssText = 'position:fixed;inset:0;background:#f5f4ef;z-index:9999;opacity:0;transition:opacity 400ms;';
+    document.body.appendChild(flood);
+    setTimeout(function() { flood.style.opacity = '1'; }, 10);
+    setTimeout(function() {
+      firebase.auth().signOut().then(function() {
+        localStorage.removeItem('domo-guest');
+        window.location.href = 'index.html';
+      });
+    }, 400);
+  });
+
+  var label = document.createElement('div');
+  label.style.cssText = [
+    'font-family:\'IBM Plex Mono\', monospace',
+    'font-size:8px',
+    'letter-spacing:3px',
+    'color:#f5f4ef',
+    'text-align:center',
+    'margin-top:16px',
+    'text-transform:uppercase'
+  ].join(';');
+  label.textContent = 'the department remembers you. step out when ready.';
+
+  wrapper.appendChild(door);
+  wrapper.appendChild(label);
+  doorsContainer.appendChild(wrapper);
+}
+
+firebase.auth().onAuthStateChanged(function(user) {
+  var isGuest = localStorage.getItem('domo-guest') === 'true';
+  if (user && !isGuest) {
+    showLoggedInDoor();
+  }
+});
+</script>
+
+<script>
+(function() {
+  var bar = document.getElementById('signal-bar');
+  if (!bar) return;
+  bar.addEventListener('animationend', function() {
+    bar.remove();
+  });
+})();
+</script>
+<script>
+(function() {
+  window.addEventListener('error', function(event) {
+    var ignoredErrors = [
+      'Script error',
+      'ResizeObserver',
+      'Non-Error promise rejection',
+      'Loading chunk',
+      'Network request failed',
+      'favicon',
+      'net::ERR'
+    ];
+    var message = event.message || '';
+    var shouldIgnore = ignoredErrors.some(function(ignored) {
+      return message.indexOf(ignored) !== -1;
+    });
+    if (!shouldIgnore) {
+      try { sessionStorage.setItem('domo-error', message); } catch(e) {}
+      window.location.href = 'error.html';
+    }
+  });
+
+  window.addEventListener('unhandledrejection', function(event) {
+    var reason = event.reason ? event.reason.toString() : '';
+    var ignoredErrors = [
+      'popup-closed-by-user',
+      'cancelled-popup-request',
+      'ResizeObserver',
+      'Network request failed',
+      'net::ERR',
+      'Failed to fetch',
+      'Load failed'
+    ];
+    var shouldIgnore = ignoredErrors.some(function(ignored) {
+      return reason.indexOf(ignored) !== -1;
+    });
+    if (!shouldIgnore) {
+      try { sessionStorage.setItem('domo-error', reason); } catch(e) {}
+      window.location.href = 'error.html';
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

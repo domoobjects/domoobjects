@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transmission — DOMO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#000; overflow:hidden; font-family:'IBM Plex Mono',monospace; }
+    #radar-canvas { position:absolute; inset:0; width:100%; height:100%; z-index:0; }
+    #static-noise { position:absolute; inset:0; pointer-events:none; z-index:3; opacity:0.03; }
+    #scan-lines { position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,65,0.015) 2px,rgba(0,255,65,0.015) 4px); pointer-events:none; z-index:8; }
+    #screen-flicker { position:absolute; inset:0; background:rgba(0,255,65,0.02); pointer-events:none; z-index:9; animation:flicker 8s infinite; }
+    @keyframes flicker { 0%,95%,100%{opacity:1} 96%{opacity:0.85} 97%{opacity:1} 98%{opacity:0.9} }
+    #ping-overlay { position:absolute; inset:0; pointer-events:none; z-index:5; }
+    .data-label { position:absolute; font-family:'IBM Plex Mono',monospace; font-size:9px; color:#00ff41; letter-spacing:2px; text-transform:uppercase; opacity:0; transition:opacity 600ms; pointer-events:none; z-index:6; white-space:nowrap; }
+    .data-label.visible { opacity:1; }
+    .label-key { color:#1a5a1a; font-size:7px; display:block; margin-bottom:2px; }
+    .label-val { color:#00ff41; }
+    .domo-back-btn {
+      position: fixed;
+      bottom: 28px;
+      left: 36px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 3px;
+      color: #3a3a38;
+      text-transform: uppercase;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 100;
+      transition: color 300ms;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .domo-back-btn:hover { color: #c1121f; }
+    .domo-back-btn::before {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 0.5px;
+      background: currentColor;
+      transition: width 300ms;
+    }
+    .domo-back-btn:hover::before { width: 30px; }
+    #exit-btn { position:absolute; bottom:28px; left:36px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:4px; color:#888880; text-transform:uppercase; background:none; border:0.5px solid #2a2a28; padding:10px 20px; cursor:pointer; z-index:10; transition:color 300ms, border-color 300ms; }
+    #exit-btn:hover { color:#d4d4cc; border-color:#888880; }
+    .tour-card { position:absolute; z-index:1002; background:rgba(0,10,0,0.88); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); border:0.5px solid rgba(0,255,65,0.25); padding:24px 28px; width:300px; opacity:0; transition:opacity 180ms; pointer-events:none; }
+    .tour-card.visible { opacity:1; }
+    .tour-step { font-family:'IBM Plex Mono',monospace; font-size:8px; color:#00ff41; letter-spacing:3px; margin-bottom:10px; }
+    .tour-message { font-family:'IBM Plex Mono',monospace; font-size:11px; color:#a8ffa8; line-height:1.9; }
+    .tour-divider { height:0.5px; background:rgba(0,255,65,0.15); margin:16px 0 12px; }
+    .tour-hint { font-family:'IBM Plex Mono',monospace; font-size:8px; color:#1a5a1a; letter-spacing:2px; }
+    .tour-arrow-svg { position:absolute; z-index:1002; pointer-events:none; opacity:0; transition:opacity 180ms; }
+    .tour-arrow-svg.visible { opacity:1; }
+  </style>
+<style>
+@keyframes signalBar {
+  0%   { width: 0%; opacity: 1; }
+  85%  { width: 100%; opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+}
+#signal-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 1.5px;
+  width: 0%;
+  background: #c1121f;
+  z-index: 9999;
+  animation: signalBar 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div id="signal-bar"></div>
+  <canvas id="radar-canvas"></canvas>
+  <canvas id="static-noise"></canvas>
+  <div id="scan-lines"></div>
+  <div id="screen-flicker"></div>
+  <div id="ping-overlay"></div>
+  <button id="exit-btn">[ exit transmission ]</button>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA6_5oWBRKZLnZhTsjtfepm2NleAEEsrPA",
+      authDomain: "domo-8cfe1.firebaseapp.com",
+      projectId: "domo-8cfe1",
+      storageBucket: "domo-8cfe1.firebasestorage.app",
+      messagingSenderId: "47790816831",
+      appId: "1:47790816831:web:0a92e160fc595d5a9c428a"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    const canvas = document.getElementById('radar-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, cx, cy, maxR;
+    let sweepAngle = 0;
+    const SWEEP_SPEED = 0.008;
+    const dataPoints = [];
+    let pingSound = null;
+    let centerEl = null;
+
+    function resize() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      cx = W / 2;
+      cy = H / 2;
+      maxR = Math.min(W, H) * 0.42;
+      positionDataLabels();
+    }
+    window.addEventListener('resize', function() { resize(); positionDataLabels(); });
+
+    const noiseCanvas = document.getElementById('static-noise');
+    const nCtx = noiseCanvas.getContext('2d');
+    function drawNoise() {
+      noiseCanvas.width = window.innerWidth;
+      noiseCanvas.height = window.innerHeight;
+      const imageData = nCtx.createImageData(noiseCanvas.width, noiseCanvas.height);
+      for (let i = 0; i < imageData.data.length; i += 4) {
+        const v = Math.random() * 30;
+        imageData.data[i] = 0; imageData.data[i+1] = v; imageData.data[i+2] = 0; imageData.data[i+3] = 255;
+      }
+      nCtx.putImageData(imageData, 0, 0);
+    }
+    setInterval(drawNoise, 100);
+
+    function createPingSound() {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const audioCtx = new AudioContext();
+      pingSound = function() {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+        osc.start(audioCtx.currentTime); osc.stop(audioCtx.currentTime + 0.4);
+      };
+    }
+    document.addEventListener('click', function initAudio() {
+      createPingSound();
+      document.removeEventListener('click', initAudio);
+    }, { once: true });
+
+    function drawRadar() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+
+      [0.25, 0.5, 0.75, 1.0].forEach(function(ratio) {
+        ctx.beginPath(); ctx.arc(cx, cy, maxR * ratio, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(0,255,65,0.12)'; ctx.lineWidth = 0.5; ctx.stroke();
+      });
+
+      ctx.beginPath(); ctx.moveTo(cx - maxR, cy); ctx.lineTo(cx + maxR, cy);
+      ctx.strokeStyle = 'rgba(0,255,65,0.08)'; ctx.lineWidth = 0.5; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx, cy - maxR); ctx.lineTo(cx, cy + maxR); ctx.stroke();
+
+      for (let i = 0; i < 60; i++) {
+        const trailAngle = sweepAngle - (Math.PI * 0.6 * i / 60);
+        const alpha = (1 - i / 60) * 0.18;
+        ctx.beginPath(); ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, maxR, trailAngle, trailAngle + Math.PI * 0.6 / 60);
+        ctx.closePath(); ctx.fillStyle = `rgba(0,255,65,${alpha})`; ctx.fill();
+      }
+
+      ctx.beginPath(); ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(sweepAngle) * maxR, cy + Math.sin(sweepAngle) * maxR);
+      ctx.strokeStyle = 'rgba(0,255,65,0.9)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+      ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#00ff41'; ctx.fill();
+
+      dataPoints.forEach(function(point) {
+        const px = cx + Math.cos(point.angle) * (maxR * point.radius);
+        const py = cy + Math.sin(point.angle) * (maxR * point.radius);
+        const angleDiff = ((sweepAngle - point.angle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+        const alpha = Math.max(0.1, 1 - (angleDiff / (Math.PI * 2)) * 0.85);
+
+        if (angleDiff < 0.15 && pingSound && !point.pinged) {
+          pingSound(); point.pinged = true;
+          setTimeout(() => { point.pinged = false; }, 3000);
+        }
+
+        ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0,255,65,${alpha})`; ctx.fill();
+        ctx.beginPath(); ctx.arc(px, py, 8, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(0,255,65,${alpha * 0.4})`; ctx.lineWidth = 0.5; ctx.stroke();
+      });
+
+      ctx.fillStyle = 'rgba(0,255,65,0.15)';
+      ctx.font = '7px IBM Plex Mono';
+      ctx.fillText('D.O.M.O TRANSMISSION ACTIVE', cx - 78, cy - maxR - 10);
+    }
+
+    function positionDataLabels() {
+      dataPoints.forEach(function(point) {
+        if (!point.el) return;
+        const px = cx + Math.cos(point.angle) * (maxR * point.radius);
+        const py = cy + Math.sin(point.angle) * (maxR * point.radius);
+        const goRight = Math.cos(point.angle) >= 0;
+        point.el.style.top = (py + 14) + 'px';
+        if (goRight) { point.el.style.left = (px + 14) + 'px'; point.el.style.right = 'auto'; point.el.style.textAlign = 'left'; }
+        else { point.el.style.right = (W - px + 14) + 'px'; point.el.style.left = 'auto'; point.el.style.textAlign = 'right'; }
+      });
+    }
+
+    function createDataLabel(point) {
+      const el = document.createElement('div');
+      el.className = 'data-label';
+      el.innerHTML = `<span class="label-key">${point.key}</span><span class="label-val">${point.value}</span>`;
+      document.getElementById('ping-overlay').appendChild(el);
+      point.el = el;
+      setTimeout(() => el.classList.add('visible'), 600 + Math.random() * 800);
+    }
+
+    function animate() {
+      sweepAngle += SWEEP_SPEED;
+      if (sweepAngle > Math.PI * 2) sweepAngle -= Math.PI * 2;
+      drawRadar();
+      requestAnimationFrame(animate);
+    }
+
+    async function buildProfile(user) {
+      const size = Math.min(window.innerWidth, window.innerHeight) * 0.1;
+
+      if (user.photoURL) {
+        const img = document.createElement('img');
+        img.id = 'center-photo';
+        img.src = user.photoURL;
+        img.style.cssText = `position:absolute;border-radius:50%;object-fit:cover;border:1px solid #1a4a1a;z-index:7;opacity:0;transition:opacity 800ms;width:${size}px;height:${size}px;left:${cx-size/2}px;top:${cy-size/2}px;`;
+        document.body.appendChild(img);
+        setTimeout(() => img.style.opacity = '1', 400);
+        centerEl = img;
+      } else {
+        const div = document.createElement('div');
+        div.id = 'center-initials';
+        div.textContent = (localStorage.getItem('domo-guest') === 'true') ? '?' : (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+        div.style.cssText = `position:absolute;border-radius:50%;background:#0a1a0a;border:1px solid #1a4a1a;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;color:#00ff41;z-index:7;opacity:0;transition:opacity 800ms;width:${size}px;height:${size}px;left:${cx-size/2}px;top:${cy-size/2}px;font-size:${size*0.4}px;`;
+        document.body.appendChild(div);
+        setTimeout(() => div.style.opacity = '1', 400);
+        centerEl = div;
+      }
+
+      let userData = {};
+      let viewedObjects = [];
+      let wishlistItems = [];
+
+      try { const doc = await db.collection('users').doc(user.uid).get(); if (doc.exists) userData = doc.data(); } catch(e) {}
+      try { const v = await db.collection('users').doc(user.uid).collection('viewedObjects').get(); v.forEach(d => viewedObjects.push(d.data())); } catch(e) {}
+      try { const w = await db.collection('users').doc(user.uid).collection('wishlist').get(); w.forEach(d => wishlistItems.push(d.data())); } catch(e) {}
+
+      const points = [
+        { key:'OPERATIVE', value:(user.displayName||'UNKNOWN').toUpperCase(), angle:Math.PI*1.1, radius:0.38 },
+        { key:'IDENTIFIER', value:user.email||'UNKNOWN', angle:Math.PI*1.4, radius:0.55 },
+        { key:'DATE OF ENTRY', value:userData.lastLogin ? new Date(userData.lastLogin.seconds*1000).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}), angle:Math.PI*0.25, radius:0.5 },
+        { key:'LAST SIGNAL', value:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}), angle:Math.PI*1.75, radius:0.45 },
+        { key:'STATUS', value:'ACTIVE OPERATIVE', angle:Math.PI*0.7, radius:0.3 },
+        { key:'CLEARANCE', value:'LEVEL — CIVILIAN', angle:Math.PI*1.6, radius:0.7 },
+      ];
+
+      if (viewedObjects.length === 0 && wishlistItems.length === 0) {
+        points.push({ key:'ACTIVITY', value:'NO TRACE YET', angle:Math.PI*0.5, radius:0.65 });
+      }
+
+      viewedObjects.slice(0,4).forEach(function(obj,i) {
+        points.push({ key:'OBJECT VIEWED', value:(obj.objectName||'UNKNOWN').toUpperCase(), angle:Math.PI*(0.1+i*0.22), radius:0.72+(i*0.04) });
+      });
+
+      wishlistItems.slice(0,3).forEach(function(obj,i) {
+        points.push({ key:'FLAGGED', value:(obj.objectName||'UNKNOWN').toUpperCase(), angle:Math.PI*(1.2+i*0.18), radius:0.78+(i*0.03) });
+      });
+
+      points.forEach(function(p) { dataPoints.push(p); createDataLabel(p); });
+      positionDataLabels();
+
+      setTimeout(() => launchTourIfNeeded(), 1500);
+    }
+
+    // ── TOUR ──
+
+    let tourStep = 0;
+    let tourOverlay = null;
+    let tourCard = null;
+    let tourArrow = null;
+
+    const tourSteps = [
+      {
+        target: 'center',
+        step: '01 / 04',
+        message: 'this is your signal. the department has located you on the grid. your identity has been confirmed and logged. everything the department knows about you radiates outward from this point. you are the origin of the transmission.',
+        hint: 'click anywhere to continue',
+        cardPos: { left: '55%', top: '58%' },
+        arrowFrom: { x: 0, y: -60 },
+      },
+      {
+        target: 'firstblip',
+        step: '02 / 04',
+        message: 'each blip on the radar is a data point the department holds on you. as the sweep passes over them they light up and fade. your name. your identifier. your date of entry. your last known signal. the department keeps everything. nothing is deleted. nothing is forgotten.',
+        hint: 'click anywhere to continue',
+        cardPos: { right: '5%', top: '20%' },
+      },
+      {
+        target: 'sweep',
+        step: '03 / 04',
+        message: 'the sweep never stops. it rotates continuously, passing over your data points one by one. each time it crosses a signal you will hear a ping. that sound means the department has read your file again. it has always been reading your file. this screen simply makes it visible.',
+        hint: 'click anywhere to continue',
+        cardPos: { left: '5%', top: '15%' },
+        sweepStep: true,
+      },
+      {
+        target: 'exit',
+        step: '04 / 04',
+        message: 'when you are done here — click exit transmission. it will take you back to the department. your file remains open. your signal remains active. the sweep does not stop when you leave. the department does not require your presence to continue monitoring your record.',
+        hint: 'click anywhere to begin transmission',
+        cardPos: { left: '120px', bottom: '80px' },
+      }
+    ];
+
+    function launchTourIfNeeded() {
+      if (localStorage.getItem('domo-profile-toured')) return;
+      startTour();
+    }
+
+    function startTour() {
+      tourOverlay = document.createElement('div');
+      tourOverlay.id = 'tour-overlay';
+      tourOverlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,10,0,0.92);z-index:999;pointer-events:none;transition:background 400ms, opacity 600ms;';
+      document.body.appendChild(tourOverlay);
+      document.body.style.overflow = 'hidden';
+      tourStep = 0;
+      showTourStep(tourStep);
+      document.addEventListener('click', tourClickHandler);
+    }
+
+    function tourClickHandler() {
+      tourStep++;
+      if (tourStep >= tourSteps.length) {
+        endTour();
+      } else {
+        hideTourElements(() => showTourStep(tourStep));
+      }
+    }
+
+    function showTourStep(index) {
+      const step = tourSteps[index];
+
+      if (step.sweepStep) {
+        tourOverlay.style.background = 'rgba(0,10,0,0.75)';
+      } else {
+        tourOverlay.style.background = 'rgba(0,10,0,0.92)';
+      }
+
+      // Highlight target
+      if (step.target === 'center' && centerEl) {
+        centerEl.style.zIndex = '1001';
+        centerEl.style.filter = 'drop-shadow(0 0 12px rgba(0,255,65,0.9)) drop-shadow(0 0 24px rgba(0,255,65,0.5))';
+        centerEl.style.opacity = '1';
+      }
+      if (step.target === 'firstblip' && dataPoints[0] && dataPoints[0].el) {
+        dataPoints[0].el.style.zIndex = '1001';
+        dataPoints[0].el.style.opacity = '1';
+        dataPoints[0].el.style.textShadow = '0 0 8px rgba(0,255,65,0.9), 0 0 16px rgba(0,255,65,0.5)';
+      }
+      if (step.target === 'exit') {
+        const exitBtn = document.getElementById('exit-btn');
+        exitBtn.style.zIndex = '1001';
+        exitBtn.style.color = '#00ff41';
+        exitBtn.style.textShadow = '0 0 8px rgba(0,255,65,0.9), 0 0 16px rgba(0,255,65,0.5)';
+      }
+
+      // Create card
+      tourCard = document.createElement('div');
+      tourCard.className = 'tour-card';
+      tourCard.innerHTML = `
+        <div class="tour-step">${step.step}</div>
+        <div class="tour-message">${step.message}</div>
+        <div class="tour-divider"></div>
+        <div class="tour-hint">${step.hint}</div>
+      `;
+
+      Object.keys(step.cardPos).forEach(k => tourCard.style[k] = step.cardPos[k]);
+      tourCard.style.position = 'fixed';
+      document.body.appendChild(tourCard);
+      setTimeout(() => tourCard.classList.add('visible'), 20);
+    }
+
+    function hideTourElements(callback) {
+      const step = tourSteps[tourStep - 1];
+
+      if (tourCard) { tourCard.classList.remove('visible'); }
+
+      // Restore previous highlight
+      if (step.target === 'center' && centerEl) {
+        centerEl.style.zIndex = '7';
+        centerEl.style.filter = '';
+      }
+      if (step.target === 'firstblip' && dataPoints[0] && dataPoints[0].el) {
+        dataPoints[0].el.style.zIndex = '';
+        dataPoints[0].el.style.textShadow = '';
+      }
+      if (step.target === 'exit') {
+        const exitBtn = document.getElementById('exit-btn');
+        exitBtn.style.zIndex = '10';
+        exitBtn.style.color = '#1a4a1a';
+        exitBtn.style.textShadow = '';
+      }
+
+      setTimeout(() => {
+        if (tourCard && tourCard.parentNode) tourCard.parentNode.removeChild(tourCard);
+        tourCard = null;
+        if (callback) callback();
+      }, 200);
+    }
+
+    function endTour() {
+      localStorage.setItem('domo-profile-toured', 'true');
+      hideTourElements(null);
+      if (tourCard && tourCard.parentNode) tourCard.parentNode.removeChild(tourCard);
+
+      tourOverlay.style.opacity = '0';
+      setTimeout(() => {
+        if (tourOverlay && tourOverlay.parentNode) tourOverlay.parentNode.removeChild(tourOverlay);
+        tourOverlay = null;
+        document.body.style.overflow = '';
+        const exitBtn = document.getElementById('exit-btn');
+        exitBtn.style.zIndex = '10';
+        exitBtn.style.color = '#1a4a1a';
+        exitBtn.style.textShadow = '';
+        if (centerEl) { centerEl.style.zIndex = '7'; centerEl.style.filter = ''; }
+        if (dataPoints[0] && dataPoints[0].el) { dataPoints[0].el.style.zIndex = ''; dataPoints[0].el.style.textShadow = ''; }
+      }, 700);
+      document.removeEventListener('click', tourClickHandler);
+    }
+
+    // ── AUTH ──
+
+    auth.onAuthStateChanged(function(user) {
+      const isGuest = localStorage.getItem('domo-guest') === 'true';
+      if (isGuest) {
+        const guestUser = {
+          displayName: 'UNKNOWN OPERATIVE',
+          email: 'unknownoperative@domoobjects.com',
+          photoURL: null,
+          uid: '000000000000'
+        };
+        resize();
+        animate();
+        buildProfile(guestUser);
+        return;
+      }
+      if (!user) { window.location.href = 'door.html'; return; }
+      resize();
+      animate();
+      buildProfile(user);
+    });
+
+    document.getElementById('exit-btn').addEventListener('click', function() {
+      localStorage.removeItem('domo-guest');
+      localStorage.removeItem('domo-guest-name');
+      window.location.href = 'index.html';
+    });
+  </script>
+<script>
+(function() {
+  var bar = document.getElementById('signal-bar');
+  if (!bar) return;
+  bar.addEventListener('animationend', function() {
+    bar.remove();
+  });
+})();
+</script>
+<script>
+(function() {
+  window.addEventListener('error', function(event) {
+    var ignoredErrors = [
+      'Script error',
+      'ResizeObserver',
+      'Non-Error promise rejection',
+      'Loading chunk',
+      'Network request failed',
+      'favicon',
+      'net::ERR'
+    ];
+    var message = event.message || '';
+    var shouldIgnore = ignoredErrors.some(function(ignored) {
+      return message.indexOf(ignored) !== -1;
+    });
+    if (!shouldIgnore) {
+      try { sessionStorage.setItem('domo-error', message); } catch(e) {}
+      window.location.href = 'error.html';
+    }
+  });
+
+  window.addEventListener('unhandledrejection', function(event) {
+    var reason = event.reason ? event.reason.toString() : '';
+    var ignoredErrors = [
+      'popup-closed-by-user',
+      'cancelled-popup-request',
+      'ResizeObserver',
+      'Network request failed',
+      'net::ERR',
+      'Failed to fetch',
+      'Load failed'
+    ];
+    var shouldIgnore = ignoredErrors.some(function(ignored) {
+      return reason.indexOf(ignored) !== -1;
+    });
+    if (!shouldIgnore) {
+      try { sessionStorage.setItem('domo-error', reason); } catch(e) {}
+      window.location.href = 'error.html';
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

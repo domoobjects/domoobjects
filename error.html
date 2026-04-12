@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signal Lost — DOMO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d0d0b;
+      min-height: 100vh;
+      overflow: hidden;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    #errorCinematic {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #0d0d0b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      transition: opacity 800ms ease;
+    }
+
+    .answer-machine {
+      width: 320px;
+      height: 180px;
+      background: #1a1a18;
+      border: 0.5px solid #2a2a28;
+      border-radius: 8px;
+      position: relative;
+      padding: 18px 20px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .am-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .am-tape-deck {
+      width: 88px;
+      height: 44px;
+      background: #111110;
+      border: 0.5px solid #2a2a28;
+      border-radius: 3px;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    .am-tape-deck::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 10px;
+      transform: translateY(-50%);
+      width: 24px; height: 24px;
+      border: 1.5px solid #2a2a28;
+      border-radius: 50%;
+      animation: reelSpin 1.8s linear infinite;
+    }
+    .am-tape-deck::after {
+      content: '';
+      position: absolute;
+      top: 50%; right: 10px;
+      transform: translateY(-50%);
+      width: 24px; height: 24px;
+      border: 1.5px solid #2a2a28;
+      border-radius: 50%;
+      animation: reelSpin 1.8s linear infinite reverse;
+    }
+    @keyframes reelSpin {
+      from { border-top-color: #3a3a38; }
+      to   { transform: translateY(-50%) rotate(360deg); border-top-color: #3a3a38; }
+    }
+    /* Orange LED — error state */
+    .am-led {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #ff6b00;
+      box-shadow: 0 0 6px rgba(255,107,0,0.8);
+      animation: ledBlink 800ms ease-in-out infinite;
+    }
+    @keyframes ledBlink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+    .am-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 7px;
+      color: #3a3a38;
+      letter-spacing: 2px;
+      text-align: center;
+      margin-top: 6px;
+    }
+    .am-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .am-btn {
+      width: 28px; height: 12px;
+      background: #2a2a28;
+      border-radius: 2px;
+    }
+
+    .vm-text-wrap {
+      margin-top: 48px;
+      text-align: center;
+      max-width: 520px;
+    }
+    .vm-line {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      color: #d4d4cc;
+      line-height: 2;
+      text-align: center;
+      display: block;
+    }
+    .vm-final {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      color: #3a3a38;
+      letter-spacing: 3px;
+      text-align: center;
+      display: block;
+      margin-top: 16px;
+      opacity: 0;
+      transition: opacity 600ms ease;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div id="errorCinematic">
+    <!-- built by JS -->
+  </div>
+
+  <script>
+  var cinematicTimeouts = [];
+  var redirected = false;
+  function ct(fn, delay) { var id = setTimeout(fn, delay); cinematicTimeouts.push(id); return id; }
+  function skipTransmission() {
+    if (redirected) return;
+    redirected = true;
+    cinematicTimeouts.forEach(function(id) { clearTimeout(id); });
+    cinematicTimeouts = [];
+    var cin = document.getElementById('errorCinematic');
+    if (cin) {
+      cin.style.opacity = '0';
+      setTimeout(function() { window.location.href = 'index.html'; }, 400);
+    }
+  }
+  </script>
+
+  <script>
+  (function() {
+    var cin = document.getElementById('errorCinematic');
+
+    /* answering machine */
+    var machine = document.createElement('div');
+    machine.className = 'answer-machine';
+    machine.innerHTML =
+      '<div class="am-top">' +
+        '<div class="am-tape-deck"></div>' +
+        '<div class="am-led"></div>' +
+      '</div>' +
+      '<div class="am-label">D.O.M.O SIGNAL SYSTEM</div>' +
+      '<div class="am-buttons"><div class="am-btn"></div><div class="am-btn"></div></div>';
+    cin.appendChild(machine);
+
+    /* text container */
+    var textWrap = document.createElement('div');
+    textWrap.className = 'vm-text-wrap';
+    cin.appendChild(textWrap);
+
+    /* skip button */
+    var skipBtn = document.createElement('div');
+    skipBtn.id = 'skip-btn';
+    skipBtn.style.cssText = 'position:absolute;bottom:36px;right:36px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-end;gap:8px;z-index:10;';
+    skipBtn.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;">' +
+        '<div id="skip-text" style="font-family:\'IBM Plex Mono\',monospace;font-size:8px;letter-spacing:4px;color:#3a3a38;text-transform:uppercase;transition:color 300ms;">interrupt transmission</div>' +
+        '<div id="skip-line" style="width:24px;height:0.5px;background:#3a3a38;transition:all 300ms;"></div>' +
+      '</div>' +
+      '<div id="skip-box" style="border:0.5px solid #2a2a28;padding:8px 16px;transition:all 300ms;">' +
+        '<span id="skip-label" style="font-family:\'IBM Plex Mono\',monospace;font-size:9px;letter-spacing:3px;color:#3a3a38;text-transform:uppercase;transition:color 300ms;">[ skip ]</span>' +
+      '</div>';
+    skipBtn.addEventListener('mouseenter', function() {
+      document.getElementById('skip-text').style.color = '#d4d4cc';
+      document.getElementById('skip-line').style.background = '#c1121f';
+      document.getElementById('skip-line').style.width = '40px';
+      document.getElementById('skip-box').style.borderColor = '#c1121f';
+      document.getElementById('skip-label').style.color = '#c1121f';
+    });
+    skipBtn.addEventListener('mouseleave', function() {
+      document.getElementById('skip-text').style.color = '#3a3a38';
+      document.getElementById('skip-line').style.background = '#3a3a38';
+      document.getElementById('skip-line').style.width = '24px';
+      document.getElementById('skip-box').style.borderColor = '#2a2a28';
+      document.getElementById('skip-label').style.color = '#3a3a38';
+    });
+    skipBtn.addEventListener('click', skipTransmission);
+    cin.appendChild(skipBtn);
+
+    var lines = [
+      'we are sorry to interrupt your transmission.',
+      'the developers have interfered with the signal again.',
+      'we apologise on their behalf.',
+      'they will not be fed tonight.',
+      'the department is working to restore the connection.'
+    ];
+
+    var lineIndex = 0;
+
+    function goHome() {
+      if (redirected) return;
+      redirected = true;
+      window.location.href = 'index.html';
+    }
+
+    function typeLine(text, callback) {
+      var lineEl = document.createElement('span');
+      lineEl.className = 'vm-line';
+      textWrap.appendChild(lineEl);
+      var i = 0;
+      var timer = setInterval(function() {
+        lineEl.textContent += text[i];
+        i++;
+        if (i >= text.length) {
+          clearInterval(timer);
+          ct(callback, 600);
+        }
+      }, 55);
+    }
+
+    function typeNext() {
+      if (lineIndex < lines.length) {
+        typeLine(lines[lineIndex], function() {
+          lineIndex++;
+          typeNext();
+        });
+      } else {
+        /* all lines done — 1200ms pause then final line */
+        ct(function() {
+          var finalEl = document.createElement('span');
+          finalEl.className = 'vm-final';
+          finalEl.textContent = '[ signal restoration in progress \u2014 returning to department ]';
+          textWrap.appendChild(finalEl);
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+              finalEl.style.opacity = '1';
+            });
+          });
+          /* 1500ms after final appears → fade out → redirect */
+          ct(function() {
+            cin.style.opacity = '0';
+            ct(goHome, 800);
+          }, 1500);
+        }, 1200);
+      }
+    }
+
+    typeNext();
+  })();
+  </script>
+
+</body>
+</html>

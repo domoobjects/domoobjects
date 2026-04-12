@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="favicon.png">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Paper Boat — DOMO</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;background:#0d0d0b;color:#d4d4cc;font-family:'IBM Plex Mono',monospace;overflow:hidden;}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:68px;
+  background:rgba(10,10,9,0.92);
+  border-bottom:0.5px solid #1e1e1c;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+}
+.brand-logo{height:32px;width:auto;display:block;opacity:0.6;}
+.nav-links{display:flex;gap:28px;list-style:none;align-items:center;}
+.nav-links a{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#3a3a38;text-decoration:none;transition:color 200ms;}
+.nav-links a:hover{color:#c1121f;}
+.cart-btn{background:none;border:0.5px solid #1e1e1c;padding:8px 14px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#3a3a38;display:flex;align-items:center;gap:8px;transition:all 200ms;position:relative;}
+.cart-btn:hover{border-color:#c1121f;color:#c1121f;}
+.cart-badge{background:#c1121f;color:#fff;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:8px;position:absolute;top:-6px;right:-6px;}
+.cart-badge.hidden{display:none;}
+.nav-avatar-btn{cursor:pointer;display:flex;align-items:center;}
+.nav-avatar-circle{width:28px;height:28px;border-radius:50%;background:#1a1a18;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#d4d4cc;border:0.5px solid #3a3a38;transition:box-shadow 200ms;}
+.nav-avatar-circle:hover{box-shadow:0 0 0 2px rgba(193,18,31,.3);}
+.nav-dropdown{display:none;flex-direction:column;position:absolute;top:calc(100% + 10px);right:0;min-width:200px;background:#0d0d0b;border:0.5px solid #2a2a28;z-index:500;padding:0;}
+.nav-dropdown-top{padding:14px 16px 10px;border-bottom:0.5px solid #1e1e1c;}
+.nav-avatar-name{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#d4d4cc;letter-spacing:.03em;}
+.nav-avatar-email{font-family:'IBM Plex Mono',monospace;font-size:8px;color:#3a3a38;letter-spacing:.05em;margin-top:2px;word-break:break-all;}
+.nav-dd-link{display:block;padding:10px 16px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#3a3a38;text-decoration:none;transition:background 150ms,color 150ms;border-bottom:0.5px solid #1e1e1c;}
+.nav-dd-link:hover{background:rgba(193,18,31,.06);color:#d4d4cc;}
+.nav-dd-signout{display:block;width:100%;padding:10px 16px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(193,18,31,.6);background:none;border:none;cursor:pointer;text-align:left;transition:background 150ms,color 150ms;}
+.nav-dd-signout:hover{background:rgba(193,18,31,.08);color:#c1121f;}
+
+/* ── NAV ARROWS ── */
+.nav-arrow{position:fixed;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;z-index:50;opacity:0.4;transition:opacity 300ms,transform 300ms;padding:0;}
+.nav-arrow:hover{opacity:1;transform:translateY(-50%) scale(1.1);}
+.prev-arrow{left:24px;}
+.next-arrow{right:24px;}
+.arrow-ring{stroke-dasharray:145;stroke-dashoffset:145;transition:stroke-dashoffset 400ms ease;}
+.nav-arrow:hover .arrow-ring{stroke-dashoffset:0;}
+
+/* ── SIGNAL BAR ── */
+@keyframes signalBar{0%{width:0%;opacity:1;}85%{width:100%;opacity:1;}100%{width:100%;opacity:0;}}
+#signal-bar{position:fixed;top:0;left:0;height:1.5px;width:0%;background:#c1121f;z-index:9999;animation:signalBar 400ms cubic-bezier(0.16,1,0.3,1) forwards;pointer-events:none;}
+
+/* ── CART DRAWER ── */
+.cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:900;opacity:0;pointer-events:none;transition:opacity 300ms;}
+.cart-overlay.open{opacity:1;pointer-events:all;}
+.cart-drawer{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:95vw;background:#0d0d0b;z-index:901;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;border-left:0.5px solid #1e1e1c;}
+.cart-drawer.open{transform:translateX(0);}
+.cart-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:0.5px solid #1e1e1c;flex-shrink:0;}
+.cart-header-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:#d4d4cc;}
+.cart-close{background:none;border:0.5px solid #1e1e1c;width:32px;height:32px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 150ms;color:#3a3a38;}
+.cart-close:hover{border-color:#c1121f;color:#c1121f;}
+.cart-body{flex:1;overflow-y:auto;padding:16px 0;}
+.cart-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;gap:8px;}
+.empty-big{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:4px;color:#2a2a28;}
+.empty-sm{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#2a2a28;}
+.drawer-item{display:flex;gap:12px;padding:14px 24px;border-bottom:0.5px solid #1e1e1c;align-items:flex-start;}
+.drawer-item-img{width:44px;height:44px;flex-shrink:0;background:#1a1a18;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.drawer-item-img img{width:100%;height:100%;object-fit:contain;}
+.drawer-item-info{flex:1;}
+.drawer-item-name{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#d4d4cc;margin-bottom:3px;}
+.drawer-item-meta{font-family:'IBM Plex Mono',monospace;font-size:8px;color:#3a3a38;letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.drawer-item-price{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#c1121f;margin-top:4px;}
+.drawer-item-remove{background:none;border:none;cursor:pointer;font-size:12px;color:#2a2a28;transition:color 150ms;flex-shrink:0;}
+.drawer-item-remove:hover{color:#c1121f;}
+.cart-footer{padding:16px 24px;border-top:0.5px solid #1e1e1c;flex-shrink:0;}
+.cart-subtotal{display:flex;justify-content:space-between;margin-bottom:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#3a3a38;}
+.cart-subtotal .val{color:#d4d4cc;}
+.btn-checkout-link{display:block;width:100%;padding:12px;background:#c1121f;color:#0d0d0b;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:4px;text-transform:uppercase;text-align:center;text-decoration:none;transition:background 200ms;}
+.btn-checkout-link:hover{background:#a00f1a;}
+
+/* ── DASHBOARD GRID ── */
+#dashboard{
+  position:fixed;
+  top:68px;left:0;right:0;bottom:0;
+  display:grid;
+  grid-template-columns:280px 1fr 280px;
+  grid-template-rows:48px 1fr 120px;
+  grid-template-areas:
+    "topbar topbar topbar"
+    "left   center right"
+    "bottom bottom bottom";
+}
+
+/* ── TOP BAR ── */
+#topbar{
+  grid-area:topbar;
+  display:flex;align-items:stretch;
+  background:#0d0d0b;
+  border-bottom:0.5px solid #1e1e1c;
+  overflow:hidden;
+}
+.color-btn{
+  flex:1;display:flex;align-items:center;padding:0 14px;gap:10px;
+  cursor:pointer;background:transparent;border:none;border-right:0.5px solid #1e1e1c;
+  transition:background 200ms;
+}
+.color-btn:last-child{border-right:none;}
+.color-btn.active{background:rgba(255,255,255,0.04);}
+.color-btn:hover{background:rgba(255,255,255,0.03);}
+.color-btn-bar{width:3px;height:24px;flex-shrink:0;border-radius:1px;}
+.color-btn-name{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:3px;color:#3a3a38;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ── LEFT PANEL ── */
+#left-panel{
+  grid-area:left;
+  border-right:0.5px solid #1e1e1c;
+  padding:24px 20px;
+  overflow:hidden;
+  display:flex;flex-direction:column;gap:0;
+  position:relative;
+}
+.panel-designation-label{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:3px;color:#3a3a38;text-transform:uppercase;margin-bottom:6px;}
+.panel-designation{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:#d4d4cc;line-height:1;}
+.panel-divider{height:0.5px;background:#1e1e1c;margin:14px 0;}
+.data-stack{display:flex;flex-direction:column;gap:13px;}
+.data-row{}
+.data-label{font-family:'IBM Plex Mono',monospace;font-size:6px;letter-spacing:2px;color:#3a3a38;text-transform:uppercase;margin-bottom:2px;}
+.data-value{font-family:'IBM Plex Mono',monospace;font-size:9px;color:#d4d4cc;line-height:1.4;}
+.scanner-wrap{height:1px;overflow:hidden;margin:14px 0;position:relative;}
+.scanner-line{height:1px;background:linear-gradient(to right,transparent,#c1121f,transparent);position:absolute;width:100%;}
+@keyframes scan{0%{transform:translateX(-100%);}100%{transform:translateX(400%);}}
+.scanner-line{animation:scan 3s linear infinite;}
+.signal-label{font-family:'IBM Plex Mono',monospace;font-size:6px;letter-spacing:2px;color:#3a3a38;text-transform:uppercase;margin-bottom:6px;}
+.signal-bars{display:flex;gap:4px;margin-bottom:6px;}
+.signal-bar-seg{width:18px;height:6px;border-radius:1px;}
+.signal-bar-seg.on{background:#c1121f;}
+.signal-bar-seg.off{background:#1e1e1c;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.signal-status{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:2px;color:#c1121f;text-transform:uppercase;animation:blink 1.4s ease-in-out infinite;}
+
+/* ── CENTER PANEL ── */
+#center-panel{
+  grid-area:center;
+  background:#0a0a09;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.grid-overlay{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+.corner-bracket{position:absolute;width:20px;height:20px;pointer-events:none;}
+.corner-bracket.tl{top:16px;left:16px;border-top:2px solid #c1121f;border-left:2px solid #c1121f;}
+.corner-bracket.tr{top:16px;right:16px;border-top:2px solid #c1121f;border-right:2px solid #c1121f;}
+.corner-bracket.bl{bottom:16px;left:16px;border-bottom:2px solid #c1121f;border-left:2px solid #c1121f;}
+.corner-bracket.br{bottom:16px;right:16px;border-bottom:2px solid #c1121f;border-right:2px solid #c1121f;}
+.crosshair-h{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:0.5px;background:#c1121f;opacity:0.4;pointer-events:none;}
+.crosshair-v{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:0.5px;height:40px;background:#c1121f;opacity:0.4;pointer-events:none;}
+.hud-tl{position:absolute;top:20px;left:20px;font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:2px;color:#3a3a38;text-transform:uppercase;pointer-events:none;}
+.hud-tr{position:absolute;top:20px;right:20px;display:flex;align-items:center;gap:6px;pointer-events:none;}
+.rec-dot{width:6px;height:6px;background:#c1121f;border-radius:50%;animation:blink 1s ease-in-out infinite;}
+.rec-text{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:2px;color:#c1121f;}
+.boat-stage{display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;z-index:2;}
+#boatSvg{width:260px;height:208px;max-height:50vh;max-width:65%;transition:filter 400ms ease;animation:drift 6s ease-in-out infinite;filter:drop-shadow(0 8px 20px rgba(193,18,31,0.2));}
+@keyframes drift{0%{transform:translateY(0) rotate(-1deg);}25%{transform:translateY(-8px) rotate(1.5deg);}50%{transform:translateY(-5px) rotate(-0.5deg);}75%{transform:translateY(-11px) rotate(2deg);}100%{transform:translateY(0) rotate(-1deg);}}
+.ripple-stage{position:relative;width:200px;height:40px;margin-top:8px;}
+.ripple-ellipse{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:0.5px solid rgba(255,255,255,0.06);border-radius:50%;}
+@keyframes ripple{0%{transform:translate(-50%,-50%) scale(0.8);opacity:0.3;}100%{transform:translate(-50%,-50%) scale(1.4);opacity:0;}}
+.r1{width:160px;height:24px;animation:ripple 3s ease-out infinite;}
+.r2{width:200px;height:30px;animation:ripple 3s ease-out 1s infinite;}
+.r3{width:240px;height:36px;animation:ripple 3s ease-out 2s infinite;}
+
+/* ── RIGHT PANEL ── */
+#right-panel{
+  grid-area:right;
+  border-left:0.5px solid #1e1e1c;
+  padding:24px 20px;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  gap:0;
+}
+.variant-label{font-family:'IBM Plex Mono',monospace;font-size:6px;letter-spacing:2px;color:#3a3a38;text-transform:uppercase;margin-bottom:6px;}
+#color-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:#4a7ab5;margin-bottom:8px;display:block;}
+#color-accent-line{height:0.5px;width:100%;background:#4a7ab5;margin-bottom:18px;transition:background 300ms;}
+.desc-heading{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#d4d4cc;line-height:1.6;margin-bottom:10px;font-weight:400;}
+.desc-body{font-family:'IBM Plex Mono',monospace;font-size:8px;color:#3a3a38;line-height:1.9;margin-bottom:14px;}
+.spec-block{margin-bottom:12px;}
+.spec-block .data-label{font-family:'IBM Plex Mono',monospace;font-size:6px;letter-spacing:2px;color:#3a3a38;text-transform:uppercase;margin-bottom:3px;}
+.spec-block .data-value{font-family:'IBM Plex Mono',monospace;font-size:8px;color:#d4d4cc;line-height:1.6;}
+.right-spacer{flex:1;}
+#addCartBtn{display:block;width:100%;background:#c1121f;color:#0d0d0b;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:4px;padding:12px;border:none;cursor:pointer;transition:background 200ms;text-transform:uppercase;margin-bottom:8px;}
+#addCartBtn:hover{background:#a00f1a;}
+#wishBtn{display:block;width:100%;background:transparent;color:#3a3a38;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:2px;padding:10px;border:0.5px solid #1e1e1c;cursor:pointer;transition:all 200ms;text-transform:uppercase;margin-bottom:8px;}
+#wishBtn:hover{border-color:#3a3a38;color:#d4d4cc;}
+.cart-release-note{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:1px;color:#2a2a28;text-align:center;}
+
+/* ── BOTTOM BAR ── */
+#bottom-bar{
+  grid-area:bottom;
+  border-top:0.5px solid #1e1e1c;
+  background:#080808;
+  display:flex;align-items:center;
+  overflow-x:auto;overflow-y:hidden;
+  position:relative;
+  scrollbar-width:none;
+}
+#bottom-bar::-webkit-scrollbar{display:none;}
+.ticker-text{
+  white-space:nowrap;
+  padding:0 40px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  color:#3a3a38;
+  line-height:1.8;
+  flex-shrink:0;
+}
+.scroll-hint{
+  position:absolute;right:0;top:0;bottom:0;
+  width:60px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(to right,transparent,#080808);
+  font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:2px;color:#2a2a28;
+  pointer-events:none;
+  flex-shrink:0;
+}
+</style>
+</head>
+<body>
+
+<div id="signal-bar"></div>
+
+<!-- PREV / NEXT ARROWS -->
+<button class="nav-arrow prev-arrow" id="prev-btn">
+  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="24" cy="24" r="23" stroke="#c1121f" stroke-width="0.5" opacity="0.4"/>
+    <circle cx="24" cy="24" r="23" stroke="#c1121f" stroke-width="0.5" opacity="0.4" class="arrow-ring"/>
+    <path d="M27 14L17 24L27 34" stroke="#d4d4cc" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="17" y1="24" x2="32" y2="24" stroke="#c1121f" stroke-width="0.5" opacity="0.6"/>
+  </svg>
+</button>
+<button class="nav-arrow next-arrow" id="next-btn">
+  <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="24" cy="24" r="23" stroke="#c1121f" stroke-width="0.5" opacity="0.4"/>
+    <path d="M21 14L31 24L21 34" stroke="#d4d4cc" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="16" y1="24" x2="31" y2="24" stroke="#c1121f" stroke-width="0.5" opacity="0.6"/>
+  </svg>
+</button>
+
+<!-- CART OVERLAY + DRAWER -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <div class="cart-header-title">Cart</div>
+    <button class="cart-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-body" id="cartBody">
+    <div class="cart-empty" id="cartEmpty">
+      <div class="empty-big">Empty</div>
+      <div class="empty-sm">Nothing added yet</div>
+    </div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-subtotal">
+      <span class="lbl">Subtotal</span>
+      <span class="val" id="cartSubtotal">₹0</span>
+    </div>
+    <a href="checkout.html" class="btn-checkout-link">Checkout →</a>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="brand"><img src="favicon.png" class="brand-logo" alt="DOMO"/></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="index.html#objects">Objects</a></li>
+    <li id="navLoginLink"><a href="login.html">Login</a></li><li id="navAvatar" style="display:none;position:relative;" onmouseenter="clearTimeout(window._ddT);this.querySelector('.nav-dropdown').style.display='flex'" onmouseleave="window._ddT=setTimeout(()=>this.querySelector('.nav-dropdown').style.display='none',320)" ondblclick="window.location.href='profile.html'"><div class="nav-avatar-btn"><div class="nav-avatar-circle"><span class="nav-avatar-initial">?</span></div></div><div class="nav-dropdown"><div class="nav-dropdown-top"><div class="nav-avatar-name">Name</div><div class="nav-avatar-email">email</div></div><a href="profile.html" class="nav-dd-link">&#9654; My Profile</a><button class="nav-dd-signout" onclick="doSignOut()">Sign Out</button></div></li>
+    <li><a href="domo-times.html">DOMO Times</a></li>
+  </ul>
+  <button class="cart-btn" onclick="openCart()">Cart <span class="cart-badge hidden" id="cartBadge">0</span></button>
+</nav>
+
+<!-- DASHBOARD GRID -->
+<div id="dashboard">
+
+  <!-- TOP BAR — COLOR SWITCHER -->
+  <div id="topbar">
+    <button class="color-btn active" data-key="blue">
+      <div class="color-btn-bar" style="background:#4a7ab5;"></div>
+      <span class="color-btn-name">Faded Blue</span>
+    </button>
+    <button class="color-btn" data-key="red">
+      <div class="color-btn-bar" style="background:#c1121f;"></div>
+      <span class="color-btn-name">Bureaucratic Red</span>
+    </button>
+    <button class="color-btn" data-key="white">
+      <div class="color-btn-bar" style="background:#f5f4ef;"></div>
+      <span class="color-btn-name">White of Surrender</span>
+    </button>
+    <button class="color-btn" data-key="green">
+      <div class="color-btn-bar" style="background:#1a3a1a;"></div>
+      <span class="color-btn-name">Dark Green</span>
+    </button>
+    <button class="color-btn" data-key="glow">
+      <div class="color-btn-bar" style="background:#00ff41;"></div>
+      <span class="color-btn-name">Glow in the Dark</span>
+    </button>
+    <button class="color-btn" data-key="yellow">
+      <div class="color-btn-bar" style="background:#f5c518;"></div>
+      <span class="color-btn-name">Glow Yellow</span>
+    </button>
+  </div>
+
+  <!-- LEFT PANEL — DATA READOUTS -->
+  <div id="left-panel">
+    <div class="panel-designation-label">Object Designation</div>
+    <div class="panel-designation">D.O.M.O-034</div>
+    <div class="panel-divider"></div>
+    <div class="data-stack">
+      <div class="data-row">
+        <div class="data-label">Weight</div>
+        <div class="data-value">negligible</div>
+      </div>
+      <div class="data-row">
+        <div class="data-label">Material</div>
+        <div class="data-value">one sheet of something that was once important</div>
+      </div>
+      <div class="data-row">
+        <div class="data-label">Structural</div>
+        <div class="data-value">dependent on belief</div>
+      </div>
+      <div class="data-row">
+        <div class="data-label">Origin</div>
+        <div class="data-value">secret DOMO lab</div>
+      </div>
+      <div class="data-row">
+        <div class="data-label">Condition</div>
+        <div class="data-value">perpetually adrift</div>
+      </div>
+      <div class="data-row">
+        <div class="data-label">Water Rating</div>
+        <div class="data-value">theoretical</div>
+      </div>
+      <div class="data-row">
+        <div class="data-label">Fold Count</div>
+        <div class="data-value">unknown — the person who folded it is gone</div>
+      </div>
+    </div>
+    <div class="scanner-wrap"><div class="scanner-line"></div></div>
+    <div class="panel-divider"></div>
+    <div class="data-row" style="margin-bottom:10px;">
+      <div class="data-label">Era</div>
+      <div class="data-value">Remember When You Were Young</div>
+    </div>
+    <div class="data-row" style="margin-bottom:0;">
+      <div class="data-label">Condition</div>
+      <div class="data-value">Perpetually Adrift</div>
+    </div>
+    <div style="flex:1;"></div>
+    <div>
+      <div class="signal-label">Signal Strength</div>
+      <div class="signal-bars">
+        <div class="signal-bar-seg on"></div>
+        <div class="signal-bar-seg on"></div>
+        <div class="signal-bar-seg on"></div>
+        <div class="signal-bar-seg off"></div>
+        <div class="signal-bar-seg off"></div>
+      </div>
+      <div class="signal-status">Object Located — Transmitting</div>
+    </div>
+  </div>
+
+  <!-- CENTER PANEL — BOAT DISPLAY -->
+  <div id="center-panel">
+    <div class="grid-overlay"></div>
+    <div class="corner-bracket tl"></div>
+    <div class="corner-bracket tr"></div>
+    <div class="corner-bracket bl"></div>
+    <div class="corner-bracket br"></div>
+    <div class="crosshair-h"></div>
+    <div class="crosshair-v"></div>
+    <div class="hud-tl">Live Feed — Object #D.O.M.O-034</div>
+    <div class="hud-tr">
+      <div class="rec-dot"></div>
+      <span class="rec-text">REC</span>
+    </div>
+    <div class="boat-stage">
+      <svg id="boatSvg" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+        <path id="hullBottom" d="M30 110 Q100 132 170 110 L155 95 Q100 112 45 95 Z" fill="#3a7fd4" stroke="#0a0a0a" stroke-width="2.5" stroke-linejoin="round"/>
+        <path id="sailLeft"   d="M100 20 L45 95 L100 95 Z"  fill="#3a7fd4" stroke="#0a0a0a" stroke-width="2.5" stroke-linejoin="round"/>
+        <path id="sailRight"  d="M100 20 L155 95 L100 95 Z" fill="#3a7fd4" stroke="#0a0a0a" stroke-width="2.5" stroke-linejoin="round"/>
+        <line x1="100" y1="20" x2="100" y2="112" stroke="#0a0a0a" stroke-width="1.5" stroke-dasharray="4 3" opacity=".5"/>
+        <line id="line1" x1="62"  y1="65" x2="95"  y2="52" stroke="#0a0a0a" stroke-width="1" opacity=".18"/>
+        <line id="line2" x1="60"  y1="74" x2="95"  y2="63" stroke="#0a0a0a" stroke-width="1" opacity=".18"/>
+        <line id="line3" x1="58"  y1="83" x2="95"  y2="74" stroke="#0a0a0a" stroke-width="1" opacity=".18"/>
+        <line id="line4" x1="138" y1="65" x2="105" y2="52" stroke="#0a0a0a" stroke-width="1" opacity=".18"/>
+        <line id="line5" x1="140" y1="74" x2="105" y2="63" stroke="#0a0a0a" stroke-width="1" opacity=".18"/>
+        <line id="line6" x1="142" y1="83" x2="105" y2="74" stroke="#0a0a0a" stroke-width="1" opacity=".18"/>
+        <path id="ripple1" d="M50 128 Q75 122 100 126 Q125 130 150 124" stroke="#0a0a0a" stroke-width="1.5" fill="none" opacity=".2"/>
+        <path id="ripple2" d="M40 136 Q70 130 100 134 Q130 138 160 132" stroke="#0a0a0a" stroke-width="1" fill="none" opacity=".12"/>
+      </svg>
+      <div class="ripple-stage">
+        <div class="ripple-ellipse r1"></div>
+        <div class="ripple-ellipse r2"></div>
+        <div class="ripple-ellipse r3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL — DESCRIPTION + STATS -->
+  <div id="right-panel">
+    <div class="variant-label">Current Variant</div>
+    <span id="color-name">Faded Blue</span>
+    <div id="color-accent-line"></div>
+    <div class="desc-heading">Every paper boat begins as something else.</div>
+    <div class="desc-body">A page. A letter. A document that once held someone's name, their address, their proof of belonging. We fold them into vessels and set them adrift — the way desperation folds human beings into something the world calls migrants and sets loose on open water.</div>
+    <div class="spec-block">
+      <div class="data-label">Material</div>
+      <div class="data-value" style="font-size:8px;line-height:1.6;">Stronger Than Paper, Weaker Than Emotions</div>
+    </div>
+    <div class="spec-block">
+      <div class="data-label">Origin</div>
+      <div class="data-value" style="font-size:8px;line-height:1.6;">Secret DOMO Lab</div>
+    </div>
+    <div class="right-spacer"></div>
+    <button id="addCartBtn" onclick="addToCart()">Acquire Object</button>
+    <button id="wishBtn" onclick="toggleWishlist()">Save for Later ♡</button>
+    <div class="cart-release-note">the department releases one object at a time.</div>
+  </div>
+
+  <!-- BOTTOM BAR — SCROLLABLE TICKER -->
+  <div id="bottom-bar">
+    <div class="ticker-text">Our boats come in the colors of the flags they fled from. Float one. Watch it drift. Then ask yourself why the real ones don't make the news anymore.&nbsp;&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;OBJECTS OF MEMORY — REMEMBER WHEN YOU WERE YOUNG&nbsp;&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;D.O.M.O-034&nbsp;&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;PERPETUALLY ADRIFT&nbsp;&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;STRONGER THAN PAPER WEAKER THAN EMOTIONS&nbsp;&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;Our boats come in the colors of the flags they fled from. Float one. Watch it drift. Then ask yourself why the real ones don't make the news anymore.</div>
+    <div class="scroll-hint">→ scroll</div>
+  </div>
+
+</div><!-- /#dashboard -->
+
+<script>
+// ── COLOR THEMES ──
+const THEMES = {
+  blue:   { acc:'#4a7ab5', fill:'#3a7fd4', name:'Faded Blue',         stroke:'#0a0a0a' },
+  red:    { acc:'#c1121f', fill:'#d44444', name:'Bureaucratic Red',    stroke:'#0a0a0a' },
+  white:  { acc:'#d4d4cc', fill:'#e8e8e8', name:'White of Surrender',  stroke:'#555555' },
+  green:  { acc:'#2a5a2a', fill:'#2d7a40', name:'Dark Green',          stroke:'#0a0a0a' },
+  glow:   { acc:'#00ff41', fill:'#00ff41', name:'Glow in the Dark',    stroke:'#00ff41' },
+  yellow: { acc:'#f5c518', fill:'#f5c800', name:'Glow Yellow',         stroke:'#0a0a0a' },
+};
+
+let currentColor = 'blue';
+
+function setColor(key) {
+  const t = THEMES[key];
+  if (!t) return;
+  currentColor = key;
+
+  // SVG fills + strokes
+  ['sailLeft','sailRight','hullBottom'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.style.fill = t.fill; el.style.stroke = t.stroke; }
+  });
+  ['line1','line2','line3','line4','line5','line6','ripple1','ripple2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.stroke = key === 'glow' ? '#00ff41' : '#0a0a0a';
+  });
+
+  // Right panel color name + accent line
+  const nameEl = document.getElementById('color-name');
+  if (nameEl) { nameEl.textContent = t.name; nameEl.style.color = t.acc; }
+  const lineEl = document.getElementById('color-accent-line');
+  if (lineEl) lineEl.style.background = t.acc;
+
+  // Glow: tint SVG with filter
+  const svg = document.getElementById('boatSvg');
+  if (svg) {
+    if (key === 'glow') {
+      svg.style.filter = 'drop-shadow(0 0 16px #00ff41) drop-shadow(0 0 32px #00ff41)';
+    } else if (key === 'red') {
+      svg.style.filter = 'drop-shadow(0 8px 20px rgba(193,18,31,0.4))';
+    } else {
+      svg.style.filter = 'drop-shadow(0 8px 20px rgba(0,0,0,0.3))';
+    }
+  }
+
+  // Active button state
+  document.querySelectorAll('.color-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.key === key);
+  });
+
+  // Update PRODUCT color
+  if (typeof PRODUCT !== 'undefined') {
+    PRODUCT.accent = t.acc;
+    PRODUCT.colorName = t.name;
+  }
+}
+
+// Color button clicks
+document.querySelectorAll('.color-btn').forEach(btn => {
+  btn.addEventListener('click', () => setColor(btn.dataset.key));
+});
+
+// ── CART ──
+const PRODUCT = {
+  slug:'paper-boat', name:'Paper Boat', model:'D.O.M.O-034', price:343,
+  accent:'#4a7ab5', colorName:'Faded Blue',
+  img:'data:image/svg+xml;base64,' + btoa('<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg"><path d="M30 110 Q100 132 170 110 L155 95 Q100 112 45 95 Z" fill="#3a7fd4"/><path d="M100 20 L45 95 L100 95 Z" fill="#3a7fd4"/><path d="M100 20 L155 95 L100 95 Z" fill="#3a7fd4"/></svg>')
+};
+
+function getCart(){try{return JSON.parse(localStorage.getItem('domo_cart'))||[];}catch{return[];}}
+function saveCart(c){localStorage.setItem('domo_cart',JSON.stringify(c));window.dispatchEvent(new Event('cartUpdated'));}
+function fmtPrice(n){return '₹'+n.toLocaleString('en-IN');}
+function openCart(){document.getElementById('cartDrawer').classList.add('open');document.getElementById('cartOverlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeCart(){document.getElementById('cartDrawer').classList.remove('open');document.getElementById('cartOverlay').classList.remove('open');document.body.style.overflow='';}
+
+function renderCart(){
+  const cart=getCart();
+  const body=document.getElementById('cartBody');
+  const footer=document.getElementById('cartFooter');
+  const empty=document.getElementById('cartEmpty');
+  const badge=document.getElementById('cartBadge');
+  body.querySelectorAll('.drawer-item').forEach(el=>el.remove());
+  if(badge){if(cart.length>0){badge.textContent=cart.length;badge.classList.remove('hidden');}else{badge.classList.add('hidden');}}
+  if(cart.length===0){empty.style.display='flex';footer.style.display='none';return;}
+  empty.style.display='none';footer.style.display='block';
+  let sub=0;
+  cart.forEach((item,i)=>{
+    sub+=item.price;
+    const div=document.createElement('div');
+    div.className='drawer-item';
+    div.innerHTML=`<div class="drawer-item-img"><img src="${item.img}" alt="${item.name}"/></div><div class="drawer-item-info"><div class="drawer-item-name">${item.name}${item.colorName?' — '+item.colorName:''}</div><div class="drawer-item-meta">${item.model}</div><div class="drawer-item-price">${fmtPrice(item.price)}</div></div><button class="drawer-item-remove" onclick="removeFromCart(${i})">✕</button>`;
+    body.insertBefore(div,empty);
+  });
+  document.getElementById('cartSubtotal').textContent=fmtPrice(sub);
+}
+function removeFromCart(i){const cart=getCart();cart.splice(i,1);saveCart(cart);renderCart();}
+window.addEventListener('cartUpdated',renderCart);
+document.addEventListener('DOMContentLoaded',renderCart);
+
+function addToCart(){
+  const btn=document.getElementById('addCartBtn');
+  const t=THEMES[currentColor];
+  const cart=getCart();
+  const item={...PRODUCT,slug:PRODUCT.slug+'-'+currentColor,colorName:t.name};
+  cart.push(item);
+  saveCart(cart);
+  renderCart();
+  const orig=btn.textContent;
+  btn.textContent='Added ✓';
+  btn.style.background=t.acc;
+  btn.style.color=currentColor==='white'||currentColor==='yellow'?'#0d0d0b':'#fff';
+  setTimeout(()=>{btn.textContent='Acquire Object';btn.style.background='#c1121f';btn.style.color='#0d0d0b';openCart();},300);
+}
+
+// Init color
+setColor('blue');
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft')window.location.href='grey-piggy-bank.html';
+  if(e.key==='ArrowRight')window.location.href='silence-after-scream.html';
+});
+</script>
+
+<script type="module">
+import{initializeApp,getApps}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+import{getFirestore,doc,setDoc,deleteDoc,getDoc,addDoc,collection,serverTimestamp}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+const _cfg={"apiKey":"AIzaSyA6_5oWBRKZLnZhTsjtfepm2NleAEEsrPA","authDomain":"domo-8cfe1.firebaseapp.com","projectId":"domo-8cfe1","storageBucket":"domo-8cfe1.firebasestorage.app","messagingSenderId":"47790816831","appId":"1:47790816831:web:0a92e160fc595d5a9c428a"};
+const _app=getApps().length?getApps()[0]:initializeApp(_cfg);
+const _auth=getAuth(_app);
+const _db=getFirestore(_app);
+let _currentUser=null;
+
+function initNav(u){
+  const loginLi=document.getElementById('navLoginLink');
+  const avatarLi=document.getElementById('navAvatar');
+  if(!loginLi||!avatarLi)return;
+  if(u){
+    loginLi.style.display='none';
+    avatarLi.style.display='flex';
+    const init=(u.displayName||u.email||'?')[0].toUpperCase();
+    const el=avatarLi.querySelector('.nav-avatar-initial');
+    const nm=avatarLi.querySelector('.nav-avatar-name');
+    const em=avatarLi.querySelector('.nav-avatar-email');
+    if(el)el.textContent=init;
+    if(nm)nm.textContent=u.displayName||u.email.split('@')[0];
+    if(em)em.textContent=u.email;
+  }else{
+    loginLi.style.display='';
+    avatarLi.style.display='none';
+  }
+}
+
+onAuthStateChanged(_auth,async u=>{
+  _currentUser=u||null;
+  initNav(u);
+  if(!u)return;
+  try{await addDoc(collection(_db,'users',u.uid,'pageViews'),{page:"Paper Boat",slug:"paper-boat",timestamp:serverTimestamp()});}catch(e){}
+  try{
+    const ws=await getDoc(doc(_db,'users',u.uid,'wishlist','paper-boat'));
+    const btn=document.getElementById('wishBtn');
+    if(btn&&ws.exists()){btn.textContent='Saved ♥';btn.style.opacity='0.6';}
+  }catch(e){}
+});
+
+window.doSignOut=async()=>{await signOut(_auth);window.location.href='login.html';};
+
+window.toggleWishlist=async()=>{
+  const u=_auth.currentUser;
+  const btn=document.getElementById('wishBtn');
+  if(!u){window.location.href='login.html';return;}
+  try{
+    const ref=doc(_db,'users',u.uid,'wishlist','paper-boat');
+    const snap=await getDoc(ref);
+    if(snap.exists()){
+      await deleteDoc(ref);
+      if(btn){btn.textContent='Save for Later ♡';btn.style.opacity='';}
+    }else{
+      const p={...PRODUCT};p.img='';p.savedAt=serverTimestamp();
+      await setDoc(ref,p);
+      if(btn){btn.textContent='Saved ♥';btn.style.opacity='0.6';}
+    }
+  }catch(e){console.error('wishlist',e);}
+};
+</script>
+
+<script>
+(function(){
+  var bar=document.getElementById('signal-bar');
+  if(!bar)return;
+  bar.addEventListener('animationend',function(){bar.remove();});
+})();
+</script>
+
+<script>
+(function(){
+  var PREV='grey-piggy-bank.html';
+  var NEXT='silence-after-scream.html';
+  var NEXT_COLOR='#1c1c1c';
+  var PREV_COLOR='#f8f5f0';
+
+  function doTransition(destination,color){
+    var overlay=document.createElement('div');
+    overlay.style.cssText=['position:fixed','inset:0','background:'+color,'z-index:9999','transform:scaleY(0)','transform-origin:center','pointer-events:all'].join(';');
+    var logoImg=document.createElement('img');
+    logoImg.src='favicon.png';
+    logoImg.style.cssText=['position:absolute','top:50%','left:50%','transform:translate(-50%,-50%)','height:32px','width:auto','opacity:0','transition:opacity 200ms'].join(';');
+    overlay.appendChild(logoImg);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(function(){
+      overlay.style.transition='transform 280ms cubic-bezier(0.76,0,0.24,1)';
+      overlay.style.transform='scaleY(1)';
+    });
+    setTimeout(function(){logoImg.style.opacity='0.6';setTimeout(function(){logoImg.style.opacity='0';},200);},150);
+    setTimeout(function(){window.location.href=destination;},300);
+  }
+
+  var prevBtn=document.getElementById('prev-btn');
+  var nextBtn=document.getElementById('next-btn');
+  if(prevBtn)prevBtn.addEventListener('click',function(e){e.preventDefault();doTransition(PREV,PREV_COLOR);});
+  if(nextBtn)nextBtn.addEventListener('click',function(e){e.preventDefault();doTransition(NEXT,NEXT_COLOR);});
+
+  var entry=document.createElement('div');
+  entry.style.cssText=['position:fixed','inset:0','background:#0d0d0b','z-index:9999','transform:scaleY(1)','transform-origin:top','pointer-events:none','transition:transform 280ms cubic-bezier(0.76,0,0.24,1)'].join(';');
+  document.body.appendChild(entry);
+  requestAnimationFrame(function(){requestAnimationFrame(function(){entry.style.transform='scaleY(0)';});});
+  setTimeout(function(){entry.remove();},300);
+})();
+</script>
+
+<script>
+(function(){
+  window.addEventListener('error',function(event){
+    var ignoredErrors=['Script error','ResizeObserver','Non-Error promise rejection','Loading chunk','Network request failed','favicon','net::ERR'];
+    var message=event.message||'';
+    var shouldIgnore=ignoredErrors.some(function(ignored){return message.indexOf(ignored)!==-1;});
+    if(!shouldIgnore){try{sessionStorage.setItem('domo-error',message);}catch(e){}window.location.href='error.html';}
+  });
+  window.addEventListener('unhandledrejection',function(event){
+    var reason=event.reason?event.reason.toString():'';
+    var ignoredErrors=['popup-closed-by-user','cancelled-popup-request','ResizeObserver','Network request failed','net::ERR','Failed to fetch','Load failed'];
+    var shouldIgnore=ignoredErrors.some(function(ignored){return reason.indexOf(ignored)!==-1;});
+    if(!shouldIgnore){try{sessionStorage.setItem('domo-error',reason);}catch(e){}window.location.href='error.html';}
+  });
+})();
+</script>
+
+
+</body>
+</html>
