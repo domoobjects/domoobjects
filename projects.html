@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Projects — DOMO</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{
+  width:100%;min-height:100%;
+  background:#0d0d0b;
+  color:#d4d4cc;
+  font-family:'IBM Plex Mono',monospace;
+  overflow-x:hidden;
+}
+
+/* ── top rule ── */
+.top-bar{
+  position:fixed;top:0;left:0;right:0;
+  height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;
+  border-bottom:0.5px solid #1e1e1c;
+  background:rgba(13,13,11,0.96);
+  z-index:100;
+}
+.top-label{
+  font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#2a2a28;
+}
+.top-back{
+  font-size:8px;letter-spacing:3px;text-transform:uppercase;
+  color:#2a2a28;text-decoration:none;
+  transition:color 200ms;
+}
+.top-back:hover{color:#d4d4cc;}
+
+/* ── page wrapper ── */
+.page{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:80px 32px 60px;
+  gap:48px;
+}
+
+/* ── section label ── */
+.section-label{
+  font-size:7px;letter-spacing:4px;text-transform:uppercase;color:#2a2a28;
+  align-self:flex-start;
+  padding-left: max(0px, calc(50vw - 340px));
+}
+
+/* ── grid ── */
+.project-grid{
+  display:flex;
+  flex-wrap:wrap;
+  gap:18px;
+  justify-content:center;
+  width:100%;
+  max-width:780px;
+}
+
+/* ── single tile ── */
+.project-tile{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  width:380px;
+  min-height:220px;
+  padding:32px 36px;
+  border:0.5px solid #1e1e1c;
+  background:#111110;
+  text-decoration:none;
+  color:inherit;
+  position:relative;
+  overflow:hidden;
+  cursor:pointer;
+  transition:border-color 280ms cubic-bezier(0.16,1,0.3,1),
+             background   280ms cubic-bezier(0.16,1,0.3,1);
+}
+.project-tile:hover{
+  border-color:#3a3a38;
+  background:#141413;
+}
+/* accent line that sweeps in on hover */
+.project-tile::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:0.5px;
+  background:#c8a92b;
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform 320ms cubic-bezier(0.16,1,0.3,1);
+}
+.project-tile:hover::before{
+  transform:scaleX(1);
+}
+
+.tile-eyebrow{
+  font-size:7px;letter-spacing:3px;text-transform:uppercase;color:#2a2a28;
+  margin-bottom:20px;
+}
+.tile-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(48px,6vw,72px);
+  letter-spacing:3px;
+  line-height:0.88;
+  color:#d4d4cc;
+  transition:color 280ms cubic-bezier(0.16,1,0.3,1);
+}
+.project-tile:hover .tile-title{
+  color:#ffffff;
+}
+.tile-foot{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:28px;
+}
+.tile-status{
+  font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#2a2a28;
+}
+.tile-arrow{
+  font-size:14px;color:#2a2a28;
+  transition:color 280ms cubic-bezier(0.16,1,0.3,1),
+             transform 280ms cubic-bezier(0.16,1,0.3,1);
+}
+.project-tile:hover .tile-arrow{
+  color:#c8a92b;
+  transform:translateX(4px);
+}
+
+/* ── bottom rule ── */
+.page-foot{
+  font-size:7px;letter-spacing:3px;text-transform:uppercase;color:#1e1e1c;
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <span class="top-label">D.O.M.O — Project Archive</span>
+  <a href="index.html" class="top-back">&#8592; return</a>
+</div>
+
+<main class="page">
+
+  <span class="section-label">Active Projects</span>
+
+  <div class="project-grid">
+
+    <!-- TRIBAL TRACES -->
+    <a href="./triabl3/" class="project-tile">
+      <div>
+        <div class="tile-eyebrow">Project 01 &mdash; Craft &amp; Territory</div>
+        <div class="tile-title">Tribal<br>Traces</div>
+      </div>
+      <div class="tile-foot">
+        <span class="tile-status">Status / Active</span>
+        <span class="tile-arrow">&#8594;</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="page-foot">Dept. of Misc. Objects &mdash; Restricted Access</div>
+
+</main>
+
+</body>
+</html>

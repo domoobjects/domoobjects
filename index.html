@@ -1038,6 +1038,31 @@
         <span class="cell-eyebrow">Vol. 07 &#8212; Field Dispatch</span>
         <div class="cell-redline"></div>
         <h2 class="cell-title">DOMO<br>Times</h2>
+
+        <!-- ── CODE GATE ── -->
+        <div id="panel-code-gate" style="margin-bottom:10px;">
+          <button id="panel-code-toggle"
+            onclick="toggleCodeGate()"
+            style="font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:3px;text-transform:uppercase;color:#2a2a28;background:none;border:none;cursor:pointer;padding:0;transition:color 200ms;"
+            onmouseover="this.style.color='#c1121f'"
+            onmouseout="this.style.color='#2a2a28'">code</button>
+          <div id="panel-code-entry" style="display:none;align-items:center;gap:10px;margin-top:10px;">
+            <input id="panel-code-input"
+              type="password"
+              maxlength="4"
+              placeholder="_ _ _ _"
+              autocomplete="off"
+              oninput="checkPanelCode(this.value)"
+              style="width:72px;background:none;border:none;border-bottom:0.5px solid #2a2a28;font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:8px;color:#d4d4cc;padding:4px 0;outline:none;text-align:center;caret-color:#c1121f;">
+          </div>
+          <button id="panel-code-open"
+            style="display:none;margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:3px;text-transform:uppercase;color:#c1121f;background:none;border:0.5px solid #1e1e1c;padding:7px 16px;cursor:pointer;transition:color 200ms,border-color 200ms;"
+            onmouseover="this.style.borderColor='#c1121f'"
+            onmouseout="this.style.borderColor='#1e1e1c'"
+            onclick="handlePanelOpen()">open</button>
+        </div>
+        <!-- ── END CODE GATE ── -->
+
         <p class="cell-article">Object #447 found in estate sale</p>
         <p class="cell-article">The last known cursed mirror</p>
         <p class="cell-article">Inventory drop &#8212; March 2026</p>
@@ -1775,7 +1800,48 @@ function togglePanel() {
 function closePanel() {
   document.getElementById('navPanel').classList.remove('is-open');
   document.body.style.overflow = '';
+  resetCodeGate();
 }
+
+/* ── CODE GATE ── */
+var _codeGateOpen = false;
+function toggleCodeGate() {
+  _codeGateOpen = !_codeGateOpen;
+  var entry  = document.getElementById('panel-code-entry');
+  var input  = document.getElementById('panel-code-input');
+  var toggle = document.getElementById('panel-code-toggle');
+  if (_codeGateOpen) {
+    entry.style.display = 'flex';
+    if (input) { input.value = ''; input.focus(); }
+    if (toggle) toggle.style.color = '#c1121f';
+  } else {
+    resetCodeGate();
+  }
+}
+function checkPanelCode(val) {
+  var openBtn = document.getElementById('panel-code-open');
+  if (!openBtn) return;
+  if (val === '4321') {
+    openBtn.style.display = 'block';
+  } else {
+    openBtn.style.display = 'none';
+  }
+}
+function resetCodeGate() {
+  _codeGateOpen = false;
+  var entry  = document.getElementById('panel-code-entry');
+  var input  = document.getElementById('panel-code-input');
+  var openBtn = document.getElementById('panel-code-open');
+  var toggle = document.getElementById('panel-code-toggle');
+  if (entry)  entry.style.display  = 'none';
+  if (input)  input.value          = '';
+  if (openBtn) openBtn.style.display = 'none';
+  if (toggle) toggle.style.color   = '#2a2a28';
+}
+function handlePanelOpen() {
+  window.location.href = 'projects.html';
+}
+/* ── END CODE GATE ── */
 
 /* FLASHLIGHT — Inside The Box cell */
 (function() {

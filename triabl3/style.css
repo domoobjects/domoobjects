@@ -1,0 +1,1012 @@
+/* ============================================================
+   LET'S THINK — style.css
+   Calm, philosophical, deeply Indian.
+   ============================================================ */
+
+@font-face {
+  font-family: 'Nomad Kalari';
+  src: url('nomadkalari-regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --- Variables -------------------------------------------- */
+:root {
+  --bg-deep:            #3d0f1a;   /* initial: vine red / deep burgundy */
+  --bg-light:           #f5f1e8;   /* final: warm parchment      */
+  --text-dark:          #1a1a1a;
+  --text-light:         #f2ece0;
+  --accent:             #7d2027;
+  --glass-border:       rgba(255, 255, 255, 0.2);
+  /* Deep ink-indigo — pairs with the temple maroon as a classic
+     miniature-painting combo.  Stays constant regardless of scroll. */
+  --navbar-scrolled-bg: rgba(28, 24, 46, 0.88);
+}
+
+/* --- Reset / Base ----------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-deep);   /* JS lerps this toward --bg-light on scroll */
+  color: var(--text-dark);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   NAVBAR  —  Soft "island" pill
+   Floating cream-glass capsule with a whisper-quiet tribal DNA:
+   Warli sun mark · Ajrakh diamond separators · Pithora 3-dot menu.
+   ============================================================ */
+#navbar {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transition: top 0.35s ease;
+}
+
+#navbar.scrolled { top: 14px; }
+
+.nav-island {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+  height: 68px;
+  padding: 0 32px;
+  border-radius: 999px;
+
+  background: rgba(232, 215, 185, 0.90);        /* warm beige / aged parchment */
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  border: 1px solid rgba(92, 26, 23, 0.14);    /* faint maroon rim */
+
+  box-shadow:
+    0 1px 0 rgba(255, 248, 230, 0.70) inset,
+    0 10px 32px rgba(61, 15, 26, 0.28),
+    0 2px 8px  rgba(61, 15, 26, 0.16);
+
+  transition: background 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+#navbar.scrolled .nav-island {
+  background: rgba(228, 208, 175, 0.96);
+  border-color: rgba(92, 26, 23, 0.20);
+  box-shadow:
+    0 1px 0 rgba(255, 248, 230, 0.80) inset,
+    0 14px 40px rgba(61, 15, 26, 0.36),
+    0 2px 10px  rgba(61, 15, 26, 0.20);
+}
+
+/* ── Left — Warli sun + wordmark ─────────────────────── */
+.nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #3d1020;                            /* deep vine maroon */
+  transition: opacity 0.25s ease;
+}
+.nav-brand:hover { opacity: 0.9; }
+
+.nav-logo {
+  width: 26px;
+  height: 26px;
+  color: #7d2027;                            /* temple red mark */
+  opacity: 0.95;
+  transition: transform 18s linear, opacity 0.25s ease;
+  flex-shrink: 0;
+}
+.nav-brand:hover .nav-logo {
+  transform: rotate(360deg);
+  opacity: 1;
+}
+
+.nav-wordmark {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 23px;
+  font-weight: 600;
+  font-style: italic;
+  font-variant: small-caps;
+  letter-spacing: 0.015em;
+  color: #3d1020;                            /* deep vine maroon */
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ── Center — nav links with Ajrakh diamond separators ─ */
+.nav-links {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nav-links .nav-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(61, 16, 32, 0.72);             /* muted deep maroon */
+  text-decoration: none;
+  padding: 9px 14px;
+  border-radius: 999px;
+  transition: color 0.25s ease, background 0.25s ease;
+}
+
+.nav-links .nav-title:hover {
+  color: #7d2027;                            /* temple red on hover */
+  background: rgba(125, 32, 39, 0.08);       /* faint maroon wash */
+}
+
+.nav-sep {
+  font-size: 7px;
+  color: #7d2027;                            /* temple red diamonds */
+  opacity: 0.65;
+  user-select: none;
+  line-height: 1;
+  transform: translateY(-0.5px);
+}
+
+/* ── Right — 3-dot Pithora menu ──────────────────────── */
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.5px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid rgba(92, 26, 23, 0.22);  /* faint maroon rim */
+  border-radius: 999px;
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.3s ease;
+}
+.hamburger:hover {
+  background: rgba(125, 32, 39, 0.09);
+  border-color: rgba(92, 26, 23, 0.50);
+}
+
+.hamburger span {
+  display: block;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #7d2027;                       /* temple red dots */
+  opacity: 0.95;
+  transition: transform 0.3s ease;
+}
+.hamburger:hover span:nth-child(1) { transform: translateY(-0.5px); }
+.hamburger:hover span:nth-child(3) { transform: translateY(0.5px);  }
+
+/* ── Mobile ───────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .nav-links { display: none; }
+  .nav-island { gap: 16px; padding: 0 18px; height: 52px; }
+  .nav-wordmark { font-size: 17px; }
+}
+
+/* --- Hero -------------------------------------------------- */
+/*
+  The hero-track is 300vh. The hero-stage sticks inside it.
+  This gives the scroll space needed for the map reveal.
+*/
+.hero-track {
+  height: 300vh;
+  position: relative;
+}
+
+.hero-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  /* GPU layer — scale + opacity transforms stay smooth */
+  will-change: transform, opacity;
+  transform-origin: center center;
+}
+
+/* Warm atmospheric glow — more visible on the dark initial state */
+.hero-stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(200, 80, 55, 0.07) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* --- Particle canvas -------------------------------------- */
+#particle-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+}
+
+/* --- Centered intro wordmark ------------------------------ */
+/*  "Let's Think" sits in the middle of the hero on page load,
+    then fades out as the user scrolls into phase 1.           */
+.hero-wordmark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+  opacity: 1;                       /* JS drives this on scroll */
+  transition: opacity 0.25s ease-out;
+  will-change: opacity, transform;
+}
+
+.hero-wordmark-text {
+  font-family: 'Nomad Kalari', Georgia, serif;
+  font-style: normal;
+  font-weight: normal;
+  font-size: clamp(56px, 11vw, 140px);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: #f5ebd8;
+  text-shadow: 0 2px 24px rgba(20, 10, 6, 0.35);
+}
+
+.hero-wordmark-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  font-size: clamp(10px, 1.1vw, 13px);
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(245, 235, 216, 0.55);
+  padding-top: 6px;
+  border-top: 1px solid rgba(245, 235, 216, 0.25);
+  min-width: 200px;
+}
+
+/* --- Scroll cue ------------------------------------------- */
+.scroll-cue {
+  position: absolute;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.3;
+  pointer-events: none;
+  animation: cue-pulse 2.4s ease-in-out infinite;
+}
+
+.scroll-cue-line {
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(to bottom, var(--text-light), transparent);
+}
+
+.scroll-cue-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-light);
+}
+
+@keyframes cue-pulse {
+  0%, 100% { opacity: 0.2; transform: translateX(-50%) translateY(0); }
+  50%       { opacity: 0.45; transform: translateX(-50%) translateY(6px); }
+}
+
+/* ============================================================
+   MAP SECTION — Interactive India / Gujarat
+   ============================================================ */
+
+.map-section {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background: #fef4ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+}
+
+/* Constrained square-ish container — overflow clips the zoom */
+.map-wrapper {
+  width: min(95vmin, 820px);
+  aspect-ratio: 800 / 900;
+  position: relative;
+  overflow: hidden;
+}
+
+/* SVG element — zooms in via JS-applied CSS transform */
+#india-map {
+  width: 100%;
+  height: 100%;
+  display: block;
+  transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* ── Layer 1: India silhouette (hidden) ──────────────────── */
+#india-base { display: none; }
+#india-base path {
+  fill:   rgba(125, 32, 39, 0.04);
+  stroke: rgba(125, 32, 39, 0.08);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  transition: opacity 0.6s ease;
+}
+
+/* ── Layer 2: all-India dots ─────────────────────────────── */
+.india-dot {
+  fill: rgba(125, 32, 39, 0.30);
+  cursor: default;
+  transition: transform 0.2s ease, opacity 0.6s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.india-dot:hover { transform: scale(1.2); }
+
+/* ── Layer 3: Gujarat dots ───────────────────────────────── */
+.gj-dot {
+  fill:   rgba(125, 32, 39, 0.85);
+  cursor: pointer;
+  filter: url(#gj-glow);
+  animation: gj-pulse 2.8s ease-in-out infinite;
+  transition: transform 0.2s ease, fill 0.2s ease, filter 0.2s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.gj-dot:hover {
+  transform: scale(1.4);
+  fill: rgba(145, 42, 49, 1.0);
+  filter: url(#gj-glow-strong);
+}
+
+@keyframes gj-pulse {
+  0%, 100% { opacity: 0.80; }
+  50%       { opacity: 1.00; }
+}
+
+/* ── Zoomed state ────────────────────────────────────────── */
+#india-map.zoomed #india-base path { opacity: 0.45; }
+
+#india-map.zoomed .india-dot { opacity: 0.28; }
+
+#india-map.zoomed .gj-dot {
+  animation: none;
+  opacity: 1;
+  fill: rgba(125, 32, 39, 0.92);
+}
+
+/* ── Ripple on click ─────────────────────────────────────── */
+.dot-ripple {
+  fill: none;
+  stroke: rgba(125, 32, 39, 0.55);
+  stroke-width: 2;
+  pointer-events: none;
+  animation: dot-ripple-out 0.48s ease-out forwards;
+}
+
+@keyframes dot-ripple-out {
+  from { r: 5;  opacity: 0.75; }
+  to   { r: 24; opacity: 0;    }
+}
+
+/* ── Dot expand on click ─────────────────────────────────── */
+.gj-dot.clicking {
+  animation: dot-expand 0.42s ease-out forwards !important;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes dot-expand {
+  from { transform: scale(1);   opacity: 1; }
+  to   { transform: scale(2.8); opacity: 0; }
+}
+
+/* ── Layer 4: Gujarat detail dots ────────────────────────── */
+/*   Shown after the user clicks Gujarat twice.              */
+
+/* Quiet background dots that draw the Gujarat silhouette */
+.gujarat-detail-dot {
+  fill: rgba(125, 32, 39, 0.45);
+  cursor: default;
+  transition: transform 0.25s ease, fill 0.25s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* The 8 interactive dots — pulse softly, pointer cursor, glow */
+.gj-clickable {
+  fill: rgba(125, 32, 39, 0.95);
+  cursor: pointer;
+  filter: url(#gj-glow);
+  animation: gj-pulse 2.4s ease-in-out infinite;
+}
+
+.gj-clickable:hover {
+  transform: scale(1.5);
+  fill: rgba(175, 52, 59, 1);
+  filter: url(#gj-glow-strong);
+}
+
+.gj-clickable.clicking {
+  animation: dot-expand 0.42s ease-out forwards !important;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* ── City labels on the Gujarat detail map ───────────────── */
+.gj-labels { pointer-events: none; }
+
+/* Small Ajrakh diamond glyph between dot and name */
+.gj-label-dmd {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 14px;
+  fill: rgba(232, 163, 74, 1);   /* marigold */
+  opacity: 0;
+  animation: gj-label-in 1.2s ease forwards;
+}
+
+/* City name — italic, elegant, with a warm parchment halo */
+.gj-label-text {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 20px;
+  font-weight: 700;
+  fill: rgba(20, 20, 20, 0.97);
+  letter-spacing: 0.05em;
+  opacity: 0;
+  animation: gj-label-in 1.2s ease forwards;
+  paint-order: stroke;
+  stroke: rgba(245, 241, 232, 1);
+  stroke-width: 5;
+  stroke-linejoin: round;
+}
+
+/* soft hover: diamond warms, name darkens (on the clickable dot group) */
+.gj-clickable:hover ~ .gj-labels .gj-label-dmd,
+.gj-labels:hover .gj-label-dmd { fill: #7d2027; }
+
+@keyframes gj-label-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Responsive ------------------------------------------- */
+@media (max-width: 600px) {
+  #navbar {
+    padding: 0 20px;
+  }
+
+  .nav-title {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+  }
+
+  .nav-logo {
+    font-size: 18px;
+  }
+
+  /* canvas fills the stage — no extra sizing needed */
+}
+
+/* ============================================================
+   FOOTER — quiet closing band
+   Parchment coda with Ajrakh diamond dividers, a Warli sun
+   mark, and a Sanskrit whisper.  Sits below the map section.
+   ============================================================ */
+
+.site-foot {
+  position: relative;
+  background: #f5d9b8;
+  color: var(--text-dark);
+  padding: 70px 40px 28px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  overflow: hidden;
+}
+
+/* soft top hairline — like the edge of parchment */
+.site-foot::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(125, 32, 39, 0.18) 50%,
+    transparent 100%);
+}
+
+/* ── Diamond divider row (Ajrakh rhythm) ─────────────────── */
+.foot-divider {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 56px;
+  color: rgba(125, 32, 39, 0.38);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+.foot-divider span:nth-child(odd)  { opacity: 0.55; }
+.foot-divider span:nth-child(even) { opacity: 0.85; font-size: 8px; }
+
+/* ── 4-column grid ───────────────────────────────────────── */
+.foot-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 48px;
+  align-items: flex-start;
+}
+
+.foot-col {
+  min-width: 0;
+}
+
+/* Brand column */
+.foot-brand .foot-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  margin-bottom: 14px;
+}
+.foot-logo {
+  width: 26px;
+  height: 26px;
+  color: var(--accent);
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+.foot-wordmark {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: 0.12em;
+  color: var(--text-dark);
+}
+.foot-tag {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(26, 26, 26, 0.68);
+  margin: 0;
+  max-width: 340px;
+}
+.foot-tag em {
+  font-style: italic;
+  color: var(--accent);
+  opacity: 0.85;
+}
+
+/* Link columns */
+.foot-title {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.55);
+  margin: 4px 0 22px;
+}
+.foot-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.foot-list a {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 400;
+  font-size: 17px;
+  letter-spacing: 0.04em;
+  color: rgba(26, 26, 26, 0.82);
+  text-decoration: none;
+  position: relative;
+  transition: color 0.25s ease, padding-left 0.3s ease;
+}
+.foot-list a::before {
+  content: "◇";
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent);
+  font-size: 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease, left 0.3s ease;
+}
+.foot-list a:hover {
+  color: var(--accent);
+  padding-left: 14px;
+}
+.foot-list a:hover::before {
+  opacity: 0.9;
+  left: 0;
+}
+
+/* ── Sanskrit whisper ────────────────────────────────────── */
+.foot-whisper {
+  margin: 64px auto 26px;
+  text-align: center;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  color: rgba(26, 26, 26, 0.55);
+  max-width: 720px;
+}
+.foot-whisper em {
+  font-style: italic;
+  opacity: 0.78;
+  margin-left: 4px;
+}
+
+/* ── Bottom line ─────────────────────────────────────────── */
+.foot-bottom {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(125, 32, 39, 0.10);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.42);
+}
+.foot-bullet {
+  color: var(--accent);
+  opacity: 0.55;
+  font-size: 8px;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .foot-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+  .foot-brand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .site-foot { padding: 56px 22px 24px; }
+  .foot-divider { margin-bottom: 40px; gap: 10px; }
+  .foot-inner { grid-template-columns: 1fr; gap: 36px; }
+  .foot-brand { grid-column: auto; }
+  .foot-tag { max-width: none; }
+  .foot-whisper { font-size: 16px; margin: 48px auto 22px; }
+  .foot-bottom {
+    flex-direction: column;
+    gap: 8px;
+    letter-spacing: 0.18em;
+  }
+  .foot-bottom .foot-bullet { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   HAMBURGER MENU — floating parchment popover
+   A compact card that drops down from under the ☰ button.
+   ═══════════════════════════════════════════════════════ */
+
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
+.menu-overlay.open { pointer-events: auto; }
+
+/* soft click-catcher behind the popover */
+.menu-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 6, 2, 0);
+  transition: background 0.5s ease;
+}
+.menu-overlay.open .menu-scrim { background: rgba(10, 6, 2, 0.18); }
+
+/* the popover itself */
+.menu-pop {
+  position: absolute;
+  top: 92px;
+  right: 28px;
+  width: min(360px, calc(100vw - 32px));
+  padding: 20px 20px 14px;
+  background: rgba(245, 241, 232, 0.92);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 22px;
+  box-shadow:
+    0 30px 70px rgba(40, 20, 8, 0.28),
+    0 6px 18px rgba(40, 20, 8, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transform-origin: top right;
+  transform: scale(0.82) translateY(-12px);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
+    opacity 0.42s ease,
+    visibility 0s linear 0.55s;
+}
+.menu-overlay.open .menu-pop {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  visibility: visible;
+  transition:
+    transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1),
+    opacity 0.42s ease;
+}
+
+/* tiny diamond tail pointing up to the hamburger */
+.pop-tail {
+  position: absolute;
+  top: -7px;
+  right: 30px;
+  width: 14px;
+  height: 14px;
+  background: rgba(245, 241, 232, 0.92);
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  border-left: 1px solid rgba(255, 255, 255, 0.5);
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+
+/* ── Head ── */
+.pop-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 4px 10px;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.5s 0.25s ease, transform 0.5s 0.25s ease;
+}
+.menu-overlay.open .pop-head { opacity: 1; transform: translateY(0); }
+
+.pop-eyebrow {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: rgba(26, 26, 26, 0.55);
+}
+.pop-sep { color: #e8a34a; font-size: 9px; }
+.pop-sans {
+  font-family: 'Tiro Devanagari Sanskrit', serif;
+  font-size: 13px;
+  color: #7d2027;
+  margin-left: auto;
+}
+
+/* ── Drawing rule ── */
+.pop-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(125, 32, 39, 0.4), transparent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.7s 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+  margin-bottom: 6px;
+}
+.menu-overlay.open .pop-rule { transform: scaleX(1); }
+
+/* ── List ── */
+.pop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+}
+
+.pop-item {
+  display: grid;
+  grid-template-columns: 26px 1fr auto 18px;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 12px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #1a1a1a;
+  position: relative;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) calc(0.38s + var(--i, 0) * 0.08s),
+    transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) calc(0.38s + var(--i, 0) * 0.08s),
+    background 0.35s ease;
+}
+.menu-overlay.open .pop-item { opacity: 1; transform: translateY(0); }
+
+.pop-item:hover {
+  background: rgba(232, 163, 74, 0.15);
+}
+
+/* thin vertical marigold accent on hover */
+.pop-item::before {
+  content: "";
+  position: absolute;
+  left: 4px; top: 14px; bottom: 14px;
+  width: 2px;
+  background: #e8a34a;
+  border-radius: 2px;
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.pop-item:hover::before { transform: scaleY(1); }
+
+.pi-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 17px;
+  color: #7d2027;
+  opacity: 0.5;
+  text-align: center;
+  line-height: 1;
+  transition: color 0.35s ease, opacity 0.35s ease, transform 0.4s ease;
+}
+.pop-item:hover .pi-num {
+  color: #e8a34a;
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.pi-word {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1;
+  color: #1a1a1a;
+  letter-spacing: -0.005em;
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), color 0.35s ease;
+}
+.pop-item:hover .pi-word {
+  color: #7d2027;
+  transform: translateX(5px);
+}
+
+.pi-sans {
+  font-family: 'Tiro Devanagari Sanskrit', serif;
+  font-size: 13px;
+  color: rgba(26, 26, 26, 0.38);
+  transition: color 0.35s ease;
+}
+.pop-item:hover .pi-sans { color: #7d2027; }
+
+.pi-arrow {
+  font-size: 13px;
+  color: rgba(125, 32, 39, 0.5);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), color 0.35s ease;
+  text-align: right;
+  line-height: 1;
+}
+.pop-item:hover .pi-arrow {
+  opacity: 1;
+  transform: translateX(0);
+  color: #e8a34a;
+}
+
+/* ── Foot ── */
+.pop-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 6px 2px;
+  margin-top: 6px;
+  border-top: 1px solid rgba(26, 26, 26, 0.08);
+  opacity: 0;
+  transition: opacity 0.55s 0.75s ease;
+}
+.menu-overlay.open .pop-foot { opacity: 1; }
+
+.pf-diamonds {
+  color: #7d2027;
+  opacity: 0.45;
+  font-size: 10px;
+  letter-spacing: 0.35em;
+}
+.pf-whisper {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 11px;
+  color: rgba(26, 26, 26, 0.5);
+  letter-spacing: 0.04em;
+}
+
+/* ── Hamburger state when popover is open ── */
+.hamburger.is-open {
+  background: rgba(125, 32, 39, 0.15);
+  border-color: rgba(125, 32, 39, 0.35);
+}
+.hamburger.is-open span { background: #7d2027; }
+.hamburger.is-open span:nth-child(1) { transform: translateY(7px)  scale(1.6); }
+.hamburger.is-open span:nth-child(2) { opacity: 0; }
+.hamburger.is-open span:nth-child(3) { transform: translateY(-7px) scale(1.6); }
+
+/* ── Responsive ── */
+@media (max-width: 720px) {
+  .menu-pop {
+    top: 78px;
+    right: 16px;
+    width: calc(100vw - 32px);
+    padding: 16px 16px 12px;
+  }
+  .pop-tail { right: 22px; }
+  .pi-word { font-size: 24px; }
+  .pi-sans { display: none; }
+  .pop-item { grid-template-columns: 24px 1fr 18px; }
+}
+
+
+
+/* ── Version tag ──────────────────────────────────────── */
+.version-tag {
+  position: fixed;
+  bottom: 16px;
+  left: 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: rgba(245, 241, 232, 0.22);
+  z-index: 10;
+  pointer-events: none;
+  user-select: none;
+}

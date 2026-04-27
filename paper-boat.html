@@ -2,230 +2,553 @@
 <html lang="en">
 <head>
 <link rel="icon" type="image/png" href="favicon.png">
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Paper Boat — DOMO</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;background:#0d0d0b;color:#d4d4cc;font-family:'IBM Plex Mono',monospace;overflow:hidden;}
+:root{
+  --bg:#0d0d0b;
+  --panel:#111110;
+  --panel-2:#0f0f0e;
+  --border:#1e1e1c;
+  --text:#d4d4cc;
+  --muted:#3a3a38;
+  --dim:#2a2a28;
+  --accent:#c8a92b;
+  --variant-accent:#4a7ab5;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+  --snap:cubic-bezier(0.76,0,0.24,1);
+}
+html,body{width:100%;min-height:100%;background:var(--bg);color:var(--text);font-family:'IBM Plex Mono',monospace;}
+body{overflow-x:hidden;}
+a{color:inherit;}
+button,input,textarea,select{font:inherit;}
 
-/* ── NAV ── */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:200;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 28px;height:68px;
-  background:rgba(10,10,9,0.92);
-  border-bottom:0.5px solid #1e1e1c;
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
+  padding:0 28px;height:68px;background:rgba(13,13,11,.96);
+  border-bottom:0.5px solid var(--border);
 }
-.brand-logo{height:32px;width:auto;display:block;opacity:0.6;}
+.brand-logo{height:32px;width:auto;display:block;opacity:.6;}
 .nav-links{display:flex;gap:28px;list-style:none;align-items:center;}
-.nav-links a{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#3a3a38;text-decoration:none;transition:color 200ms;}
-.nav-links a:hover{color:#c1121f;}
-.cart-btn{background:none;border:0.5px solid #1e1e1c;padding:8px 14px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#3a3a38;display:flex;align-items:center;gap:8px;transition:all 200ms;position:relative;}
-.cart-btn:hover{border-color:#c1121f;color:#c1121f;}
-.cart-badge{background:#c1121f;color:#fff;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:8px;position:absolute;top:-6px;right:-6px;}
+.nav-links a{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 200ms var(--ease);}
+.nav-links a:hover{color:var(--accent);}
+.cart-btn{background:none;border:0.5px solid var(--border);padding:8px 14px;cursor:pointer;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px;transition:all 200ms var(--ease);position:relative;}
+.cart-btn:hover{border-color:var(--accent);color:var(--accent);}
+.cart-badge{background:var(--accent);color:var(--bg);border-radius:999px;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:8px;position:absolute;top:-6px;right:-6px;}
 .cart-badge.hidden{display:none;}
 .nav-avatar-btn{cursor:pointer;display:flex;align-items:center;}
-.nav-avatar-circle{width:28px;height:28px;border-radius:50%;background:#1a1a18;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#d4d4cc;border:0.5px solid #3a3a38;transition:box-shadow 200ms;}
-.nav-avatar-circle:hover{box-shadow:0 0 0 2px rgba(193,18,31,.3);}
-.nav-dropdown{display:none;flex-direction:column;position:absolute;top:calc(100% + 10px);right:0;min-width:200px;background:#0d0d0b;border:0.5px solid #2a2a28;z-index:500;padding:0;}
-.nav-dropdown-top{padding:14px 16px 10px;border-bottom:0.5px solid #1e1e1c;}
-.nav-avatar-name{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#d4d4cc;letter-spacing:.03em;}
-.nav-avatar-email{font-family:'IBM Plex Mono',monospace;font-size:8px;color:#3a3a38;letter-spacing:.05em;margin-top:2px;word-break:break-all;}
-.nav-dd-link{display:block;padding:10px 16px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#3a3a38;text-decoration:none;transition:background 150ms,color 150ms;border-bottom:0.5px solid #1e1e1c;}
-.nav-dd-link:hover{background:rgba(193,18,31,.06);color:#d4d4cc;}
-.nav-dd-signout{display:block;width:100%;padding:10px 16px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(193,18,31,.6);background:none;border:none;cursor:pointer;text-align:left;transition:background 150ms,color 150ms;}
-.nav-dd-signout:hover{background:rgba(193,18,31,.08);color:#c1121f;}
+.nav-avatar-circle{width:28px;height:28px;border-radius:50%;background:#1a1a18;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text);border:0.5px solid var(--muted);transition:border-color 200ms var(--ease),color 200ms var(--ease);}
+.nav-avatar-circle:hover{border-color:var(--accent);color:var(--accent);}
+.nav-dropdown{display:none;flex-direction:column;position:absolute;top:calc(100% + 10px);right:0;min-width:200px;background:var(--bg);border:0.5px solid var(--border);z-index:500;padding:0;}
+.nav-dropdown-top{padding:14px 16px 10px;border-bottom:0.5px solid var(--border);}
+.nav-avatar-name{font-size:10px;color:var(--text);letter-spacing:.03em;}
+.nav-avatar-email{font-size:8px;color:var(--muted);letter-spacing:.05em;margin-top:2px;word-break:break-all;}
+.nav-dd-link{display:block;padding:10px 16px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:background 150ms var(--ease),color 150ms var(--ease);border-bottom:0.5px solid var(--border);}
+.nav-dd-link:hover{background:rgba(200,169,43,.06);color:var(--text);}
+.nav-dd-signout{display:block;width:100%;padding:10px 16px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(200,169,43,.72);background:none;border:none;cursor:pointer;text-align:left;transition:background 150ms var(--ease),color 150ms var(--ease);}
+.nav-dd-signout:hover{background:rgba(200,169,43,.08);color:var(--accent);}
 
-/* ── NAV ARROWS ── */
-.nav-arrow{position:fixed;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;z-index:50;opacity:0.4;transition:opacity 300ms,transform 300ms;padding:0;}
-.nav-arrow:hover{opacity:1;transform:translateY(-50%) scale(1.1);}
+.nav-arrow{position:fixed;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;z-index:50;opacity:.4;transition:opacity 300ms var(--ease),transform 300ms var(--ease);padding:0;}
+.nav-arrow:hover{opacity:1;transform:translateY(-50%) scale(1.06);}
 .prev-arrow{left:24px;}
 .next-arrow{right:24px;}
 .arrow-ring{stroke-dasharray:145;stroke-dashoffset:145;transition:stroke-dashoffset 400ms ease;}
 .nav-arrow:hover .arrow-ring{stroke-dashoffset:0;}
 
-/* ── SIGNAL BAR ── */
 @keyframes signalBar{0%{width:0%;opacity:1;}85%{width:100%;opacity:1;}100%{width:100%;opacity:0;}}
-#signal-bar{position:fixed;top:0;left:0;height:1.5px;width:0%;background:#c1121f;z-index:9999;animation:signalBar 400ms cubic-bezier(0.16,1,0.3,1) forwards;pointer-events:none;}
+#signal-bar{position:fixed;top:0;left:0;height:1.5px;width:0;background:var(--accent);z-index:9999;animation:signalBar 420ms var(--ease) forwards;pointer-events:none;}
 
-/* ── CART DRAWER ── */
-.cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:900;opacity:0;pointer-events:none;transition:opacity 300ms;}
+.cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:900;opacity:0;pointer-events:none;transition:opacity 300ms var(--ease);}
 .cart-overlay.open{opacity:1;pointer-events:all;}
-.cart-drawer{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:95vw;background:#0d0d0b;z-index:901;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;border-left:0.5px solid #1e1e1c;}
+.cart-drawer{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:95vw;background:var(--bg);z-index:901;transform:translateX(100%);transition:transform .35s var(--ease);display:flex;flex-direction:column;border-left:0.5px solid var(--border);}
 .cart-drawer.open{transform:translateX(0);}
-.cart-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:0.5px solid #1e1e1c;flex-shrink:0;}
-.cart-header-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:#d4d4cc;}
-.cart-close{background:none;border:0.5px solid #1e1e1c;width:32px;height:32px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 150ms;color:#3a3a38;}
-.cart-close:hover{border-color:#c1121f;color:#c1121f;}
+.cart-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:0.5px solid var(--border);flex-shrink:0;}
+.cart-header-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:4px;color:var(--text);}
+.cart-close{background:none;border:0.5px solid var(--border);width:32px;height:32px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 150ms var(--ease);color:var(--muted);}
+.cart-close:hover{border-color:var(--accent);color:var(--accent);}
 .cart-body{flex:1;overflow-y:auto;padding:16px 0;}
 .cart-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;gap:8px;}
-.empty-big{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:4px;color:#2a2a28;}
-.empty-sm{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#2a2a28;}
-.drawer-item{display:flex;gap:12px;padding:14px 24px;border-bottom:0.5px solid #1e1e1c;align-items:flex-start;}
-.drawer-item-img{width:44px;height:44px;flex-shrink:0;background:#1a1a18;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.empty-big{font-family:'Bebas Neue',sans-serif;font-size:40px;letter-spacing:4px;color:var(--dim);}
+.empty-sm{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);}
+.drawer-item{display:flex;gap:12px;padding:14px 24px;border-bottom:0.5px solid var(--border);align-items:flex-start;}
+.drawer-item-img{width:44px;height:44px;flex-shrink:0;background:#1a1a18;display:flex;align-items:center;justify-content:center;overflow:hidden;border:0.5px solid var(--border);}
 .drawer-item-img img{width:100%;height:100%;object-fit:contain;}
 .drawer-item-info{flex:1;}
-.drawer-item-name{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#d4d4cc;margin-bottom:3px;}
-.drawer-item-meta{font-family:'IBM Plex Mono',monospace;font-size:8px;color:#3a3a38;letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
-.drawer-item-price{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#c1121f;margin-top:4px;}
-.drawer-item-remove{background:none;border:none;cursor:pointer;font-size:12px;color:#2a2a28;transition:color 150ms;flex-shrink:0;}
-.drawer-item-remove:hover{color:#c1121f;}
-.cart-footer{padding:16px 24px;border-top:0.5px solid #1e1e1c;flex-shrink:0;}
-.cart-subtotal{display:flex;justify-content:space-between;margin-bottom:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#3a3a38;}
-.cart-subtotal .val{color:#d4d4cc;}
-.btn-checkout-link{display:block;width:100%;padding:12px;background:#c1121f;color:#0d0d0b;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:4px;text-transform:uppercase;text-align:center;text-decoration:none;transition:background 200ms;}
-.btn-checkout-link:hover{background:#a00f1a;}
+.drawer-item-name{font-size:10px;color:var(--text);margin-bottom:3px;}
+.drawer-item-meta{font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.drawer-item-price{font-size:10px;color:var(--accent);margin-top:4px;}
+.drawer-item-remove{background:none;border:none;cursor:pointer;font-size:12px;color:var(--dim);transition:color 150ms var(--ease);flex-shrink:0;}
+.drawer-item-remove:hover{color:var(--accent);}
+.cart-footer{padding:16px 24px;border-top:0.5px solid var(--border);flex-shrink:0;}
+.cart-subtotal{display:flex;justify-content:space-between;margin-bottom:12px;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.cart-subtotal .val{color:var(--text);}
+.btn-checkout-link{display:block;width:100%;padding:12px;background:var(--accent);color:var(--bg);font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:4px;text-transform:uppercase;text-align:center;text-decoration:none;transition:filter 200ms var(--ease);}
+.btn-checkout-link:hover{filter:brightness(.92);}
 
-/* ── DASHBOARD GRID ── */
-#dashboard{
-  position:fixed;
-  top:68px;left:0;right:0;bottom:0;
+.page{
+  --water-top:rgba(17,30,46,.76);
+  --water-bottom:rgba(6,10,17,.98);
+  --surface-line:rgba(212,212,204,.18);
+  --water-sheen:rgba(212,212,204,.05);
+  --note-line:rgba(212,212,204,.12);
+  padding:124px clamp(20px,4vw,56px) 60px;
+  max-width:1320px;
+  margin:0 auto;
   display:grid;
-  grid-template-columns:280px 1fr 280px;
-  grid-template-rows:48px 1fr 120px;
-  grid-template-areas:
-    "topbar topbar topbar"
-    "left   center right"
-    "bottom bottom bottom";
+  gap:30px;
+  position:relative;
 }
-
-/* ── TOP BAR ── */
-#topbar{
-  grid-area:topbar;
-  display:flex;align-items:stretch;
-  background:#0d0d0b;
-  border-bottom:0.5px solid #1e1e1c;
+.header-kicker,
+.small-label,
+.meta-label,
+.page-code,
+.color-btn-name{
+  font-size:8px;
+  letter-spacing:2.4px;
+  text-transform:uppercase;
+}
+.page-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:18px;
+}
+.page-status{
+  display:grid;
+  justify-items:end;
+  gap:4px;
+}
+.page-status strong{
+  font-weight:400;
+  color:var(--text);
+}
+.header-kicker,
+.small-label,
+.meta-label,
+.page-code{
+  color:var(--muted);
+}
+.launch-stage{
+  display:grid;
+  gap:18px;
+}
+.launch-scene{
+  position:relative;
+  min-height:68vh;
   overflow:hidden;
+  border-top:0.5px solid var(--note-line);
+  border-bottom:0.5px solid var(--note-line);
+}
+.launch-scene::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to bottom, rgba(255,255,255,.015), transparent 62%);
+  pointer-events:none;
+}
+.launch-scene::after{
+  content:"";
+  position:absolute;
+  left:-2%;
+  right:-2%;
+  bottom:0;
+  height:46%;
+  background:
+    radial-gradient(140% 120% at 50% 0%, var(--water-sheen), transparent 56%),
+    linear-gradient(to bottom, var(--water-top), var(--water-bottom));
+  background-size:180% 160%,100% 100%;
+  background-position:45% 50%,0 0;
+  animation:waterShift 14s ease-in-out infinite alternate;
+  pointer-events:none;
+}
+@keyframes waterShift{
+  0%{background-position:42% 48%,0 0;}
+  100%{background-position:58% 52%,0 0;}
+}
+.surface-line{
+  position:absolute;
+  left:0;
+  right:0;
+  top:54%;
+  height:1px;
+  background:var(--surface-line);
+  z-index:1;
+}
+.surface-line::after{
+  content:"";
+  position:absolute;
+  left:8%;
+  right:8%;
+  top:10px;
+  height:1px;
+  background:rgba(212,212,204,.05);
+}
+.scene-guides{
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(54% - 24px);
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  z-index:2;
+  pointer-events:none;
+}
+.scene-guides span,
+.stage-status{
+  font-size:7px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.scene-guides strong{
+  color:var(--text);
+  font-weight:400;
+}
+.scene-copy{
+  position:absolute;
+  top:58px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:3;
+  width:min(100%,760px);
+  padding:0 18px;
+  display:grid;
+  gap:10px;
+  text-align:center;
+}
+.launch-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(92px,12vw,170px);
+  letter-spacing:6px;
+  line-height:.82;
+  color:var(--text);
+}
+.launch-subtitle{
+  font-size:10px;
+  letter-spacing:1.8px;
+  text-transform:uppercase;
+  color:var(--text);
+}
+.scene-state-line{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:10px 18px;
+  align-items:center;
+}
+#color-name{
+  font-size:9px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--variant-accent);
+}
+#variant-state-code{
+  font-size:8px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.boat-stage{
+  position:absolute;
+  left:50%;
+  top:calc(54% - 84px);
+  transform:translateX(-50%);
+  z-index:3;
+  display:grid;
+  justify-items:center;
+  gap:12px;
+}
+#boatSvg{
+  width:min(290px,38vw);
+  height:auto;
+  transition:transform 420ms var(--ease),filter 420ms var(--ease);
+}
+.object-shadow{
+  width:min(220px,28vw);
+  height:14px;
+  border:none;
+  background:radial-gradient(ellipse at center, rgba(0,0,0,.18), transparent 74%);
+  opacity:.28;
+}
+.fold-line{
+  stroke:#1b1b19;
+  stroke-width:1;
+  opacity:.11;
+}
+.water-line{
+  stroke:rgba(212,212,204,.22);
+  fill:none;
+  opacity:0;
+  transition:opacity 340ms var(--ease);
+}
+.launch-scene:hover .water-line,
+.launch-scene.is-releasing .water-line{
+  opacity:.2;
+}
+.launch-scene:hover #boatSvg{
+  transform:translateY(-2px);
+}
+.launch-scene.is-releasing #boatSvg{
+  transform:translateY(1px);
+}
+.stage-status{
+  position:absolute;
+  left:50%;
+  bottom:36px;
+  transform:translateX(-50%);
+  z-index:3;
+  white-space:nowrap;
+}
+.launch-rail{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:22px;
+  align-items:end;
+  padding-top:18px;
+  border-top:0.5px solid var(--note-line);
+}
+.rail-left{
+  display:grid;
+  gap:14px;
+}
+.state-copy{
+  display:grid;
+  gap:6px;
+  max-width:54ch;
+}
+#variant-ledger{
+  font-size:9px;
+  line-height:1.8;
+  color:var(--text);
+  text-transform:uppercase;
+  letter-spacing:1.4px;
+}
+.variant-note,
+.variant-foot-note{
+  font-size:10px;
+  line-height:1.9;
+  color:var(--muted);
+}
+.variant-strip{
+  display:flex;
+  flex-wrap:wrap;
+  gap:16px 24px;
+  align-items:center;
 }
 .color-btn{
-  flex:1;display:flex;align-items:center;padding:0 14px;gap:10px;
-  cursor:pointer;background:transparent;border:none;border-right:0.5px solid #1e1e1c;
-  transition:background 200ms;
-}
-.color-btn:last-child{border-right:none;}
-.color-btn.active{background:rgba(255,255,255,0.04);}
-.color-btn:hover{background:rgba(255,255,255,0.03);}
-.color-btn-bar{width:3px;height:24px;flex-shrink:0;border-radius:1px;}
-.color-btn-name{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:3px;color:#3a3a38;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-
-/* ── LEFT PANEL ── */
-#left-panel{
-  grid-area:left;
-  border-right:0.5px solid #1e1e1c;
-  padding:24px 20px;
-  overflow:hidden;
-  display:flex;flex-direction:column;gap:0;
+  appearance:none;
+  background:none;
+  border:none;
+  padding:5px 0 8px;
+  color:var(--muted);
+  cursor:pointer;
   position:relative;
+  transition:color 300ms var(--ease),transform 300ms var(--ease);
 }
-.panel-designation-label{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:3px;color:#3a3a38;text-transform:uppercase;margin-bottom:6px;}
-.panel-designation{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:#d4d4cc;line-height:1;}
-.panel-divider{height:0.5px;background:#1e1e1c;margin:14px 0;}
-.data-stack{display:flex;flex-direction:column;gap:13px;}
-.data-row{}
-.data-label{font-family:'IBM Plex Mono',monospace;font-size:6px;letter-spacing:2px;color:#3a3a38;text-transform:uppercase;margin-bottom:2px;}
-.data-value{font-family:'IBM Plex Mono',monospace;font-size:9px;color:#d4d4cc;line-height:1.4;}
-.scanner-wrap{height:1px;overflow:hidden;margin:14px 0;position:relative;}
-.scanner-line{height:1px;background:linear-gradient(to right,transparent,#c1121f,transparent);position:absolute;width:100%;}
-@keyframes scan{0%{transform:translateX(-100%);}100%{transform:translateX(400%);}}
-.scanner-line{animation:scan 3s linear infinite;}
-.signal-label{font-family:'IBM Plex Mono',monospace;font-size:6px;letter-spacing:2px;color:#3a3a38;text-transform:uppercase;margin-bottom:6px;}
-.signal-bars{display:flex;gap:4px;margin-bottom:6px;}
-.signal-bar-seg{width:18px;height:6px;border-radius:1px;}
-.signal-bar-seg.on{background:#c1121f;}
-.signal-bar-seg.off{background:#1e1e1c;}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
-.signal-status{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:2px;color:#c1121f;text-transform:uppercase;animation:blink 1.4s ease-in-out infinite;}
-
-/* ── CENTER PANEL ── */
-#center-panel{
-  grid-area:center;
-  background:#0a0a09;
-  position:relative;
-  display:flex;align-items:center;justify-content:center;
-  overflow:hidden;
+.color-btn::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:1px;
+  background:var(--variant-accent);
+  transform:scaleX(0);
+  transform-origin:left;
+  opacity:.8;
+  transition:transform 320ms var(--ease);
 }
-.grid-overlay{
-  position:absolute;inset:0;pointer-events:none;
-  background-image:linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);
-  background-size:40px 40px;
+.color-btn:hover,
+.color-btn.active{
+  color:var(--text);
 }
-.corner-bracket{position:absolute;width:20px;height:20px;pointer-events:none;}
-.corner-bracket.tl{top:16px;left:16px;border-top:2px solid #c1121f;border-left:2px solid #c1121f;}
-.corner-bracket.tr{top:16px;right:16px;border-top:2px solid #c1121f;border-right:2px solid #c1121f;}
-.corner-bracket.bl{bottom:16px;left:16px;border-bottom:2px solid #c1121f;border-left:2px solid #c1121f;}
-.corner-bracket.br{bottom:16px;right:16px;border-bottom:2px solid #c1121f;border-right:2px solid #c1121f;}
-.crosshair-h{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:0.5px;background:#c1121f;opacity:0.4;pointer-events:none;}
-.crosshair-v{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:0.5px;height:40px;background:#c1121f;opacity:0.4;pointer-events:none;}
-.hud-tl{position:absolute;top:20px;left:20px;font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:2px;color:#3a3a38;text-transform:uppercase;pointer-events:none;}
-.hud-tr{position:absolute;top:20px;right:20px;display:flex;align-items:center;gap:6px;pointer-events:none;}
-.rec-dot{width:6px;height:6px;background:#c1121f;border-radius:50%;animation:blink 1s ease-in-out infinite;}
-.rec-text{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:2px;color:#c1121f;}
-.boat-stage{display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;z-index:2;}
-#boatSvg{width:260px;height:208px;max-height:50vh;max-width:65%;transition:filter 400ms ease;animation:drift 6s ease-in-out infinite;filter:drop-shadow(0 8px 20px rgba(193,18,31,0.2));}
-@keyframes drift{0%{transform:translateY(0) rotate(-1deg);}25%{transform:translateY(-8px) rotate(1.5deg);}50%{transform:translateY(-5px) rotate(-0.5deg);}75%{transform:translateY(-11px) rotate(2deg);}100%{transform:translateY(0) rotate(-1deg);}}
-.ripple-stage{position:relative;width:200px;height:40px;margin-top:8px;}
-.ripple-ellipse{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:0.5px solid rgba(255,255,255,0.06);border-radius:50%;}
-@keyframes ripple{0%{transform:translate(-50%,-50%) scale(0.8);opacity:0.3;}100%{transform:translate(-50%,-50%) scale(1.4);opacity:0;}}
-.r1{width:160px;height:24px;animation:ripple 3s ease-out infinite;}
-.r2{width:200px;height:30px;animation:ripple 3s ease-out 1s infinite;}
-.r3{width:240px;height:36px;animation:ripple 3s ease-out 2s infinite;}
-
-/* ── RIGHT PANEL ── */
-#right-panel{
-  grid-area:right;
-  border-left:0.5px solid #1e1e1c;
-  padding:24px 20px;
-  overflow:hidden;
-  display:flex;flex-direction:column;
-  gap:0;
+.color-btn:hover{
+  transform:translateY(-1px);
 }
-.variant-label{font-family:'IBM Plex Mono',monospace;font-size:6px;letter-spacing:2px;color:#3a3a38;text-transform:uppercase;margin-bottom:6px;}
-#color-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:#4a7ab5;margin-bottom:8px;display:block;}
-#color-accent-line{height:0.5px;width:100%;background:#4a7ab5;margin-bottom:18px;transition:background 300ms;}
-.desc-heading{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#d4d4cc;line-height:1.6;margin-bottom:10px;font-weight:400;}
-.desc-body{font-family:'IBM Plex Mono',monospace;font-size:8px;color:#3a3a38;line-height:1.9;margin-bottom:14px;}
-.spec-block{margin-bottom:12px;}
-.spec-block .data-label{font-family:'IBM Plex Mono',monospace;font-size:6px;letter-spacing:2px;color:#3a3a38;text-transform:uppercase;margin-bottom:3px;}
-.spec-block .data-value{font-family:'IBM Plex Mono',monospace;font-size:8px;color:#d4d4cc;line-height:1.6;}
-.right-spacer{flex:1;}
-#addCartBtn{display:block;width:100%;background:#c1121f;color:#0d0d0b;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:4px;padding:12px;border:none;cursor:pointer;transition:background 200ms;text-transform:uppercase;margin-bottom:8px;}
-#addCartBtn:hover{background:#a00f1a;}
-#wishBtn{display:block;width:100%;background:transparent;color:#3a3a38;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:2px;padding:10px;border:0.5px solid #1e1e1c;cursor:pointer;transition:all 200ms;text-transform:uppercase;margin-bottom:8px;}
-#wishBtn:hover{border-color:#3a3a38;color:#d4d4cc;}
-.cart-release-note{font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:1px;color:#2a2a28;text-align:center;}
-
-/* ── BOTTOM BAR ── */
-#bottom-bar{
-  grid-area:bottom;
-  border-top:0.5px solid #1e1e1c;
-  background:#080808;
-  display:flex;align-items:center;
-  overflow-x:auto;overflow-y:hidden;
-  position:relative;
-  scrollbar-width:none;
+.color-btn.active::after{
+  transform:scaleX(1);
 }
-#bottom-bar::-webkit-scrollbar{display:none;}
-.ticker-text{
-  white-space:nowrap;
-  padding:0 40px;
-  font-family:'IBM Plex Mono',monospace;
-  font-size:9px;
-  color:#3a3a38;
-  line-height:1.8;
-  flex-shrink:0;
+.color-chip,
+.color-btn-type,
+.color-btn-code,
+.color-btn-state{
+  display:none;
 }
-.scroll-hint{
-  position:absolute;right:0;top:0;bottom:0;
-  width:60px;
-  display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(to right,transparent,#080808);
-  font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:2px;color:#2a2a28;
-  pointer-events:none;
-  flex-shrink:0;
+#addCartBtn{
+  min-width:150px;
+  padding:12px 24px 10px;
+  border:0.5px solid rgba(212,212,204,.22);
+  background:transparent;
+  color:var(--text);
+  cursor:pointer;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:26px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  transition:transform 280ms var(--ease),border-color 280ms var(--ease),background 280ms var(--ease);
+}
+#addCartBtn:hover{
+  transform:translateY(-1px);
+  border-color:rgba(212,212,204,.48);
+  background:rgba(255,255,255,.02);
+}
+.description-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.1fr) minmax(280px,.85fr);
+  gap:34px;
+}
+.description-panel,
+.meta-panel{
+  padding-top:18px;
+  border-top:0.5px solid var(--note-line);
+}
+.section-title{
+  margin-top:6px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:34px;
+  letter-spacing:3px;
+  color:var(--text);
+}
+.description-body{
+  display:grid;
+  gap:16px;
+  margin-top:16px;
+}
+.description-body p{
+  max-width:68ch;
+  font-size:11px;
+  line-height:2;
+  color:var(--text);
+}
+#archive-comment-live{
+  color:var(--muted);
+}
+.description-strip,
+.meta-foot,
+.meta-strip{
+  display:grid;
+  gap:14px;
+  margin-top:18px;
+}
+.description-strip{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.meta-list{
+  display:grid;
+  gap:10px;
+  margin-top:16px;
+}
+.meta-row{
+  display:grid;
+  grid-template-columns:120px 1fr;
+  gap:12px;
+  padding-top:10px;
+  border-top:0.5px solid rgba(212,212,204,.08);
+}
+.meta-row:first-child{
+  padding-top:0;
+  border-top:none;
+}
+.meta-value,
+.small-value{
+  font-size:10px;
+  line-height:1.9;
+  color:var(--text);
+}
+.meta-foot{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.meta-column,
+.meta-strip-item{
+  display:grid;
+  gap:4px;
+}
+.meta-strip{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  padding-top:16px;
+  border-top:0.5px solid rgba(212,212,204,.08);
+}
+@media (max-width:980px){
+  .launch-rail,
+  .description-layout{
+    grid-template-columns:1fr;
+  }
+  #addCartBtn{
+    justify-self:start;
+  }
+}
+@media (max-width:720px){
+  nav{padding:0 16px;}
+  .nav-links{gap:14px;}
+  .nav-links a{font-size:8px;letter-spacing:1.4px;}
+  .prev-arrow{left:8px;}
+  .next-arrow{right:8px;}
+  .page-header{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .page-status{
+    justify-items:start;
+  }
+  .launch-scene{
+    min-height:62vh;
+  }
+  .scene-copy{
+    top:44px;
+  }
+  .launch-title{
+    font-size:clamp(74px,22vw,120px);
+  }
+  .launch-subtitle{
+    line-height:1.7;
+  }
+  .scene-guides{
+    top:calc(54% - 34px);
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .boat-stage{
+    top:calc(54% - 70px);
+  }
+  #boatSvg{
+    width:min(250px,56vw);
+  }
+  .description-strip,
+  .meta-foot,
+  .meta-strip{
+    grid-template-columns:1fr;
+  }
+  .meta-row{
+    grid-template-columns:1fr;
+    gap:4px;
+  }
+}
+@media (max-width:520px){
+  .page{
+    padding-left:18px;
+    padding-right:18px;
+  }
+  .launch-scene{
+    min-height:56vh;
+  }
+  .scene-copy{
+    width:100%;
+    padding:0 10px;
+  }
+  .boat-stage{
+    top:calc(54% - 60px);
+  }
+  #boatSvg{
+    width:min(220px,62vw);
+  }
+  .stage-status{
+    bottom:28px;
+  }
 }
 </style>
 </head>
@@ -233,24 +556,23 @@ nav{
 
 <div id="signal-bar"></div>
 
-<!-- PREV / NEXT ARROWS -->
-<button class="nav-arrow prev-arrow" id="prev-btn">
+<button class="nav-arrow prev-arrow" id="prev-btn" aria-label="Previous object">
   <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="24" cy="24" r="23" stroke="#c1121f" stroke-width="0.5" opacity="0.4"/>
-    <circle cx="24" cy="24" r="23" stroke="#c1121f" stroke-width="0.5" opacity="0.4" class="arrow-ring"/>
-    <path d="M27 14L17 24L27 34" stroke="#d4d4cc" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-    <line x1="17" y1="24" x2="32" y2="24" stroke="#c1121f" stroke-width="0.5" opacity="0.6"/>
+    <circle cx="24" cy="24" r="23" stroke="#c8a92b" stroke-width="0.5" opacity="0.4"></circle>
+    <circle cx="24" cy="24" r="23" stroke="#c8a92b" stroke-width="0.5" opacity="0.4" class="arrow-ring"></circle>
+    <path d="M27 14L17 24L27 34" stroke="#d4d4cc" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line x1="17" y1="24" x2="32" y2="24" stroke="#c8a92b" stroke-width="0.5" opacity="0.6"></line>
   </svg>
 </button>
-<button class="nav-arrow next-arrow" id="next-btn">
+<button class="nav-arrow next-arrow" id="next-btn" aria-label="Next object">
   <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="24" cy="24" r="23" stroke="#c1121f" stroke-width="0.5" opacity="0.4"/>
-    <path d="M21 14L31 24L21 34" stroke="#d4d4cc" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
-    <line x1="16" y1="24" x2="31" y2="24" stroke="#c1121f" stroke-width="0.5" opacity="0.6"/>
+    <circle cx="24" cy="24" r="23" stroke="#c8a92b" stroke-width="0.5" opacity="0.4"></circle>
+    <circle cx="24" cy="24" r="23" stroke="#c8a92b" stroke-width="0.5" opacity="0.4" class="arrow-ring"></circle>
+    <path d="M21 14L31 24L21 34" stroke="#d4d4cc" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path>
+    <line x1="16" y1="24" x2="31" y2="24" stroke="#c8a92b" stroke-width="0.5" opacity="0.6"></line>
   </svg>
 </button>
 
-<!-- CART OVERLAY + DRAWER -->
 <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
 <div class="cart-drawer" id="cartDrawer">
   <div class="cart-header">
@@ -272,246 +594,368 @@ nav{
   </div>
 </div>
 
-<!-- NAV -->
 <nav>
-  <a href="index.html" class="brand"><img src="favicon.png" class="brand-logo" alt="DOMO"/></a>
+  <a href="index.html" class="brand"><img src="favicon.png" class="brand-logo" alt="DOMO"></a>
   <ul class="nav-links">
     <li><a href="index.html">Home</a></li>
     <li><a href="index.html#objects">Objects</a></li>
-    <li id="navLoginLink"><a href="login.html">Login</a></li><li id="navAvatar" style="display:none;position:relative;" onmouseenter="clearTimeout(window._ddT);this.querySelector('.nav-dropdown').style.display='flex'" onmouseleave="window._ddT=setTimeout(()=>this.querySelector('.nav-dropdown').style.display='none',320)" ondblclick="window.location.href='profile.html'"><div class="nav-avatar-btn"><div class="nav-avatar-circle"><span class="nav-avatar-initial">?</span></div></div><div class="nav-dropdown"><div class="nav-dropdown-top"><div class="nav-avatar-name">Name</div><div class="nav-avatar-email">email</div></div><a href="profile.html" class="nav-dd-link">&#9654; My Profile</a><button class="nav-dd-signout" onclick="doSignOut()">Sign Out</button></div></li>
+    <li id="navLoginLink"><a href="login.html">Login</a></li>
+    <li id="navAvatar" style="display:none;position:relative;" onmouseenter="clearTimeout(window._ddT);this.querySelector('.nav-dropdown').style.display='flex'" onmouseleave="window._ddT=setTimeout(()=>this.querySelector('.nav-dropdown').style.display='none',320)" ondblclick="window.location.href='profile.html'">
+      <div class="nav-avatar-btn"><div class="nav-avatar-circle"><span class="nav-avatar-initial">?</span></div></div>
+      <div class="nav-dropdown">
+        <div class="nav-dropdown-top">
+          <div class="nav-avatar-name">Name</div>
+          <div class="nav-avatar-email">email</div>
+        </div>
+        <a href="profile.html" class="nav-dd-link">&#9654; My Profile</a>
+        <button class="nav-dd-signout" onclick="doSignOut()">Sign Out</button>
+      </div>
+    </li>
     <li><a href="domo-times.html">DOMO Times</a></li>
   </ul>
   <button class="cart-btn" onclick="openCart()">Cart <span class="cart-badge hidden" id="cartBadge">0</span></button>
 </nav>
 
-<!-- DASHBOARD GRID -->
-<div id="dashboard">
+<main class="page">
+  <header class="page-header">
+    <div class="header-kicker">Department Of Miscellaneous Objects / Launch Window</div>
+    <div class="page-status">
+      <span class="small-label">Surface Status</span>
+      <strong id="header-status">Surface Holding</strong>
+      <span class="page-code" id="scan-head-code">water state / still water</span>
+    </div>
+  </header>
 
-  <!-- TOP BAR — COLOR SWITCHER -->
-  <div id="topbar">
-    <button class="color-btn active" data-key="blue">
-      <div class="color-btn-bar" style="background:#4a7ab5;"></div>
-      <span class="color-btn-name">Faded Blue</span>
-    </button>
-    <button class="color-btn" data-key="red">
-      <div class="color-btn-bar" style="background:#c1121f;"></div>
-      <span class="color-btn-name">Bureaucratic Red</span>
-    </button>
-    <button class="color-btn" data-key="white">
-      <div class="color-btn-bar" style="background:#f5f4ef;"></div>
-      <span class="color-btn-name">White of Surrender</span>
-    </button>
-    <button class="color-btn" data-key="green">
-      <div class="color-btn-bar" style="background:#1a3a1a;"></div>
-      <span class="color-btn-name">Dark Green</span>
-    </button>
-    <button class="color-btn" data-key="glow">
-      <div class="color-btn-bar" style="background:#00ff41;"></div>
-      <span class="color-btn-name">Glow in the Dark</span>
-    </button>
-    <button class="color-btn" data-key="yellow">
-      <div class="color-btn-bar" style="background:#f5c518;"></div>
-      <span class="color-btn-name">Glow Yellow</span>
-    </button>
-  </div>
+  <section class="launch-stage">
+    <div class="launch-scene" id="launchScene">
+      <div class="surface-line" aria-hidden="true"></div>
+      <div class="scene-guides">
+        <span>shore edge / hand not yet opened</span>
+        <span>water line / <strong id="scan-condition">Surface Holding</strong></span>
+      </div>
 
-  <!-- LEFT PANEL — DATA READOUTS -->
-  <div id="left-panel">
-    <div class="panel-designation-label">Object Designation</div>
-    <div class="panel-designation">D.O.M.O-034</div>
-    <div class="panel-divider"></div>
-    <div class="data-stack">
-      <div class="data-row">
-        <div class="data-label">Weight</div>
-        <div class="data-value">negligible</div>
+      <div class="scene-copy">
+        <div class="header-kicker">D.O.M.O-034 / Objects Of Memory</div>
+        <h1 class="launch-title">Paper Boat</h1>
+        <p class="launch-subtitle">once released, it cannot be retrieved</p>
+        <div class="scene-state-line">
+          <span id="color-name">Still Water</span>
+          <span id="variant-state-code">state 01 / still water</span>
+        </div>
       </div>
-      <div class="data-row">
-        <div class="data-label">Material</div>
-        <div class="data-value">one sheet of something that was once important</div>
-      </div>
-      <div class="data-row">
-        <div class="data-label">Structural</div>
-        <div class="data-value">dependent on belief</div>
-      </div>
-      <div class="data-row">
-        <div class="data-label">Origin</div>
-        <div class="data-value">secret DOMO lab</div>
-      </div>
-      <div class="data-row">
-        <div class="data-label">Condition</div>
-        <div class="data-value">perpetually adrift</div>
-      </div>
-      <div class="data-row">
-        <div class="data-label">Water Rating</div>
-        <div class="data-value">theoretical</div>
-      </div>
-      <div class="data-row">
-        <div class="data-label">Fold Count</div>
-        <div class="data-value">unknown — the person who folded it is gone</div>
-      </div>
-    </div>
-    <div class="scanner-wrap"><div class="scanner-line"></div></div>
-    <div class="panel-divider"></div>
-    <div class="data-row" style="margin-bottom:10px;">
-      <div class="data-label">Era</div>
-      <div class="data-value">Remember When You Were Young</div>
-    </div>
-    <div class="data-row" style="margin-bottom:0;">
-      <div class="data-label">Condition</div>
-      <div class="data-value">Perpetually Adrift</div>
-    </div>
-    <div style="flex:1;"></div>
-    <div>
-      <div class="signal-label">Signal Strength</div>
-      <div class="signal-bars">
-        <div class="signal-bar-seg on"></div>
-        <div class="signal-bar-seg on"></div>
-        <div class="signal-bar-seg on"></div>
-        <div class="signal-bar-seg off"></div>
-        <div class="signal-bar-seg off"></div>
-      </div>
-      <div class="signal-status">Object Located — Transmitting</div>
-    </div>
-  </div>
 
-  <!-- CENTER PANEL — BOAT DISPLAY -->
-  <div id="center-panel">
-    <div class="grid-overlay"></div>
-    <div class="corner-bracket tl"></div>
-    <div class="corner-bracket tr"></div>
-    <div class="corner-bracket bl"></div>
-    <div class="corner-bracket br"></div>
-    <div class="crosshair-h"></div>
-    <div class="crosshair-v"></div>
-    <div class="hud-tl">Live Feed — Object #D.O.M.O-034</div>
-    <div class="hud-tr">
-      <div class="rec-dot"></div>
-      <span class="rec-text">REC</span>
-    </div>
-    <div class="boat-stage">
-      <svg id="boatSvg" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
-        <path id="hullBottom" d="M30 110 Q100 132 170 110 L155 95 Q100 112 45 95 Z" fill="#3a7fd4" stroke="#0a0a0a" stroke-width="2.5" stroke-linejoin="round"/>
-        <path id="sailLeft"   d="M100 20 L45 95 L100 95 Z"  fill="#3a7fd4" stroke="#0a0a0a" stroke-width="2.5" stroke-linejoin="round"/>
-        <path id="sailRight"  d="M100 20 L155 95 L100 95 Z" fill="#3a7fd4" stroke="#0a0a0a" stroke-width="2.5" stroke-linejoin="round"/>
-        <line x1="100" y1="20" x2="100" y2="112" stroke="#0a0a0a" stroke-width="1.5" stroke-dasharray="4 3" opacity=".5"/>
-        <line id="line1" x1="62"  y1="65" x2="95"  y2="52" stroke="#0a0a0a" stroke-width="1" opacity=".18"/>
-        <line id="line2" x1="60"  y1="74" x2="95"  y2="63" stroke="#0a0a0a" stroke-width="1" opacity=".18"/>
-        <line id="line3" x1="58"  y1="83" x2="95"  y2="74" stroke="#0a0a0a" stroke-width="1" opacity=".18"/>
-        <line id="line4" x1="138" y1="65" x2="105" y2="52" stroke="#0a0a0a" stroke-width="1" opacity=".18"/>
-        <line id="line5" x1="140" y1="74" x2="105" y2="63" stroke="#0a0a0a" stroke-width="1" opacity=".18"/>
-        <line id="line6" x1="142" y1="83" x2="105" y2="74" stroke="#0a0a0a" stroke-width="1" opacity=".18"/>
-        <path id="ripple1" d="M50 128 Q75 122 100 126 Q125 130 150 124" stroke="#0a0a0a" stroke-width="1.5" fill="none" opacity=".2"/>
-        <path id="ripple2" d="M40 136 Q70 130 100 134 Q130 138 160 132" stroke="#0a0a0a" stroke-width="1" fill="none" opacity=".12"/>
-      </svg>
-      <div class="ripple-stage">
-        <div class="ripple-ellipse r1"></div>
-        <div class="ripple-ellipse r2"></div>
-        <div class="ripple-ellipse r3"></div>
+      <div class="boat-stage">
+        <svg id="boatSvg" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" aria-label="Paper Boat object render">
+          <path id="hullBottom" d="M30 110 Q100 132 170 110 L155 95 Q100 112 45 95 Z" fill="#ece8df" stroke="#1b1b19" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path id="sailLeft" d="M100 20 L45 95 L100 95 Z" fill="#ece8df" stroke="#1b1b19" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path id="sailRight" d="M100 20 L155 95 L100 95 Z" fill="#ece8df" stroke="#1b1b19" stroke-width="2.5" stroke-linejoin="round"></path>
+          <line x1="100" y1="20" x2="100" y2="112" stroke="#1b1b19" stroke-width="1.5" stroke-dasharray="4 3" opacity=".42"></line>
+          <line id="line1" class="fold-line" x1="62" y1="65" x2="95" y2="52"></line>
+          <line id="line2" class="fold-line" x1="60" y1="74" x2="95" y2="63"></line>
+          <line id="line3" class="fold-line" x1="58" y1="83" x2="95" y2="74"></line>
+          <line id="line4" class="fold-line" x1="138" y1="65" x2="105" y2="52"></line>
+          <line id="line5" class="fold-line" x1="140" y1="74" x2="105" y2="63"></line>
+          <line id="line6" class="fold-line" x1="142" y1="83" x2="105" y2="74"></line>
+          <path id="ripple1" class="water-line" d="M50 128 Q75 122 100 126 Q125 130 150 124" stroke-width="1.5"></path>
+          <path id="ripple2" class="water-line" d="M40 136 Q70 130 100 134 Q130 138 160 132" stroke-width="1"></path>
+        </svg>
+        <div class="object-shadow" aria-hidden="true"></div>
       </div>
-    </div>
-  </div>
 
-  <!-- RIGHT PANEL — DESCRIPTION + STATS -->
-  <div id="right-panel">
-    <div class="variant-label">Current Variant</div>
-    <span id="color-name">Faded Blue</span>
-    <div id="color-accent-line"></div>
-    <div class="desc-heading">Every paper boat begins as something else.</div>
-    <div class="desc-body">A page. A letter. A document that once held someone's name, their address, their proof of belonging. We fold them into vessels and set them adrift — the way desperation folds human beings into something the world calls migrants and sets loose on open water.</div>
-    <div class="spec-block">
-      <div class="data-label">Material</div>
-      <div class="data-value" style="font-size:8px;line-height:1.6;">Stronger Than Paper, Weaker Than Emotions</div>
+      <div class="stage-status" id="stage-status">held above the line / no release yet</div>
     </div>
-    <div class="spec-block">
-      <div class="data-label">Origin</div>
-      <div class="data-value" style="font-size:8px;line-height:1.6;">Secret DOMO Lab</div>
+
+    <div class="launch-rail">
+      <div class="rail-left">
+        <div class="state-copy">
+          <span class="small-label">Current Water Condition</span>
+          <span id="variant-ledger">surface unbroken / reflection intact</span>
+          <p class="variant-note" id="variant-note">The water is calm enough to invite release and quiet enough to record the first mistake.</p>
+        </div>
+        <div class="variant-strip" aria-label="Water conditions">
+          <button class="color-btn active" data-key="blue"><span class="color-btn-name">Still Water</span></button>
+          <button class="color-btn" data-key="red"><span class="color-btn-name">Rain</span></button>
+          <button class="color-btn" data-key="white"><span class="color-btn-name">Fog</span></button>
+          <button class="color-btn" data-key="green"><span class="color-btn-name">Current</span></button>
+          <button class="color-btn" data-key="glow"><span class="color-btn-name">Night Drift</span></button>
+          <button class="color-btn" data-key="yellow"><span class="color-btn-name">Runoff</span></button>
+        </div>
+        <p class="variant-foot-note" id="variant-foot-note">Choose the surface the fold is about to meet.</p>
+      </div>
+
+      <button id="addCartBtn" type="button" onclick="releaseObject()">Release</button>
     </div>
-    <div class="right-spacer"></div>
-    <button id="addCartBtn" onclick="addToCart()">Acquire Object</button>
-    <button id="wishBtn" onclick="toggleWishlist()">Save for Later ♡</button>
-    <div class="cart-release-note">the department releases one object at a time.</div>
-  </div>
+  </section>
 
-  <!-- BOTTOM BAR — SCROLLABLE TICKER -->
-  <div id="bottom-bar">
-    <div class="ticker-text">Our boats come in the colors of the flags they fled from. Float one. Watch it drift. Then ask yourself why the real ones don't make the news anymore.&nbsp;&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;OBJECTS OF MEMORY — REMEMBER WHEN YOU WERE YOUNG&nbsp;&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;D.O.M.O-034&nbsp;&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;PERPETUALLY ADRIFT&nbsp;&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;STRONGER THAN PAPER WEAKER THAN EMOTIONS&nbsp;&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;Our boats come in the colors of the flags they fled from. Float one. Watch it drift. Then ask yourself why the real ones don't make the news anymore.</div>
-    <div class="scroll-hint">→ scroll</div>
-  </div>
+  <section class="description-layout">
+    <article class="description-panel">
+      <span class="small-label">Field Reading</span>
+      <h2 class="section-title">Before Launch</h2>
+      <div class="description-body">
+        <p>Paper Boat is made to exist briefly. A hand can make the fold exact, but it cannot make the journey obedient. The object carries intention without control, which is why the moment before release matters more than any promise of arrival.</p>
+        <p>Water determines the outcome. It decides whether the boat glides, stalls, turns sideways, stains at the edge, or gives up its shape almost immediately. The fold begins as structure, then becomes evidence of how long the structure could resist the world that received it.</p>
+        <p>Memory forms before failure does. That is the quiet intelligence of the object: it becomes unforgettable while it is still technically intact. The eye remembers the poised edge, the held breath, the thin confidence of paper pretending to be enough.</p>
+        <p id="archive-comment-live">Collapse is part of the design. The boat is not diminished by that fact. It is clarified by it.</p>
+      </div>
 
-</div><!-- /#dashboard -->
+      <div class="description-strip">
+        <div class="meta-column">
+          <span class="small-label">Launch Tone</span>
+          <span class="small-value" id="dossier-signal">clear surface / intact reflection</span>
+        </div>
+        <div class="meta-column">
+          <span class="small-label">Structural Life</span>
+          <span class="small-value" id="dossier-fragility">momentary / graceful until soaked</span>
+        </div>
+      </div>
+    </article>
+
+    <aside class="meta-panel">
+      <span class="small-label">Launch Notes</span>
+      <div class="meta-list">
+        <div class="meta-row">
+          <span class="meta-label">Condition</span>
+          <span class="meta-value" id="scan-condition-block">Surface Holding</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Fold Status</span>
+          <span class="meta-value" id="scan-fold-status">Creases intact / hand pressure visible</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Structural Life</span>
+          <span class="meta-value" id="scan-fragility">Momentary / graceful until soaked</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Water Tone</span>
+          <span class="meta-value" id="scan-signal-type">Clear surface / intact reflection</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Water Exposure</span>
+          <span class="meta-value" id="scan-water-rating">Minimal before release / total after</span>
+        </div>
+      </div>
+
+      <div class="meta-foot">
+        <div class="meta-column">
+          <span class="small-label">Release Point</span>
+          <span class="small-value" id="dossier-launch">curb edge / quiet runoff</span>
+        </div>
+        <div class="meta-column">
+          <span class="small-label">Memory Trace</span>
+          <span class="small-value" id="dossier-trace">formed before failure / retained after</span>
+        </div>
+        <div class="meta-column">
+          <span class="small-label">After Release</span>
+          <span class="small-value" id="system-submersion">delayed, never cancelled</span>
+        </div>
+        <div class="meta-column">
+          <span class="small-label">Visibility</span>
+          <span class="small-value" id="system-visibility">high / reflection stable</span>
+        </div>
+      </div>
+
+      <div class="meta-strip">
+        <div class="meta-strip-item">
+          <span class="small-label">State</span>
+          <span class="small-value" id="scan-footer-state">state 01 / still water</span>
+        </div>
+        <div class="meta-strip-item">
+          <span class="small-label">Release</span>
+          <span class="small-value" id="scan-footer-launch">curb edge / quiet runoff</span>
+        </div>
+        <div class="meta-strip-item">
+          <span class="small-label">Trace</span>
+          <span class="small-value" id="scan-footer-trace">formed before failure / retained after</span>
+        </div>
+      </div>
+    </aside>
+  </section>
+</main>
 
 <script>
-// ── COLOR THEMES ──
-const THEMES = {
-  blue:   { acc:'#4a7ab5', fill:'#3a7fd4', name:'Faded Blue',         stroke:'#0a0a0a' },
-  red:    { acc:'#c1121f', fill:'#d44444', name:'Bureaucratic Red',    stroke:'#0a0a0a' },
-  white:  { acc:'#d4d4cc', fill:'#e8e8e8', name:'White of Surrender',  stroke:'#555555' },
-  green:  { acc:'#2a5a2a', fill:'#2d7a40', name:'Dark Green',          stroke:'#0a0a0a' },
-  glow:   { acc:'#00ff41', fill:'#00ff41', name:'Glow in the Dark',    stroke:'#00ff41' },
-  yellow: { acc:'#f5c518', fill:'#f5c800', name:'Glow Yellow',         stroke:'#0a0a0a' },
+const THEMES={
+  blue:{
+    acc:'#8aa2c4',fill:'#ece8df',name:'Still Water',stroke:'#1b1b19',
+    state:'state 01 / still water',tag:'surface unbroken / reflection intact',
+    note:'The water is calm enough to invite release and quiet enough to record the first mistake.',
+    foot:'Quiet enough to mistake delay for safety.',
+    condition:'Surface Holding',signal:'clear surface / intact reflection',launch:'curb edge / quiet runoff',
+    trace:'formed before failure / retained after',foldStatus:'Creases intact / hand pressure visible',
+    fragility:'Momentary / graceful until soaked',water:'Minimal before release / total after',
+    archive:'The most persuasive lie is calm water: it makes brief survival look almost permanent.',
+    stage:'held above the line / no release yet',scanCode:'water state / still water',
+    submersion:'delayed, never cancelled',visibility:'high / reflection stable',
+    waterTop:'rgba(17,30,46,.76)',waterBottom:'rgba(6,10,17,.98)',surfaceLine:'rgba(212,212,204,.18)'
+  },
+  red:{
+    acc:'#907675',fill:'#ebe1dc',name:'Rain',stroke:'#1b1b19',
+    state:'state 02 / rain',tag:'surface interrupted / impact beginning',
+    note:'Before the boat touches water, rain has already started rewriting the surface.',
+    foot:'The weather begins first. Release only joins it.',
+    condition:'Rain Beginning',signal:'broken surface / repeated impact',launch:'open hand / rain already falling',
+    trace:'reflection interrupted before release',foldStatus:'Edges sharp / paper already listening to weather',
+    fragility:'Reduced by repetition, not force',water:'Broken / impatient / cold',
+    archive:'Rain makes the decision feel less voluntary. The surface has already started without you.',
+    stage:'rain arriving first / launch more final',scanCode:'water state / rain',
+    submersion:'accelerated by repeated drops',visibility:'interrupted / low reflection',
+    waterTop:'rgba(21,24,34,.82)',waterBottom:'rgba(8,10,15,.98)',surfaceLine:'rgba(186,190,199,.16)'
+  },
+  white:{
+    acc:'#afb4b6',fill:'#f3f0ea',name:'Fog',stroke:'#2c2a28',
+    state:'state 03 / fog',tag:'pale surface / blurred outline',
+    note:'The water looks merciful here because distance starts erasing the boat before the water does.',
+    foot:'Soft visibility can feel kinder than it is.',
+    condition:'Fog Bank',signal:'pale surface / blurred outline',launch:'cold basin / low witness',
+    trace:'memory persists where vision thins',foldStatus:'Geometry clear at hand / uncertain at distance',
+    fragility:'Soft / immediate / quiet',water:'Pale / low visibility / still',
+    archive:'The boat disappears slowly here, which can feel kinder than it is.',
+    stage:'held above pale water / edges barely legible',scanCode:'water state / fog',
+    submersion:'difficult to see, easy to imagine',visibility:'low / diffused',
+    waterTop:'rgba(26,30,34,.72)',waterBottom:'rgba(10,12,14,.98)',surfaceLine:'rgba(213,212,204,.14)'
+  },
+  green:{
+    acc:'#74836f',fill:'#e2e6dd',name:'Current',stroke:'#1b1b19',
+    state:'state 04 / current',tag:'lateral pull / direction unstable',
+    note:'The current is already choosing a path before the hand has finished deciding.',
+    foot:'Release here means giving up direction immediately.',
+    condition:'Current Taking',signal:'lateral pull / steady drag',launch:'bank edge / sideways pull',
+    trace:'direction stolen before release completes',foldStatus:'Creases intact / motion already negotiated',
+    fragility:'Moderate before turn / high after pull',water:'Moving / directional / cold',
+    archive:'The current does not wait for intention. It accepts the boat by taking it sideways.',
+    stage:'current already choosing / hand still holding',scanCode:'water state / current',
+    submersion:'increased after first turn',visibility:'medium / moving reflection',
+    waterTop:'rgba(13,27,23,.80)',waterBottom:'rgba(6,12,11,.98)',surfaceLine:'rgba(191,200,187,.16)'
+  },
+  glow:{
+    acc:'#8c97a3',fill:'#e1e5e7',name:'Night Drift',stroke:'#1c1c1a',
+    state:'state 05 / night drift',tag:'after-dark surface / weak reflection',
+    note:'Dark water removes the shore first. What remains is the brief brightness of the fold against black.',
+    foot:'The shoreline disappears sooner than the memory does.',
+    condition:'Night Drift',signal:'after-dark surface / weak reflection',launch:'streetlight spill / no shoreline certainty',
+    trace:'recognition depends on the last available light',foldStatus:'Creases readable only near the light source',
+    fragility:'Quiet / delayed / unreadable from distance',water:'Black / light-starved / cold',
+    archive:'Night removes certainty before it removes the boat. That is why the release feels irreversible sooner.',
+    stage:'dark water below / release would vanish quickly',scanCode:'water state / night drift',
+    submersion:'hard to witness, easy to lose',visibility:'low / dependent on stray light',
+    waterTop:'rgba(9,16,24,.84)',waterBottom:'rgba(4,6,10,.99)',surfaceLine:'rgba(165,171,180,.14)'
+  },
+  yellow:{
+    acc:'#96815f',fill:'#e7dfcf',name:'Runoff',stroke:'#1b1b19',
+    state:'state 06 / runoff',tag:'stained surface / compromised clarity',
+    note:'The water still carries, but not cleanly. The surface shows damage before the fold has even finished floating.',
+    foot:'The surface can hold the boat and stain it at the same time.',
+    condition:'Runoff Warning',signal:'stained surface / compromised clarity',launch:'storm drain edge / yellowed foam',
+    trace:'damage visible before failure completes',foldStatus:'Edges tint before they loosen',
+    fragility:'High from first contact',water:'Contaminated / warm / restless',
+    archive:'The water still carries, but never innocently. The surface makes the cost visible early.',
+    stage:'held over runoff / cleanliness already lost',scanCode:'water state / runoff',
+    submersion:'likely after first stain',visibility:'murky / contaminated sheen',
+    waterTop:'rgba(33,26,15,.80)',waterBottom:'rgba(10,8,6,.99)',surfaceLine:'rgba(182,167,138,.16)'
+  }
 };
 
-let currentColor = 'blue';
+let currentColor='blue';
 
-function setColor(key) {
-  const t = THEMES[key];
-  if (!t) return;
-  currentColor = key;
+function boatImageData(fill){
+  return 'data:image/svg+xml;base64,'+btoa('<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg"><path d="M30 110 Q100 132 170 110 L155 95 Q100 112 45 95 Z" fill="'+fill+'"/><path d="M100 20 L45 95 L100 95 Z" fill="'+fill+'"/><path d="M100 20 L155 95 L100 95 Z" fill="'+fill+'"/></svg>');
+}
 
-  // SVG fills + strokes
-  ['sailLeft','sailRight','hullBottom'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.style.fill = t.fill; el.style.stroke = t.stroke; }
+function setGauge(id,value){
+  const fill=document.getElementById(id+'-fill');
+  const label=document.getElementById(id+'-value');
+  if(fill)fill.style.width=value+'%';
+  if(label)label.textContent=value+'%';
+}
+
+function setText(id,value){
+  const el=document.getElementById(id);
+  if(el)el.textContent=value;
+}
+
+function setColor(key){
+  const t=THEMES[key];
+  if(!t)return;
+  currentColor=key;
+
+  ['sailLeft','sailRight','hullBottom'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.style.fill=t.fill;el.style.stroke=t.stroke;}
   });
-  ['line1','line2','line3','line4','line5','line6','ripple1','ripple2'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.stroke = key === 'glow' ? '#00ff41' : '#0a0a0a';
+  ['line1','line2','line3','line4','line5','line6','ripple1','ripple2'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.stroke=id.indexOf('ripple')===0?t.surfaceLine:t.stroke;
   });
 
-  // Right panel color name + accent line
-  const nameEl = document.getElementById('color-name');
-  if (nameEl) { nameEl.textContent = t.name; nameEl.style.color = t.acc; }
-  const lineEl = document.getElementById('color-accent-line');
-  if (lineEl) lineEl.style.background = t.acc;
+  const root=document.documentElement;
+  root.style.setProperty('--water-top',t.waterTop);
+  root.style.setProperty('--water-bottom',t.waterBottom);
+  root.style.setProperty('--surface-line',t.surfaceLine);
+  root.style.setProperty('--variant-accent',t.acc);
 
-  // Glow: tint SVG with filter
-  const svg = document.getElementById('boatSvg');
-  if (svg) {
-    if (key === 'glow') {
-      svg.style.filter = 'drop-shadow(0 0 16px #00ff41) drop-shadow(0 0 32px #00ff41)';
-    } else if (key === 'red') {
-      svg.style.filter = 'drop-shadow(0 8px 20px rgba(193,18,31,0.4))';
-    } else {
-      svg.style.filter = 'drop-shadow(0 8px 20px rgba(0,0,0,0.3))';
-    }
+  const nameEl=document.getElementById('color-name');
+  if(nameEl){nameEl.textContent=t.name;nameEl.style.color=t.acc;}
+  setText('variant-note',t.note);
+  setText('variant-foot-note',t.foot);
+  setText('variant-state-code',t.state);
+  setText('variant-ledger',t.tag);
+  setText('header-status',t.condition);
+  setText('scan-head-code',t.scanCode);
+  setText('scan-condition',t.condition);
+  setText('scan-condition-block',t.condition);
+  setText('scan-fold-status',t.foldStatus);
+  setText('scan-fragility',t.fragility);
+  setText('scan-signal-type',t.signal);
+  setText('scan-water-rating',t.water);
+  setText('archive-comment-live',t.archive);
+  setText('stage-status',t.stage);
+  setText('scan-footer-state',t.state);
+  setText('scan-footer-launch',t.launch);
+  setText('scan-footer-trace',t.trace);
+  setText('dossier-launch',t.launch);
+  setText('dossier-signal',t.signal);
+  setText('dossier-fragility',t.fragility);
+  setText('dossier-trace',t.trace);
+  setText('system-submersion',t.submersion);
+  setText('system-visibility',t.visibility);
+
+  const svg=document.getElementById('boatSvg');
+  if(svg){
+    svg.style.transform='translateY(0)';
+    svg.style.filter='drop-shadow(0 10px 12px rgba(0,0,0,.14))';
   }
 
-  // Active button state
-  document.querySelectorAll('.color-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.key === key);
+  document.querySelectorAll('.color-btn').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.key===key);
   });
 
-  // Update PRODUCT color
-  if (typeof PRODUCT !== 'undefined') {
-    PRODUCT.accent = t.acc;
-    PRODUCT.colorName = t.name;
+  if(typeof PRODUCT!=='undefined'){
+    PRODUCT.accent=t.acc;
+    PRODUCT.colorName=t.name;
+    PRODUCT.img=boatImageData(t.fill);
   }
 }
 
-// Color button clicks
-document.querySelectorAll('.color-btn').forEach(btn => {
-  btn.addEventListener('click', () => setColor(btn.dataset.key));
+function releaseObject(){
+  const scene=document.getElementById('launchScene');
+  if(!scene)return;
+  scene.classList.remove('is-releasing');
+  void scene.offsetWidth;
+  scene.classList.add('is-releasing');
+  clearTimeout(window._releasePulse);
+  window._releasePulse=setTimeout(()=>scene.classList.remove('is-releasing'),900);
+}
+
+document.querySelectorAll('.color-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>setColor(btn.dataset.key));
 });
 
-// ── CART ──
-const PRODUCT = {
-  slug:'paper-boat', name:'Paper Boat', model:'D.O.M.O-034', price:343,
-  accent:'#4a7ab5', colorName:'Faded Blue',
-  img:'data:image/svg+xml;base64,' + btoa('<svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg"><path d="M30 110 Q100 132 170 110 L155 95 Q100 112 45 95 Z" fill="#3a7fd4"/><path d="M100 20 L45 95 L100 95 Z" fill="#3a7fd4"/><path d="M100 20 L155 95 L100 95 Z" fill="#3a7fd4"/></svg>')
+const PRODUCT={
+  slug:'paper-boat',name:'Paper Boat',model:'D.O.M.O-034',price:343,
+  accent:'#8aa2c4',colorName:'Still Water',img:boatImageData('#ece8df')
 };
 
-function getCart(){try{return JSON.parse(localStorage.getItem('domo_cart'))||[];}catch{return[];}}
-function saveCart(c){localStorage.setItem('domo_cart',JSON.stringify(c));window.dispatchEvent(new Event('cartUpdated'));}
+function getCart(){try{return JSON.parse(localStorage.getItem('domo_cart'))||[];}catch(e){return[];}}
+function saveCart(cart){localStorage.setItem('domo_cart',JSON.stringify(cart));window.dispatchEvent(new Event('cartUpdated'));}
 function fmtPrice(n){return '₹'+n.toLocaleString('en-IN');}
 function openCart(){document.getElementById('cartDrawer').classList.add('open');document.getElementById('cartOverlay').classList.add('open');document.body.style.overflow='hidden';}
 function closeCart(){document.getElementById('cartDrawer').classList.remove('open');document.getElementById('cartOverlay').classList.remove('open');document.body.style.overflow='';}
@@ -523,7 +967,10 @@ function renderCart(){
   const empty=document.getElementById('cartEmpty');
   const badge=document.getElementById('cartBadge');
   body.querySelectorAll('.drawer-item').forEach(el=>el.remove());
-  if(badge){if(cart.length>0){badge.textContent=cart.length;badge.classList.remove('hidden');}else{badge.classList.add('hidden');}}
+  if(badge){
+    if(cart.length>0){badge.textContent=cart.length;badge.classList.remove('hidden');}
+    else{badge.classList.add('hidden');}
+  }
   if(cart.length===0){empty.style.display='flex';footer.style.display='none';return;}
   empty.style.display='none';footer.style.display='block';
   let sub=0;
@@ -531,7 +978,7 @@ function renderCart(){
     sub+=item.price;
     const div=document.createElement('div');
     div.className='drawer-item';
-    div.innerHTML=`<div class="drawer-item-img"><img src="${item.img}" alt="${item.name}"/></div><div class="drawer-item-info"><div class="drawer-item-name">${item.name}${item.colorName?' — '+item.colorName:''}</div><div class="drawer-item-meta">${item.model}</div><div class="drawer-item-price">${fmtPrice(item.price)}</div></div><button class="drawer-item-remove" onclick="removeFromCart(${i})">✕</button>`;
+    div.innerHTML='<div class="drawer-item-img"><img src="'+item.img+'" alt="'+item.name+'"></div><div class="drawer-item-info"><div class="drawer-item-name">'+item.name+(item.colorName?' — '+item.colorName:'')+'</div><div class="drawer-item-meta">'+item.model+'</div><div class="drawer-item-price">'+fmtPrice(item.price)+'</div></div><button class="drawer-item-remove" onclick="removeFromCart('+i+')">✕</button>';
     body.insertBefore(div,empty);
   });
   document.getElementById('cartSubtotal').textContent=fmtPrice(sub);
@@ -548,14 +995,18 @@ function addToCart(){
   cart.push(item);
   saveCart(cart);
   renderCart();
-  const orig=btn.textContent;
+  const original=btn.textContent;
   btn.textContent='Added ✓';
   btn.style.background=t.acc;
-  btn.style.color=currentColor==='white'||currentColor==='yellow'?'#0d0d0b':'#fff';
-  setTimeout(()=>{btn.textContent='Acquire Object';btn.style.background='#c1121f';btn.style.color='#0d0d0b';openCart();},300);
+  btn.style.color=(currentColor==='white'||currentColor==='yellow')?'#0d0d0b':'#fff';
+  setTimeout(()=>{
+    btn.textContent=original;
+    btn.style.background='var(--paper-ink)';
+    btn.style.color='var(--paper)';
+    openCart();
+  },320);
 }
 
-// Init color
 setColor('blue');
 
 document.addEventListener('keydown',e=>{
@@ -572,7 +1023,6 @@ const _cfg={"apiKey":"AIzaSyA6_5oWBRKZLnZhTsjtfepm2NleAEEsrPA","authDomain":"dom
 const _app=getApps().length?getApps()[0]:initializeApp(_cfg);
 const _auth=getAuth(_app);
 const _db=getFirestore(_app);
-let _currentUser=null;
 
 function initNav(u){
   const loginLi=document.getElementById('navLoginLink');
@@ -595,10 +1045,9 @@ function initNav(u){
 }
 
 onAuthStateChanged(_auth,async u=>{
-  _currentUser=u||null;
   initNav(u);
   if(!u)return;
-  try{await addDoc(collection(_db,'users',u.uid,'pageViews'),{page:"Paper Boat",slug:"paper-boat",timestamp:serverTimestamp()});}catch(e){}
+  try{await addDoc(collection(_db,'users',u.uid,'pageViews'),{page:'Paper Boat',slug:'paper-boat',timestamp:serverTimestamp()});}catch(e){}
   try{
     const ws=await getDoc(doc(_db,'users',u.uid,'wishlist','paper-boat'));
     const btn=document.getElementById('wishBtn');
@@ -619,7 +1068,8 @@ window.toggleWishlist=async()=>{
       await deleteDoc(ref);
       if(btn){btn.textContent='Save for Later ♡';btn.style.opacity='';}
     }else{
-      const p={...PRODUCT};p.img='';p.savedAt=serverTimestamp();
+      const p={...PRODUCT};
+      p.savedAt=serverTimestamp();
       await setDoc(ref,p);
       if(btn){btn.textContent='Saved ♥';btn.style.opacity='0.6';}
     }
@@ -687,7 +1137,6 @@ window.toggleWishlist=async()=>{
   });
 })();
 </script>
-
 
 </body>
 </html>
