@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery — TRIBAL TRACES</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Tiro+Devanagari+Sanskrit:ital@0;1&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- three.js import map so GLTFLoader/OrbitControls resolve cleanly -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --wall-top:    #efe4cf;   /* cream lit near ceiling */
+      --wall-mid:    #e5d6b9;   /* warm beige */
+      --wall-low:    #c8ae8a;   /* deeper tan near floor  */
+      --wood-top:    #8c6a47;   /* lit top edge of shelf */
+      --wood-face:   #6b4a2e;   /* shelf front */
+      --wood-dark:   #3f2a1a;   /* deep grain shadow */
+      --plinth:      #ece1cb;   /* light-stone plinth */
+      --ink:         #1a1a1a;
+      --gold:        #b78a3c;   /* plaque brass */
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      background: var(--wall-mid);
+      color: var(--ink);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── Back button (same feel as other pages) ─────────── */
+    .back-btn {
+      position: fixed;
+      top: 28px;
+      left: 28px;
+      width: 90px;
+      height: 90px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.25s ease, transform 0.3s ease;
+      z-index: 20;
+    }
+    .back-btn:hover  { opacity: 1; transform: translateX(-3px) scale(1.05); }
+    .back-btn:active { transform: translateX(-1px) scale(0.98); }
+    .back-btn img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+      transform: rotate(-90deg);
+    }
+
+    /* ── Museum Title ───────────────────────────────────── */
+    .gallery-header {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 96px 24px 36px;
+    }
+    .gallery-eyebrow {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.42em;
+      text-transform: uppercase;
+      color: rgba(26, 26, 26, 0.52);
+      margin: 0 0 14px;
+    }
+    .gallery-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(40px, 6vw, 80px);
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      margin: 0 0 10px;
+    }
+    .gallery-title-sanskrit {
+      font-family: 'Tiro Devanagari Sanskrit', serif;
+      font-size: clamp(18px, 2.2vw, 26px);
+      color: var(--accent, #7d2027);
+      opacity: 0.78;
+      margin: 0 0 6px;
+    }
+    .gallery-sub {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 18px;
+      color: rgba(26, 26, 26, 0.55);
+      margin: 0;
+    }
+
+    /* ── The Room ────────────────────────────────────────── */
+    .museum-room {
+      position: relative;
+      width: 100%;
+      min-height: 92vh;
+      padding: 40px 4vw 0;
+      overflow: hidden;
+      /* wall itself — vertical gradient top→bottom suggests ceiling light */
+      background:
+        radial-gradient(ellipse 80% 45% at 50% -10%, rgba(255,240,210,0.55), transparent 70%),
+        linear-gradient(180deg,
+          var(--wall-top)  0%,
+          var(--wall-mid) 40%,
+          var(--wall-mid) 72%,
+          var(--wall-low) 100%);
+    }
+
+    /* very subtle wall texture */
+    .museum-room::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>");
+      opacity: 0.08;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+
+    /* faint horizontal molding near top of the wall */
+    .museum-room::after {
+      content: "";
+      position: absolute;
+      top: 130px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent, rgba(63,42,26,0.18), rgba(63,42,26,0.18), transparent);
+      pointer-events: none;
+    }
+
+    /* ── Centerpiece: a large empty framed rectangle on the wall ── */
+    .wall-frame {
+      position: relative;
+      z-index: 2;
+      width: min(780px, 80%);
+      aspect-ratio: 3 / 2;
+      margin: 30px auto 50px;
+      border: 12px solid transparent;
+      border-image: linear-gradient(180deg, #8c6a47, #3f2a1a 55%, #6b4a2e) 1;
+      background:
+        linear-gradient(180deg, #d9c9a7, #c2ad82);
+      box-shadow:
+        0 14px 40px rgba(60, 40, 20, 0.28),
+        inset 0 0 60px rgba(60, 40, 20, 0.18);
+    }
+    /* inner mat */
+    .wall-frame::before {
+      content: "";
+      position: absolute;
+      inset: 16px;
+      background:
+        radial-gradient(ellipse at 50% 40%, rgba(255,240,210,0.45), transparent 75%),
+        linear-gradient(180deg, #eadcc0, #d5c29d);
+      box-shadow: inset 0 0 30px rgba(60, 40, 20, 0.25);
+      z-index: 0;
+    }
+    /* centerpiece image */
+    .wall-frame-img {
+      position: absolute;
+      inset: 16px;
+      width: calc(100% - 32px);
+      height: calc(100% - 32px);
+      object-fit: cover;
+      z-index: 1;
+      box-shadow: inset 0 0 30px rgba(60, 40, 20, 0.35);
+    }
+    /* small brass plaque under the frame */
+    .wall-frame::after {
+      content: "";
+      position: absolute;
+      bottom: -26px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 14px;
+      border-radius: 2px;
+      background: linear-gradient(180deg, #d7a74d, #a37627 60%, #6a4613);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+    }
+
+    /* ── Shelves container ───────────────────────────────── */
+    .shelf-stack {
+      position: relative;
+      z-index: 2;
+      max-width: 1180px;
+      margin: 20px auto 0;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 78px;
+    }
+
+    /* A single shelf row */
+    .shelf {
+      position: relative;
+    }
+
+    /* the set of slots sitting ON the shelf */
+    .shelf-items {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 24px;
+      padding: 0 14px 0;
+      margin-bottom: 0;
+    }
+
+    /* an empty display slot — a cubby / plinth top */
+    .slot {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      background:
+        linear-gradient(180deg, rgba(255,245,225,0.25), rgba(60,40,20,0.10));
+      border: 1px dashed rgba(63, 42, 26, 0.22);
+      box-shadow:
+        inset 0 6px 20px rgba(60, 40, 20, 0.12),
+        inset 0 -3px 8px rgba(60, 40, 20, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: box-shadow 0.35s ease, transform 0.35s ease;
+    }
+    .slot::before {
+      /* soft spotlight in each slot */
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 20%, rgba(255,240,210,0.35), transparent 70%);
+      pointer-events: none;
+    }
+    .slot-label {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      color: rgba(26, 26, 26, 0.28);
+    }
+
+    /* the wooden shelf itself (plank) */
+    .shelf-plank {
+      position: relative;
+      height: 22px;
+      margin-top: 6px;
+      background:
+        linear-gradient(180deg,
+          var(--wood-top) 0%,
+          var(--wood-face) 40%,
+          var(--wood-dark) 100%);
+      border-top: 1px solid rgba(255, 230, 190, 0.35);
+      box-shadow:
+        0 10px 22px rgba(40, 20, 8, 0.28),
+        0 22px 40px rgba(40, 20, 8, 0.12);
+    }
+    /* grain lines */
+    .shelf-plank::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(90deg,
+          transparent 0, transparent 22px,
+          rgba(0,0,0,0.06) 22px, rgba(0,0,0,0.06) 23px);
+      opacity: 0.9;
+    }
+    /* shelf bracket shadows on wall below */
+    .shelf-plank::after {
+      content: "";
+      position: absolute;
+      bottom: -14px;
+      left: 2%;
+      right: 2%;
+      height: 14px;
+      background: radial-gradient(ellipse 50% 100% at 50% 0%,
+        rgba(40, 20, 8, 0.22), transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── Floor plinths row (separate from shelves) ───────── */
+    .floor-row {
+      position: relative;
+      z-index: 2;
+      max-width: 1180px;
+      margin: 90px auto 0;
+      padding: 0 20px 60px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 36px;
+    }
+    .plinth {
+      position: relative;
+      aspect-ratio: 2 / 3;
+      background:
+        linear-gradient(180deg, #f0e6cf 0%, #d7c39e 60%, #b79b6e 100%);
+      border-top: 1px solid rgba(255,240,210,0.6);
+      box-shadow:
+        inset 0 0 30px rgba(60, 40, 20, 0.10),
+        0 16px 30px rgba(40, 20, 8, 0.16);
+    }
+    .plinth::before {
+      /* top cap lip */
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -6px;
+      right: -6px;
+      height: 10px;
+      background: linear-gradient(180deg, #ede0c3, #c5ab7c);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    }
+    .plinth::after {
+      /* empty placard at the foot of the plinth */
+      content: "";
+      position: absolute;
+      bottom: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 10px;
+      background: linear-gradient(180deg, #d7a74d, #a37627 60%, #6a4613);
+      opacity: 0.8;
+      border-radius: 1px;
+    }
+
+    /* floor baseline / skirting */
+    .museum-floor {
+      position: relative;
+      z-index: 2;
+      height: 28px;
+      background:
+        linear-gradient(180deg, #8c6a47 0%, #5a3a20 100%);
+      border-top: 1px solid rgba(255, 220, 180, 0.25);
+      box-shadow: 0 -12px 26px rgba(40, 20, 8, 0.22);
+    }
+
+    /* ── Artifact card (a filled slot) ───────────────────── */
+    .slot.has-artifact {
+      background:
+        linear-gradient(180deg, rgba(255,245,225,0.50), rgba(60,40,20,0.18));
+      border: 1px solid rgba(63, 42, 26, 0.28);
+      cursor: pointer;
+      overflow: hidden;
+      padding: 14px 10px 40px;
+      flex-direction: column;
+      gap: 6px;
+      transition: transform 0.45s cubic-bezier(0.4,0,0.2,1),
+                  box-shadow 0.45s ease;
+    }
+    .slot.has-artifact:hover {
+      transform: translateY(-4px);
+      box-shadow:
+        inset 0 6px 20px rgba(60, 40, 20, 0.14),
+        inset 0 -3px 8px rgba(60, 40, 20, 0.20),
+        0 18px 30px rgba(40, 20, 8, 0.25);
+    }
+    .slot.has-artifact:active { transform: translateY(-1px); }
+
+    .artifact-img-wrap {
+      flex: 1 1 auto;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+      padding: 0;
+    }
+
+    .artifact-img-wrap img {
+      max-width: 130%;
+      max-height: 130%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      transform: scale(1.25);
+      transform-origin: center;
+      filter: drop-shadow(0 10px 16px rgba(40, 20, 8, 0.40));
+      transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+    }
+    .slot.has-artifact:hover .artifact-img-wrap img {
+      transform: scale(1.32);
+    }
+
+    [data-artifact="painted-terracotta-ware"] .artifact-img-wrap img {
+      transform: scale(0.75);
+    }
+    [data-artifact="painted-terracotta-ware"]:hover .artifact-img-wrap img {
+      transform: scale(0.82);
+    }
+    [data-artifact="sankheda"] .artifact-img-wrap img {
+      transform: scale(0.55) rotate(-90deg);
+    }
+    [data-artifact="sankheda"]:hover .artifact-img-wrap img {
+      transform: scale(0.62) rotate(-90deg);
+    }
+    [data-artifact="silver-jewellery"] .artifact-img-wrap img {
+      transform: scale(0.70);
+    }
+    [data-artifact="silver-jewellery"]:hover .artifact-img-wrap img {
+      transform: scale(0.77);
+    }
+
+    /* brass plaque at the foot of the card */
+    .artifact-plaque {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 4px 12px;
+      background: linear-gradient(180deg, #d7a74d, #a37627 60%, #6a4613);
+      border-radius: 1px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #fff1d4;
+      white-space: nowrap;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+      z-index: 2;
+    }
+
+    /* tiny "view in 3D" hint pill above the plaque on hover */
+    .artifact-hint {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 4px 8px;
+      background: rgba(26, 26, 26, 0.72);
+      color: #f5ebd8;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 8px;
+      font-weight: 500;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      border-radius: 2px;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+    .slot.has-artifact:hover .artifact-hint {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Modal overlay (3D viewer) ───────────────────────── */
+    .artifact-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 36px 20px;
+      background: rgba(20, 14, 8, 0.55);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.45s ease, visibility 0s linear 0.45s;
+    }
+    .artifact-modal.open {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.45s ease, visibility 0s;
+    }
+
+    /* blur the rest of the page when modal is open */
+    body.modal-open .back-btn,
+    body.modal-open .gallery-header,
+    body.modal-open .museum-room,
+    body.modal-open .museum-floor {
+      filter: blur(10px) brightness(0.85);
+      transition: filter 0.45s ease;
+      pointer-events: none;
+    }
+
+    .modal-card {
+      position: relative;
+      width: min(920px, 94vw);
+      height: min(720px, 86vh);
+      background:
+        radial-gradient(ellipse at 50% 30%, rgba(255,240,210,0.55), transparent 70%),
+        linear-gradient(180deg, #efe4cf 0%, #d9c59d 100%);
+      border: 14px solid transparent;
+      border-image: linear-gradient(180deg, #8c6a47, #3f2a1a 55%, #6b4a2e) 1;
+      box-shadow:
+        0 30px 80px rgba(40, 20, 8, 0.55),
+        inset 0 0 60px rgba(60, 40, 20, 0.18);
+      display: flex;
+      flex-direction: column;
+      transform: scale(0.95);
+      transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+    }
+    .artifact-modal.open .modal-card { transform: scale(1); }
+
+    .modal-title-row {
+      position: relative;
+      padding: 22px 28px 12px;
+      text-align: center;
+      border-bottom: 1px solid rgba(63, 42, 26, 0.22);
+    }
+    .modal-eyebrow {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: rgba(26, 26, 26, 0.55);
+      margin: 0 0 6px;
+    }
+    .modal-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(24px, 3vw, 34px);
+      color: var(--ink);
+      margin: 0;
+      letter-spacing: 0.02em;
+    }
+    .modal-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(26, 26, 26, 0.42);
+      margin: 6px 0 0;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(63, 42, 26, 0.3);
+      background: rgba(255, 245, 225, 0.35);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: background 0.25s ease, transform 0.25s ease, color 0.25s ease;
+    }
+    .modal-close:hover {
+      background: rgba(26, 26, 26, 0.88);
+      color: #f5ebd8;
+      transform: rotate(90deg);
+    }
+
+    .modal-viewer-wrap {
+      flex: 1 1 auto;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      min-height: 360px;
+    }
+    #three-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 340px;
+      background: transparent;
+      touch-action: none;
+      outline: none;
+    }
+
+    .modal-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: rgba(26,26,26,0.45);
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .modal-loading.hide { opacity: 0; }
+    .modal-loading .spinner {
+      width: 26px;
+      height: 26px;
+      border: 2px solid rgba(26,26,26,0.15);
+      border-top-color: var(--accent, #7d2027);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .modal-hint {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(26, 26, 26, 0.42);
+    }
+
+    /* ── Artifact description rows ─────────────────────────── */
+    .shelf-desc-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 24px;
+      padding: 26px 14px 10px;
+    }
+
+    .artifact-desc {
+      padding-top: 14px;
+      border-top: 1px solid rgba(63, 42, 26, 0.20);
+    }
+
+    .artifact-desc-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 8px;
+      font-weight: 500;
+      letter-spacing: 0.36em;
+      text-transform: uppercase;
+      color: var(--gold, #b78a3c);
+      margin-bottom: 9px;
+      opacity: 0.90;
+    }
+
+    .artifact-desc-text {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 13px;
+      line-height: 1.78;
+      color: rgba(26, 26, 26, 0.66);
+      letter-spacing: 0.015em;
+    }
+
+    /* ── Responsive ──────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .shelf-items     { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+      .shelf-desc-row  { grid-template-columns: repeat(3, 1fr); gap: 18px; }
+      .floor-row       { grid-template-columns: repeat(2, 1fr); gap: 28px; }
+      .wall-frame      { width: 90%; }
+    }
+    @media (max-width: 560px) {
+      .back-btn        { top: 16px; left: 16px; width: 64px; height: 64px; }
+      .gallery-header  { padding: 76px 20px 28px; }
+      .shelf-items     { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .shelf-desc-row  { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .floor-row       { grid-template-columns: 1fr; gap: 22px; padding-bottom: 40px; }
+      .shelf-stack     { gap: 58px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Back to home -->
+  <a href="index.html" class="back-btn" aria-label="Back to home">
+    <img src="back.png" alt="Back" />
+  </a>
+
+  <!-- Title -->
+  <header class="gallery-header">
+    <p class="gallery-eyebrow">the gallery</p>
+    <h1 class="gallery-title">a quiet room</h1>
+    <p class="gallery-title-sanskrit">सङ्ग्रहालयः</p>
+    <p class="gallery-sub">where every shelf is still waiting</p>
+  </header>
+
+  <!-- The museum room -->
+  <section class="museum-room" aria-label="Museum room">
+
+    <!-- Large wall frame (centerpiece) -->
+    <div class="wall-frame">
+      <img src="center.png" alt="Centerpiece" class="wall-frame-img" />
+    </div>
+
+    <!-- Shelves -->
+    <div class="shelf-stack">
+
+      <!-- Shelf 1 -->
+      <div class="shelf">
+        <div class="shelf-items">
+          <!-- Sankheda artifact card -->
+          <button
+            type="button"
+            class="slot has-artifact"
+            data-artifact="sankheda"
+            data-glb="jhu.glb"
+            data-title="Sankheda"
+            data-sub="earthen · votive · gujarat"
+            aria-label="View Sankheda in 3D">
+            <span class="artifact-hint">3D · click</span>
+            <div class="artifact-img-wrap">
+              <img src="jhu.png" alt="Sankheda" />
+            </div>
+            <span class="artifact-plaque">Sankheda</span>
+          </button>
+
+          <!-- Silver Jewellery artifact card -->
+          <button
+            type="button"
+            class="slot has-artifact"
+            data-artifact="silver-jewellery"
+            data-glb="silver.glb"
+            data-title="Silver Jewellery"
+            data-sub="earthen · votive · gujarat"
+            aria-label="View Silver Jewellery in 3D">
+            <span class="artifact-hint">3D · click</span>
+            <div class="artifact-img-wrap">
+              <img src="silver.png" alt="Silver Jewellery" />
+            </div>
+            <span class="artifact-plaque">Silver Jewellery</span>
+          </button>
+
+          <!-- Terracotta Horse artifact card -->
+          <button
+            type="button"
+            class="slot has-artifact"
+            data-artifact="terracotta-horse"
+            data-glb="terracottahorse.opt.glb"
+            data-title="Terracotta Horse"
+            data-sub="earthen · votive · gujarat"
+            aria-label="View Terracotta Horse in 3D">
+            <span class="artifact-hint">3D · click</span>
+            <div class="artifact-img-wrap">
+              <img src="terracottahorse.png" alt="Terracotta Horse" />
+            </div>
+            <span class="artifact-plaque">Terracotta Horse</span>
+          </button>
+
+          <!-- Charu Pot artifact card -->
+          <button
+            type="button"
+            class="slot has-artifact"
+            data-artifact="charupot"
+            data-glb="pot.glb"
+            data-title="Charu Pot"
+            data-sub="earthen · votive · gujarat"
+            aria-label="View Charu Pot in 3D">
+            <span class="artifact-hint">3D · click</span>
+            <div class="artifact-img-wrap">
+              <img src="pot2.png" alt="Charu Pot" />
+            </div>
+            <span class="artifact-plaque">Charu Pot</span>
+          </button>
+
+          <!-- Painted Terracotta Ware artifact card -->
+          <button
+            type="button"
+            class="slot has-artifact"
+            data-artifact="painted-terracotta-ware"
+            data-glb="red2.glb"
+            data-title="Painted Terracotta Ware"
+            data-sub="earthen · votive · gujarat"
+            aria-label="View Painted Terracotta Ware in 3D">
+            <span class="artifact-hint">3D · click</span>
+            <div class="artifact-img-wrap">
+              <img src="red2.png" alt="Painted Terracotta Ware" />
+            </div>
+            <span class="artifact-plaque">Painted Terracotta Ware</span>
+          </button>
+
+        </div>
+        <div class="shelf-plank"></div>
+
+        <!-- Artifact descriptions -->
+        <div class="shelf-desc-row">
+
+          <div class="artifact-desc">
+            <p class="artifact-desc-label">Sankheda</p>
+            <p class="artifact-desc-text">Craftsmen of the Kharadi community coat mango-wood forms with layers of lac — a resin mixed with earth pigments — building a surface both rich and fragile. The furniture carries warmth in its weight and memory in its colour.</p>
+          </div>
+
+          <div class="artifact-desc">
+            <p class="artifact-desc-label">Silver Jewellery</p>
+            <p class="artifact-desc-text">Tribal silver from Gujarat encodes identity, season, and belonging in every curve. Cast or beaten by silversmiths who learned from their grandfathers, the pieces echo older cosmologies — moons, fish, seeds, and the unbroken line of a people who moved with the land.</p>
+          </div>
+
+          <div class="artifact-desc">
+            <p class="artifact-desc-label">Terracotta Horse</p>
+            <p class="artifact-desc-text">Terracotta horses are traditional clay figures connected to ritual, memory, and local craft. Their handmade form reflects both devotion and the living relationship between land, material, and community.</p>
+          </div>
+
+          <div class="artifact-desc">
+            <p class="artifact-desc-label">Charu Pot</p>
+            <p class="artifact-desc-text">The charu is a ritual vessel whose form has changed little across centuries. Shaped on the wheel from local clay and fired in open kilns, it carries water, grain, or sacred offerings. Its simple roundness holds a language older than text.</p>
+          </div>
+
+          <div class="artifact-desc">
+            <p class="artifact-desc-label">Painted Terracotta Ware</p>
+            <p class="artifact-desc-text">Painted terracotta from Gujarat carries the colour language of the land — ochre, red, and white drawn from earth and mineral. Each mark made on unfired clay connects the maker to generations of hands that shaped the same forms.</p>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Shelf 2 -->
+      <div class="shelf">
+        <div class="shelf-items">
+          <div class="slot"><span class="slot-label">—</span></div>
+          <div class="slot"><span class="slot-label">—</span></div>
+          <div class="slot"><span class="slot-label">—</span></div>
+          <div class="slot"><span class="slot-label">—</span></div>
+          <div class="slot"><span class="slot-label">—</span></div>
+        </div>
+        <div class="shelf-plank"></div>
+      </div>
+
+      <!-- Shelf 3 -->
+      <div class="shelf">
+        <div class="shelf-items">
+          <div class="slot"><span class="slot-label">—</span></div>
+          <div class="slot"><span class="slot-label">—</span></div>
+          <div class="slot"><span class="slot-label">—</span></div>
+          <div class="slot"><span class="slot-label">—</span></div>
+          <div class="slot"><span class="slot-label">—</span></div>
+        </div>
+        <div class="shelf-plank"></div>
+      </div>
+
+      <!-- Shelf 4 -->
+      <div class="shelf">
+        <div class="shelf-items">
+          <div class="slot"><span class="slot-label">—</span></div>
+          <div class="slot"><span class="slot-label">—</span></div>
+          <div class="slot"><span class="slot-label">—</span></div>
+          <div class="slot"><span class="slot-label">—</span></div>
+          <div class="slot"><span class="slot-label">—</span></div>
+        </div>
+        <div class="shelf-plank"></div>
+      </div>
+
+    </div>
+
+    <!-- Floor plinths row -->
+    <div class="floor-row">
+      <div class="plinth" aria-hidden="true"></div>
+      <div class="plinth" aria-hidden="true"></div>
+      <div class="plinth" aria-hidden="true"></div>
+    </div>
+
+  </section>
+
+  <!-- Museum floor baseline -->
+  <div class="museum-floor" aria-hidden="true"></div>
+
+  <!-- ====================================================
+       ARTIFACT MODAL — opens when a card is clicked.
+       The 3D .glb model is loaded via <model-viewer>;
+       user can drag to rotate, pinch to zoom.
+  ==================================================== -->
+  <div class="artifact-modal" id="artifact-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-card">
+
+      <div class="modal-title-row">
+        <p class="modal-eyebrow">artifact</p>
+        <h2 class="modal-title" id="modal-title">—</h2>
+        <p class="modal-sub" id="modal-sub">—</p>
+        <button type="button" class="modal-close" id="modal-close" aria-label="Close">×</button>
+      </div>
+
+      <div class="modal-viewer-wrap">
+        <canvas id="three-canvas"></canvas>
+        <div class="modal-loading" id="modal-loading">
+          <div class="spinner"></div>
+          <span>loading artifact</span>
+        </div>
+        <div id="modal-debug" style="display:none;"></div>
+        <p class="modal-hint">drag to rotate &nbsp;·&nbsp; scroll to zoom</p>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader }     from 'three/addons/loaders/GLTFLoader.js';
+    import { OrbitControls }  from 'three/addons/controls/OrbitControls.js';
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+    const modal     = document.getElementById('artifact-modal');
+    const canvas    = document.getElementById('three-canvas');
+    const titleEl   = document.getElementById('modal-title');
+    const subEl     = document.getElementById('modal-sub');
+    const closeBtn  = document.getElementById('modal-close');
+    const loadingEl = document.getElementById('modal-loading');
+    const debugEl   = document.getElementById('modal-debug');
+
+    function dbg(msg) {
+      const t = new Date().toLocaleTimeString();
+      debugEl.textContent += '[' + t + '] ' + msg + '\n';
+      debugEl.scrollTop = debugEl.scrollHeight;
+      console.log('[artifact]', msg);
+    }
+
+    // three.js scene
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+
+    const scene = new THREE.Scene();
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 1000);
+    camera.position.set(0, 0.8, 2.6);
+
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.7;
+
+    const key  = new THREE.DirectionalLight(0xffffff, 1.2); key.position.set(2, 3, 2);
+    const fill = new THREE.DirectionalLight(0xffe9c7, 0.4); fill.position.set(-3, 1.2, -2);
+    scene.add(key, fill, new THREE.AmbientLight(0xffffff, 0.15));
+
+    let currentModel = null;
+    const loader = new GLTFLoader();
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.max(1, rect.width);
+      const h = Math.max(1, rect.height);
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    function frameObject(obj) {
+      const box    = new THREE.Box3().setFromObject(obj);
+      const size   = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      obj.position.sub(center);
+      const maxDim = Math.max(size.x, size.y, size.z) || 1;
+      const fov    = camera.fov * Math.PI / 180;
+      const dist   = (maxDim / 2) / Math.tan(fov / 2) * 1.15;
+      camera.position.set(0, size.y * 0.15, dist);
+      camera.near = dist / 100;
+      camera.far  = dist * 100;
+      camera.updateProjectionMatrix();
+      controls.target.set(0, 0, 0);
+      controls.minDistance = dist * 0.3;
+      controls.maxDistance = dist * 4;
+      controls.update();
+      dbg('framed · size=' + size.toArray().map(v => v.toFixed(2)).join(',') +
+          ' · dist=' + dist.toFixed(2));
+    }
+
+    function loadArtifact(url) {
+      dbg('loading ' + url);
+      loadingEl.classList.remove('hide');
+      loadingEl.querySelector('span').textContent = 'loading artifact';
+
+      if (currentModel) {
+        scene.remove(currentModel);
+        currentModel.traverse((o) => {
+          if (o.isMesh) {
+            o.geometry && o.geometry.dispose();
+            if (o.material) {
+              const mats = Array.isArray(o.material) ? o.material : [o.material];
+              mats.forEach(m => m && m.dispose && m.dispose());
+            }
+          }
+        });
+        currentModel = null;
+      }
+
+      loader.load(
+        url,
+        (gltf) => {
+          currentModel = gltf.scene;
+          scene.add(currentModel);
+          resize();
+          frameObject(currentModel);
+          loadingEl.classList.add('hide');
+          dbg('LOADED');
+        },
+        (xhr) => {
+          if (xhr && xhr.lengthComputable) {
+            const pct = Math.round(xhr.loaded / xhr.total * 100);
+            loadingEl.querySelector('span').textContent =
+              'loading artifact … ' + pct + '%';
+          } else if (xhr && xhr.loaded) {
+            loadingEl.querySelector('span').textContent =
+              'loading artifact … ' + (xhr.loaded / 1024 / 1024).toFixed(1) + ' MB';
+          }
+        },
+        (err) => {
+          const msg = (err && (err.message || err.toString())) || 'unknown';
+          dbg('ERROR · ' + msg);
+          loadingEl.querySelector('span').textContent = 'failed: ' + msg;
+        }
+      );
+    }
+
+    function openArtifact(card) {
+      const glb   = card.getAttribute('data-glb');
+      const title = card.getAttribute('data-title') || '—';
+      const sub   = card.getAttribute('data-sub')   || '';
+      titleEl.textContent = title;
+      subEl.textContent   = sub;
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      requestAnimationFrame(() => {
+        resize();
+        loadArtifact(glb);
+      });
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('modal-open');
+    }
+
+    document.querySelectorAll('.slot.has-artifact').forEach((card) => {
+      card.addEventListener('click', () => openArtifact(card));
+    });
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+
+    dbg('three.js viewer ready');
+  </script>
+
+</body>
+</html>

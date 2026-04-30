@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ajrakhpur · TRIBAL TRACES</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500&family=Tiro+Devanagari+Sanskrit:ital@0;1&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* ===================================================
+       AJRAKHPUR PAGE — a slow, unrolling scroll essay
+       =================================================== */
+
+    :root {
+      --parchment:    #f5f1e8;
+      --parchment-2:  #efe7d4;
+      --parchment-3:  #e6dcc3;
+      --ink:          #1a1a1a;
+      --ink-soft:     rgba(26,26,26,0.72);
+      --ink-whisper:  rgba(26,26,26,0.40);
+      --maroon:       #7d2027;
+      --maroon-deep:  #5a1318;
+      --marigold:     #e8a34a;
+      --indigo:       #2a3a6a;
+      --wood:         #3f2a1a;
+      --line:         rgba(26,26,26,0.14);
+    }
+
+    html, body {
+      background: var(--parchment);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+    }
+    body { overflow-x: hidden; }
+
+    /* ── Top coordinate line (right side) ───────────────────── */
+    .top-loc {
+      position: fixed;
+      top: 42px;
+      right: 36px;
+      z-index: 50;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: var(--ink-soft);
+      letter-spacing: 0.04em;
+    }
+    .top-loc span { color: var(--maroon); font-style: normal; font-weight: 500; }
+
+    /* ── Back button (image, top-left) ───────────────────────── */
+    .back-btn {
+      position: fixed;
+      top: 32px;
+      left: 32px;
+      width: 110px;
+      height: 110px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      opacity: 0.85;
+      transition: opacity 0.25s ease, transform 0.3s ease;
+      z-index: 100;
+    }
+    .back-btn:hover  { opacity: 1; transform: translateX(-4px) scale(1.06); }
+    .back-btn:active { transform: translateX(-2px) scale(0.98); }
+    .back-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+      transform: rotate(-90deg);
+    }
+
+    /* ── Side arrow buttons (prev / next) ─────────────────────── */
+    .side-arrow {
+      position: fixed;
+      top: 50%;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      opacity: 0.75;
+      transition: opacity 0.25s ease, transform 0.3s ease;
+      z-index: 100;
+    }
+    .side-arrow img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+    }
+    .side-arrow.left {
+      left: 40px;
+      width: 95px;
+      height: 95px;
+      transform: translateY(-50%);
+    }
+    .side-arrow.left:hover  { opacity: 1; transform: translateY(-50%) translateX(-5px) scale(1.05); }
+    .side-arrow.left:active { transform: translateY(-50%) translateX(-2px) scale(0.98); }
+
+    .side-arrow.right {
+      right: 40px;
+      width: 115px;
+      height: 115px;
+      transform: translateY(-50%);
+    }
+    .side-arrow.right img { transform: rotate(180deg); }
+    .side-arrow.right:hover  { opacity: 1; transform: translateY(-50%) translateX(5px) scale(1.05); }
+    .side-arrow.right:active { transform: translateY(-50%) translateX(2px) scale(0.98); }
+
+    @media (max-width: 700px) {
+      .back-btn       { top: 20px; left: 20px; width: 76px; height: 76px; }
+      .side-arrow.left  { left: 12px;  width: 64px;  height: 64px; }
+      .side-arrow.right { right: 12px; width: 78px;  height: 78px; }
+      .top-loc { top: 24px; right: 18px; font-size: 12px; }
+    }
+
+    /* ── Progress rail (top-center island — matches homepage navbar) ── */
+    .progress-rail {
+      position: fixed;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 40;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 36px;
+      padding: 20px 40px;
+      background: rgba(245, 241, 232, 0.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 999px;
+      pointer-events: none;
+      box-shadow:
+        0 10px 34px rgba(40, 20, 8, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    .progress-rail::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 22px;
+      right: 22px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--line), transparent);
+      transform: translateY(-50%);
+      z-index: -1;
+    }
+    .rail-dot {
+      position: relative;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: transparent;
+      border: 1.5px solid rgba(26,26,26,0.35);
+      transition: background 0.6s ease, border-color 0.6s ease, transform 0.6s ease;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    .rail-dot.active {
+      background: var(--marigold);
+      border-color: var(--marigold);
+      transform: scale(1.35);
+      box-shadow: 0 0 0 6px rgba(232, 163, 74, 0.18);
+    }
+    .rail-dot[data-label]::after {
+      content: attr(data-label);
+      position: absolute;
+      top: calc(100% + 12px);
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: var(--ink-soft);
+      white-space: nowrap;
+      padding: 3px 9px;
+      background: rgba(245, 241, 232, 0.95);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+    .rail-dot:hover::after,
+    .rail-dot.active::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(2px);
+    }
+
+    @media (max-width: 700px) {
+      .progress-rail { gap: 16px; padding: 10px 18px; top: 14px; }
+      .rail-dot[data-label]::after { display: none; }
+    }
+
+    /* ── Hero ───────────────────────────────────────────────── */
+    .bhuj-hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      overflow: hidden;
+    }
+    /* faint dot field background */
+    .bhuj-hero::before {
+      content: "";
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle at center, rgba(125,32,39,0.18) 1px, transparent 1.5px);
+      background-size: 22px 22px;
+      mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 80%);
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.55em;
+      text-transform: uppercase;
+      color: var(--maroon);
+      margin: 0 0 32px;
+      opacity: 0;
+      animation: riseIn 1.1s 0.2s ease forwards;
+    }
+
+    .hero-title {
+      font-family: 'Nomad Kalari', Georgia, serif;
+      font-style: normal;
+      font-weight: 400;
+      font-size: clamp(64px, 13vw, 190px);
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      margin: 0;
+      color: var(--ink);
+      opacity: 0;
+      animation: riseIn 1.4s 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+    }
+
+    .hero-sanskrit {
+      font-family: 'Tiro Devanagari Sanskrit', serif;
+      font-size: clamp(20px, 2.4vw, 28px);
+      color: var(--maroon);
+      margin: 18px 0 10px;
+      letter-spacing: 0.02em;
+      opacity: 0;
+      animation: riseIn 1.2s 0.9s ease forwards;
+    }
+
+    .hero-sub {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(18px, 2vw, 22px);
+      color: var(--ink-soft);
+      max-width: 560px;
+      margin: 6px auto 0;
+      line-height: 1.6;
+      opacity: 0;
+      animation: riseIn 1.2s 1.15s ease forwards;
+    }
+
+    .hero-locator {
+      margin-top: 46px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--ink-whisper);
+      opacity: 0;
+      animation: riseIn 1.2s 1.5s ease forwards;
+    }
+    .hero-locator span { color: var(--maroon); }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      animation: riseIn 1.2s 2s ease forwards;
+    }
+    .hero-scroll-line {
+      width: 1px;
+      height: 44px;
+      background: linear-gradient(180deg, transparent, var(--ink-whisper));
+      animation: dropLine 2.2s infinite ease-in-out;
+    }
+    .hero-scroll-label {
+      font-size: 10px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--ink-whisper);
+    }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes dropLine {
+      0%, 100% { transform: scaleY(0.4); transform-origin: top; opacity: 0.5; }
+      50%      { transform: scaleY(1);   transform-origin: top; opacity: 1; }
+    }
+
+    /* ── Opening prose (narrow italic column) ──────────────── */
+    .opening {
+      max-width: 640px;
+      margin: 40px auto 80px;
+      padding: 0 28px;
+      text-align: center;
+    }
+    .opening p {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(20px, 2vw, 24px);
+      line-height: 1.7;
+      color: var(--ink-soft);
+      margin: 0;
+    }
+    .opening-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin: 44px auto 0;
+      color: var(--maroon);
+      opacity: 0.6;
+      font-size: 14px;
+      letter-spacing: 0.4em;
+    }
+
+    /* ── Chapter ────────────────────────────────────────────── */
+    .chapter {
+      position: relative;
+      padding: 120px 32px 140px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .chapter + .chapter { padding-top: 0; }
+
+    /* Ajrakh unroll seal at the top of each chapter */
+    .chapter-seal {
+      position: relative;
+      height: 34px;
+      margin: 0 auto 80px;
+      max-width: 900px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .chapter-seal::before,
+    .chapter-seal::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(125,32,39,0.35), transparent);
+      width: 40%;
+      transform: translateY(-50%) scaleX(0);
+      transform-origin: center;
+      transition: transform 1.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .chapter-seal::before { left: 0;   transform-origin: right center; }
+    .chapter-seal::after  { right: 0;  transform-origin: left  center; }
+
+    .chapter.revealed .chapter-seal::before,
+    .chapter.revealed .chapter-seal::after {
+      transform: translateY(-50%) scaleX(1);
+    }
+
+    .chapter-seal-diamonds {
+      display: flex;
+      gap: 14px;
+      color: var(--maroon);
+      font-size: 14px;
+      letter-spacing: 0.4em;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.8s 0.6s ease, transform 0.8s 0.6s ease;
+    }
+    .chapter.revealed .chapter-seal-diamonds {
+      opacity: 0.8;
+      transform: translateY(0);
+    }
+    .chapter-seal-diamonds span:nth-child(2),
+    .chapter-seal-diamonds span:nth-child(4) { color: var(--marigold); }
+
+    /* chapter header */
+    .chapter-head {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 40px;
+      align-items: end;
+      margin-bottom: 64px;
+    }
+    .chapter-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 120px;
+      line-height: 0.9;
+      color: var(--maroon);
+      opacity: 0.22;
+    }
+    .chapter-title-wrap { opacity: 0; transform: translateY(20px); transition: opacity 1s 0.2s ease, transform 1s 0.2s ease; }
+    .chapter.revealed .chapter-title-wrap { opacity: 1; transform: translateY(0); }
+
+    .chapter-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--maroon);
+      margin: 0 0 12px;
+    }
+    .chapter-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(48px, 7vw, 84px);
+      line-height: 1.05;
+      color: var(--ink);
+      margin: 0 0 8px;
+    }
+    .chapter-sanskrit {
+      font-family: 'Tiro Devanagari Sanskrit', serif;
+      font-size: 18px;
+      color: var(--ink-soft);
+      margin: 0;
+    }
+
+    /* chapter body — editorial prose */
+    .chapter-body {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 40px;
+    }
+    .chapter-body > :first-child { grid-column: 2; }
+
+    .prose {
+      max-width: 680px;
+    }
+    .prose p {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 19px;
+      line-height: 1.85;
+      color: var(--ink-soft);
+      margin: 0 0 1.4em;
+    }
+    .prose p.lede::first-letter {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 4.2em;
+      float: left;
+      line-height: 0.85;
+      padding: 0.1em 0.14em 0 0;
+      color: var(--maroon);
+    }
+    .prose em { color: var(--ink); font-style: italic; }
+
+    /* word-by-word reveal */
+    .prose .w {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .chapter.revealed .prose .w { opacity: 1; transform: translateY(0); }
+
+    /* pull quote */
+    .pullquote {
+      margin: 48px 0;
+      padding: 0 0 0 26px;
+      border-left: 2px solid var(--maroon);
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(22px, 2.4vw, 28px);
+      line-height: 1.5;
+      color: var(--maroon-deep);
+      opacity: 0;
+      transform: translateX(-8px);
+      transition: opacity 1.2s 0.3s ease, transform 1.2s 0.3s ease;
+    }
+    .chapter.revealed .pullquote { opacity: 1; transform: translateX(0); }
+
+    /* subsections inside a chapter */
+    .subsection {
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 1px solid var(--line);
+    }
+    .subsection-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.55em;
+      text-transform: uppercase;
+      color: var(--maroon);
+      margin: 0 0 12px;
+    }
+    .subsection-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(28px, 3.6vw, 42px);
+      font-weight: 500;
+      line-height: 1.1;
+      color: var(--ink);
+      margin: 0 0 26px;
+    }
+
+    /* tiny stat/fact strip */
+    .fact-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 28px;
+      margin: 56px 0 20px;
+      padding: 28px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .fact-strip-item .num {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 38px;
+      color: var(--maroon);
+      line-height: 1;
+    }
+    .fact-strip-item .lbl {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      margin-top: 10px;
+    }
+
+    /* image slot — parchment plate with caption */
+    .plate {
+      margin: 56px 0;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .plate-img {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background:
+        linear-gradient(180deg, var(--parchment-2), var(--parchment-3));
+      border: 1px solid var(--line);
+      box-shadow:
+        inset 0 0 40px rgba(60,40,20,0.10),
+        0 10px 30px rgba(40,20,8,0.08);
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      color: rgba(26,26,26,0.22);
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 14px;
+      letter-spacing: 0.2em;
+    }
+    .plate-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .plate-caption {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: var(--ink-whisper);
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+
+    /* tribe / community chip strip */
+    .tribe-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 30px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .tribe-strip li {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink-soft);
+      background: rgba(255,255,255,0.3);
+    }
+
+    /* closing whisper */
+    .bhuj-close {
+      text-align: center;
+      padding: 140px 24px 80px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .bhuj-close .diamonds {
+      color: var(--maroon);
+      opacity: 0.5;
+      font-size: 14px;
+      letter-spacing: 0.5em;
+      margin-bottom: 40px;
+    }
+    .bhuj-close .sanskrit {
+      font-family: 'Tiro Devanagari Sanskrit', serif;
+      font-size: clamp(22px, 2.4vw, 28px);
+      color: var(--maroon);
+      margin: 0 0 14px;
+    }
+    .bhuj-close .translation {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(18px, 2vw, 22px);
+      color: var(--ink-soft);
+      line-height: 1.6;
+    }
+
+    /* Responsive */
+    @media (max-width: 720px) {
+      .chapter-head { grid-template-columns: 1fr; gap: 8px; }
+      .chapter-num { font-size: 64px; }
+      .chapter-body { grid-template-columns: 1fr; }
+      .chapter-body > :first-child { grid-column: 1; }
+      .progress-rail { right: 14px; gap: 16px; }
+      .rail-dot[data-label]::after { display: none; }
+      .top-loc { font-size: 12px; }
+      .chapter { padding: 80px 22px 100px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== BACK + SIDE NAVIGATION ========== -->
+  <a href="index.html#map-section" class="back-btn" aria-label="Back to Gujarat map">
+    <img src="back.png" alt="Back" />
+  </a>
+
+  <a href="bhuj.html" class="side-arrow left" aria-label="Previous city — Bhuj">
+    <img src="arrow.png" alt="" />
+  </a>
+
+  <a href="empty.html" class="side-arrow right" aria-label="Next city">
+    <img src="arrow.png" alt="" />
+  </a>
+
+  <div class="top-loc"><span>23.12° N</span> &nbsp;·&nbsp; <span>69.78° E</span> &nbsp;·&nbsp; <em>Kutch</em></div>
+
+  <!-- ========== PROGRESS RAIL ========== -->
+  <nav class="progress-rail" aria-label="Chapter progress">
+    <a class="rail-dot" href="#ch-name"          data-label="The Art in the Name"></a>
+    <a class="rail-dot" href="#ch-village"        data-label="The Art in the Village"></a>
+    <a class="rail-dot" href="#ch-history"        data-label="The Art in the History"></a>
+    <a class="rail-dot" href="#ch-process"        data-label="The Art in the Process"></a>
+    <a class="rail-dot" href="#ch-blocks"         data-label="The Art in the Blocks"></a>
+    <a class="rail-dot" href="#ch-pattern"        data-label="The Art in the Pattern"></a>
+    <a class="rail-dot" href="#ch-color"          data-label="The Art in the Color"></a>
+    <a class="rail-dot" href="#ch-community"      data-label="The Art in the Community"></a>
+    <a class="rail-dot" href="#ch-migration"      data-label="The Art in Migration"></a>
+    <a class="rail-dot" href="#ch-use"            data-label="The Art in Everyday Use"></a>
+    <a class="rail-dot" href="#ch-contemporary"   data-label="The Art in Contemporary Relevance"></a>
+  </nav>
+
+  <!-- ========== HERO ========== -->
+  <section class="bhuj-hero" aria-label="Ajrakhpur">
+    <p class="hero-eyebrow">Gujarat · Kutch · Chapter Two</p>
+    <h1 class="hero-title">Ajrakhpur</h1>
+    <p class="hero-sanskrit">अजरखपुर · नीलस्य गाथा</p>
+    <p class="hero-sub">A village where indigo, discipline, and generations of knowledge become cloth.</p>
+    <p class="hero-locator"><span>23.12° N</span> &nbsp;·&nbsp; <span>69.78° E</span> &nbsp;·&nbsp; in the lap of Kutch</p>
+
+    <div class="hero-scroll" aria-hidden="true">
+      <div class="hero-scroll-line"></div>
+      <span class="hero-scroll-label">unroll</span>
+    </div>
+  </section>
+
+  <!-- ========== OPENING PROSE ========== -->
+  <section class="opening" aria-label="Opening">
+    <p>
+      Ajrakhpur is not famous for a landscape. It is not famous for a landmark.
+      It is famous for a <em>process</em>. Around a hundred families here spend weeks —
+      sometimes three — turning plain cloth into Ajrakh: block by block, dye bath by
+      dye bath, washing cycle by washing cycle. This is a village where
+      <em>making</em> is the culture, not a remnant of it.
+    </p>
+    <div class="opening-divider" aria-hidden="true">
+      <span>◇</span><span>◈</span><span>◇</span>
+    </div>
+  </section>
+
+  <!-- ========== CHAPTER 1 — THE ART IN THE NAME ========== -->
+  <article class="chapter" id="ch-name" data-chapter="1">
+    <div class="chapter-seal" aria-hidden="true">
+      <div class="chapter-seal-diamonds">
+        <span>◇</span><span>◈</span><span>◇</span><span>◈</span><span>◇</span>
+      </div>
+    </div>
+
+    <header class="chapter-head">
+      <div class="chapter-num">I</div>
+      <div class="chapter-title-wrap">
+        <p class="chapter-eyebrow">Chapter One</p>
+        <h2 class="chapter-title">The Art in the Name</h2>
+        <p class="chapter-sanskrit">नामधेयम् · in the word lies the world</p>
+      </div>
+    </header>
+
+    <div class="chapter-body">
+      <div class="prose" data-reveal>
+        <p class="lede">
+          The word <em>Ajrakh</em> carries more inside it than most art forms
+          manage to carry in their entire biography. Before you see the cloth,
+          before you touch a printed block or smell a dye bath, the name itself
+          already tells you something true and difficult about what this art is.
+        </p>
+
+        <p>
+          One story says Ajrakh means <em>keep it today</em> — a reference to the
+          long, multi-day process that demands patience at every stage. You cannot
+          hurry it. You cannot compress it. The cloth is not ready until it is ready,
+          and the name already knows this.
+        </p>
+
+        <p>
+          Another thread connects Ajrakh to <em>azrakh</em> — the Arabic word for
+          indigo. The color that defines the palette. The color that gives Ajrakh
+          its most recognizable depth. So in the name there is both a hue and a
+          philosophy: the blue of waiting, the blue of discipline, the blue of time.
+        </p>
+
+        <div class="pullquote">
+          Good work cannot be rushed. The name already knew this long before
+          anyone thought to say it out loud.
+        </div>
+
+        <p>
+          The art in the name lies in how it already contains an entire artistic
+          worldview. Time. Color. Waiting. Process. Tradition. These are not
+          descriptions layered onto Ajrakh after the fact — they are what the name
+          itself announces. Brutal news for modern people with seven-second
+          attention spans.
+        </p>
+
+        <ul class="tribe-strip" aria-label="What the name holds">
+          <li>Time</li><li>Color</li><li>Waiting</li>
+          <li>Process</li><li>Tradition</li><li>Indigo</li>
+        </ul>
+      </div>
+    </div>
+  </article>
+
+  <!-- ========== CHAPTER 2 — THE ART IN THE VILLAGE ========== -->
+  <article class="chapter" id="ch-village" data-chapter="2">
+    <div class="chapter-seal" aria-hidden="true">
+      <div class="chapter-seal-diamonds">
+        <span>◇</span><span>◈</span><span>◇</span><span>◈</span><span>◇</span>
+      </div>
+    </div>
+
+    <header class="chapter-head">
+      <div class="chapter-num">II</div>
+      <div class="chapter-title-wrap">
+        <p class="chapter-eyebrow">Chapter Two</p>
+        <h2 class="chapter-title">The Art in the Village</h2>
+        <p class="chapter-sanskrit">ग्रामः · the village as a living workshop</p>
+      </div>
+    </header>
+
+    <div class="chapter-body">
+      <div class="prose" data-reveal>
+        <p class="lede">
+          Ajrakhpur is not famous because it happens to have some random scenic
+          charm or an old fort nearby. It matters because the village itself is
+          a craft ecosystem — a living, working environment built entirely around
+          a single art form.
+        </p>
+
+        <p>
+          When about a hundred families in a single settlement all participate in
+          Ajrakh production, the village stops being just a place where people
+          live. It becomes a collective workspace. Courtyards become printing
+          tables. Rooftops become drying racks. Homes hold dye knowledge and
+          block collections and generational memory side by side with kitchens
+          and children's drawings.
+        </p>
+
+        <div class="pullquote">
+          The village itself can be understood as a collective workshop landscape —
+          where art lives in homes, courtyards, dye spaces, and the space between
+          one generation and the next.
+        </div>
+
+        <p>
+          Ajrakhpur is linked to older Ajrakh centers like <em>Dhamadka</em>,
+          showing that it belongs to a lineage of traditional print centers rather
+          than appearing from nowhere. The art in the village is not a coincidence.
+          It is what the village was built to hold.
+        </p>
+
+        <ul class="tribe-strip" aria-label="What the village is">
+          <li>Production Space</li><li>Learning Space</li><li>Heritage Space</li>
+          <li>Family Network</li><li>Continuation Zone</li>
+        </ul>
+      </div>
+    </div>
+  </article>
+
+  <!-- ========== CHAPTER 3 — THE ART IN THE HISTORY ========== -->
+  <article class="chapter" id="ch-history" data-chapter="3">
+    <div class="chapter-seal" aria-hidden="true">
+      <div class="chapter-seal-diamonds">
+        <span>◇</span><span>◈</span><span>◇</span><span>◈</span><span>◇</span>
+      </div>
+    </div>
+
+    <header class="chapter-head">
+      <div class="chapter-num">III</div>
+      <div class="chapter-title-wrap">
+        <p class="chapter-eyebrow">Chapter Three</p>
+        <h2 class="chapter-title">The Art in the History</h2>
+        <p class="chapter-sanskrit">इतिहासः · tradition as a living river</p>
+      </div>
+    </header>
+
+    <div class="chapter-body">
+      <div class="prose" data-reveal>
+        <p class="lede">
+          Ajrakhpur does not exist in isolation. It belongs to the larger history of
+          Ajrakh block printing in Kutch — a tradition shaped over generations by
+          community use, trade networks, dye knowledge, regional identity,
+          and inherited skill.
+        </p>
+
+        <p>
+          Ajrakh has historically been worn by communities across Kutch — Rabaris,
+          Maldharis, and Ahirs — as turbans, lungis, and stoles. It has appeared at
+          weddings and during Eid. It has been part of everyday wear and special
+          occasion alike, meaning it carries both the ordinary and the sacred within
+          the same block-printed surface.
+        </p>
+
+        <ul class="tribe-strip" aria-label="Communities that have worn Ajrakh">
+          <li>Rabari</li><li>Maldhari</li><li>Ahir</li><li>Khatri</li>
+        </ul>
+
+        <div class="pullquote">
+          Ajrakhpur is important not only because it prints fabric. It is important
+          because it holds a historical system of making that still survives.
+        </div>
+
+        <p>
+          The art in history lies in <em>continuity</em>. Ajrakhpur carries forward
+          a tradition shaped by community use, trade routes, dye intelligence, and
+          regional belonging. History here is not something that happened. It is
+          something that keeps being made, wash by wash, block by block.
+        </p>
+
+        <div class="plate">
+          <div class="plate-img">
+            <span>— ajrakh on the body · Kutch, Rann season —</span>
+          </div>
+          <div class="plate-caption"><em>turban, lungi, stole — the cloth worn into history</em></div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ========== CHAPTER 4 — THE ART IN THE PROCESS ========== -->
+  <article class="chapter" id="ch-process" data-chapter="4">
+    <div class="chapter-seal" aria-hidden="true">
+      <div class="chapter-seal-diamonds">
+        <span>◇</span><span>◈</span><span>◇</span><span>◈</span><span>◇</span>
+      </div>
+    </div>
+
+    <header class="chapter-head">
+      <div class="chapter-num">IV</div>
+      <div class="chapter-title-wrap">
+        <p class="chapter-eyebrow">Chapter Four</p>
+        <h2 class="chapter-title">The Art in the Process</h2>
+        <p class="chapter-sanskrit">क्रियाः · discipline woven into cloth</p>
+      </div>
+    </header>
+
+    <div class="chapter-body">
+      <div class="prose" data-reveal>
+        <p class="lede">
+          This is the heart of Ajrakhpur. The process is not just a method — it
+          is the art itself. The final cloth is beautiful, yes, but the real
+          brilliance lies in what happens before it is beautiful: fourteen to
+          sixteen stages of washing, resisting, printing, mordanting, dyeing,
+          drying, and beginning again.
+        </p>
+
+        <div class="fact-strip">
+          <div class="fact-strip-item"><div class="num">14–16</div><div class="lbl">Stages from start to finish</div></div>
+          <div class="fact-strip-item"><div class="num">~3 weeks</div><div class="lbl">Time per cloth</div></div>
+          <div class="fact-strip-item"><div class="num">~20</div><div class="lbl">Blocks used in printing</div></div>
+          <div class="fact-strip-item"><div class="num">~100</div><div class="lbl">Families in Ajrakhpur</div></div>
+        </div>
+
+        <p>
+          The stages can include: washing and de-starching the fabric, treating it
+          with myrobalan or harde, printing with resist pastes, applying mordants
+          such as alum, dyeing with indigo and other natural colors, repeated
+          drying and washing, and reprinting for layered effects. Each stage
+          prepares the cloth for the next — invisibly, patiently, precisely.
+        </p>
+
+        <p>
+          The natural materials used are just as remarkable as the method: pomegranate
+          seeds, gum, harde powder, wood, flour of kachika, flower of dhavadi,
+          alizarin, and locally cultivated indigo. These are not purchased pigments
+          from a catalog. They are the chemistry of a specific landscape, drawn from
+          what the land near Kutch makes available.
+        </p>
+
+        <ul class="tribe-strip" aria-label="Natural materials in Ajrakh">
+          <li>Indigo</li><li>Madder</li><li>Alum</li><li>Harde</li>
+          <li>Pomegranate</li><li>Alizarin</li><li>Dhavadi</li><li>Kachika</li>
+        </ul>
+
+        <div class="pullquote">
+          The artisan must imagine the finished design while moving through many
+          invisible stages. Ajrakh is art through process intelligence.
+        </div>
+
+        <p>
+          The art in the process lies in discipline, sequencing, chemistry, hand
+          skill, timing, and the control of repetition. To make Ajrakh is to hold
+          the final image in your mind while your hands are still in the first
+          washing stage. That is a particular kind of intelligence — not easy to
+          teach, not easy to rush.
+        </p>
+      </div>
+    </div>
+  </article>
+
+  <!-- ========== CHAPTER 5 — THE ART IN THE BLOCKS ========== -->
+  <article class="chapter" id="ch-blocks" data-chapter="5">
+    <div class="chapter-seal" aria-hidden="true">
+      <div class="chapter-seal-diamonds">
+        <span>◇</span><span>◈</span><span>◇</span><span>◈</span><span>◇</span>
+      </div>
+    </div>
+
+    <header class="chapter-head">
+      <div class="chapter-num">V</div>
+      <div class="chapter-title-wrap">
+        <p class="chapter-eyebrow">Chapter Five</p>
+        <h2 class="chapter-title">The Art in the Blocks</h2>
+        <p class="chapter-sanskrit">मुद्राः · the block as the mind of pattern</p>
+      </div>
+    </header>
+
+    <div class="chapter-body">
+      <div class="prose" data-reveal>
+        <p class="lede">
+          Around twenty carved wooden blocks are used in the resist-printing and
+          dyeing process of a single Ajrakh cloth. Each block contributes exactly
+          one layer of the pattern. Each layer has to align properly with the one
+          before it, and the one that will come after.
+        </p>
+
+        <p>
+          The blocks are arranged so that their impressions join seamlessly —
+          continuing the pattern without interruption or visible break. One block
+          ends where the next begins. The cloth does not show the seams. It shows
+          only the rhythm.
+        </p>
+
+        <div class="pullquote">
+          Modular by design. Handmade by touch. The block is where mechanical
+          logic and human hand agree to work together without either one winning.
+        </div>
+
+        <p>
+          The art in the blocks lies in: repetition without visible break, exact
+          registration, pattern logic, modular design, and rhythm across the cloth.
+          Ajrakhpur is important for design study because it shows how a modular
+          system can still feel deeply handmade and soulful. Which is a very hard
+          thing to do well, and most modular design today manages to feel exactly
+          like a spreadsheet that got overconfident.
+        </p>
+
+        <div class="plate">
+          <div class="plate-img">
+            <span>— carved teak blocks · Ajrakhpur workshop —</span>
+          </div>
+          <div class="plate-caption"><em>twenty blocks, one cloth, zero visible seams</em></div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ========== CHAPTER 6 — THE ART IN THE PATTERN ========== -->
+  <article class="chapter" id="ch-pattern" data-chapter="6">
+    <div class="chapter-seal" aria-hidden="true">
+      <div class="chapter-seal-diamonds">
+        <span>◇</span><span>◈</span><span>◇</span><span>◈</span><span>◇</span>
+      </div>
+    </div>
+
+    <header class="chapter-head">
+      <div class="chapter-num">VI</div>
+      <div class="chapter-title-wrap">
+        <p class="chapter-eyebrow">Chapter Six</p>
+        <h2 class="chapter-title">The Art in the Pattern</h2>
+        <p class="chapter-sanskrit">रूपम् · geometry as devotion</p>
+      </div>
+    </header>
+
+    <div class="chapter-body">
+      <div class="prose" data-reveal>
+        <p class="lede">
+          Ajrakh patterns are not decorative in the casual sense. They use complex
+          geometry to create constellation-like arrangements — fields of indigo,
+          madder, black, and white that feel simultaneously mathematical and alive.
+          The kind of thing that makes you stop and want to find the logic, and
+          then stop again because the logic is beautiful.
+        </p>
+
+        <p>
+          These motifs echo the forms of Islamic architecture — the intricate
+          latticework of <em>jali</em> windows, the overlapping rhythms of
+          <em>trefoil arches</em>. There is a shared visual vocabulary between
+          cloth and stone here, between surface and structure. The block carries
+          the memory of the wall.
+        </p>
+
+        <div class="pullquote">
+          Ajrakh patterning feels mathematical, but not cold. It turns strict
+          structure into something alive. That is a very hard thing to do well.
+        </div>
+
+        <p>
+          The art in the pattern lies in geometry, symmetry, repetition, and the
+          balance between visual fullness and visual clarity. Nothing in an Ajrakh
+          pattern feels random, but nothing feels mechanical either. Ajrakhpur is
+          one of the places where that precise, difficult knowledge is still
+          actively practiced and passed on.
+        </p>
+
+        <ul class="tribe-strip" aria-label="What the pattern holds">
+          <li>Geometry</li><li>Symmetry</li><li>Repetition</li>
+          <li>Sacred Order</li><li>Visual Balance</li><li>Depth</li>
+        </ul>
+      </div>
+    </div>
+  </article>
+
+  <!-- ========== CHAPTER 7 — THE ART IN THE COLOR ========== -->
+  <article class="chapter" id="ch-color" data-chapter="7">
+    <div class="chapter-seal" aria-hidden="true">
+      <div class="chapter-seal-diamonds">
+        <span>◇</span><span>◈</span><span>◇</span><span>◈</span><span>◇</span>
+      </div>
+    </div>
+
+    <header class="chapter-head">
+      <div class="chapter-num">VII</div>
+      <div class="chapter-title-wrap">
+        <p class="chapter-eyebrow">Chapter Seven</p>
+        <h2 class="chapter-title">The Art in the Color</h2>
+        <p class="chapter-sanskrit">वर्णः · restraint as power</p>
+      </div>
+    </header>
+
+    <div class="chapter-body">
+      <div class="prose" data-reveal>
+        <p class="lede">
+          Ajrakh does not try to dazzle you with fifty colors. It builds power
+          through a tightly controlled palette — indigo blue, madder red, black,
+          and the undyed white or cream of the ground cloth. Four voices.
+          All of them necessary. None of them extra.
+        </p>
+
+        <p>
+          Red, blue, black, and lighter tones emerge through a mix of resist and
+          dye methods: alum as mordant for the reds, iron-based processes for the
+          blacks, indigo baths for the blues. The chemistry of the color is inseparable
+          from the visual result. You cannot separate what it looks like from how it
+          was made.
+        </p>
+
+        <ul class="tribe-strip" aria-label="The Ajrakh palette">
+          <li>Indigo Blue</li><li>Madder Red</li><li>Iron Black</li>
+          <li>Undyed White</li><li>Alum Gold</li>
+        </ul>
+
+        <div class="pullquote">
+          The art in color lies in restraint and depth. Ajrakh does not scream.
+          It endures. And endurance is a more interesting kind of power.
+        </div>
+
+        <p>
+          The result feels earthy and celestial at once — rooted in the landscape
+          of Kutch while looking like something that could belong to the night sky.
+          That is one of the reasons Ajrakh from Ajrakhpur has moved well beyond
+          traditional use into contemporary design and fashion — carrying its
+          palette intact, on its own terms.
+        </p>
+
+        <div class="plate">
+          <div class="plate-img">
+            <span>— the ajrakh palette · indigo, madder, black, white —</span>
+          </div>
+          <div class="plate-caption"><em>four colors, one worldview</em></div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- ========== CHAPTER 8 — THE ART IN THE COMMUNITY ========== -->
+  <article class="chapter" id="ch-community" data-chapter="8">
+    <div class="chapter-seal" aria-hidden="true">
+      <div class="chapter-seal-diamonds">
+        <span>◇</span><span>◈</span><span>◇</span><span>◈</span><span>◇</span>
+      </div>
+    </div>
+
+    <header class="chapter-head">
+      <div class="chapter-num">VIII</div>
+      <div class="chapter-title-wrap">
+        <p class="chapter-eyebrow">Chapter Eight</p>
+        <h2 class="chapter-title">The Art in the Community</h2>
+        <p class="chapter-sanskrit">समाजः · knowledge held in common hands</p>
+      </div>
+    </header>
+
+    <div class="chapter-body">
+      <div class="prose" data-reveal>
+        <p class="lede">
+          Ajrakhpur is not about individual artisans making individual things.
+          Around a hundred families participate in Ajrakh production here —
+          household-level, family-level, generation-level. The knowledge is not
+          stored in one master's head. It is distributed across the whole village.
+        </p>
+
+        <p>
+          Elders pass methods down. Families specialize through repetition.
+          Children grow up around the process — watching, helping, eventually
+          leading. The village identity itself becomes tied to the craft. You
+          cannot separate being from Ajrakhpur from knowing Ajrakh. They are
+          the same thing.
+        </p>
+
+        <div class="pullquote">
+          Ajrakhpur represents art as living inheritance — not just art as product.
+          The community is the archive. The hands are the library.
+        </div>
+
+        <p>
+          The art in the community lies in how knowledge is held collectively. It
+          is not fragile in the way that single-master traditions can be fragile.
+          When knowledge lives in a hundred households, it does not die when one
+          person stops making. It continues, distributed, practiced, alive.
+        </p>
+
+        <ul class="tribe-strip" aria-label="How community holds the art">
+          <li>Elders Teach</li><li>Families Repeat</li><li>Children Watch</li>
+          <li>Village Remembers</li><li>Craft Identifies</li>
+        </ul>
+      </div>
+    </div>
+  </article>
+
+  <!-- ========== CHAPTER 9 — THE ART IN MIGRATION AND REBUILDING ========== -->
+  <article class="chapter" id="ch-migration" data-chapter="9">
+    <div class="chapter-seal" aria-hidden="true">
+      <div class="chapter-seal-diamonds">
+        <span>◇</span><span>◈</span><span>◇</span><span>◈</span><span>◇</span>
+      </div>
+    </div>
+
+    <header class="chapter-head">
+      <div class="chapter-num">IX</div>
+      <div class="chapter-title-wrap">
+        <p class="chapter-eyebrow">Chapter Nine</p>
+        <h2 class="chapter-title">The Art in Migration and Rebuilding</h2>
+        <p class="chapter-sanskrit">प्रवासः · survival as continuity</p>
+      </div>
+    </header>
+
+    <div class="chapter-body">
+      <div class="prose" data-reveal>
+        <p class="lede">
+          Ajrakhpur is described as a recently created settlement — a newer
+          village linked to Ajrakh artisans and their continuity within Kutch.
+          It belongs to the post-disruption landscape of Ajrakh practice, part of
+          the reorganization of a tradition that had to move, adapt, and rebuild
+          without losing itself in the process.
+        </p>
+
+        <p>
+          What this means is important: Ajrakhpur was not always where it is.
+          The tradition arrived here by finding its way through change. It did not
+          stop. It responded. The craft shifted geography without shifting its
+          identity, which is exactly the kind of resilience that is very difficult
+          to teach and impossible to fake.
+        </p>
+
+        <div class="pullquote">
+          A tradition that can respond to changing geography, economy, and social
+          conditions without disappearing is not just surviving. It is proving
+          something about its own depth.
+        </div>
+
+        <p>
+          The art in migration and rebuilding lies in survival. Not the dramatic,
+          heroic kind — the quiet, insistent, village-level kind. The kind where
+          you set up a new printing table in a new courtyard and begin again on
+          the same cloth, with the same blocks, using water from a different well.
+        </p>
+      </div>
+    </div>
+  </article>
+
+  <!-- ========== CHAPTER 10 — THE ART IN EVERYDAY USE ========== -->
+  <article class="chapter" id="ch-use" data-chapter="10">
+    <div class="chapter-seal" aria-hidden="true">
+      <div class="chapter-seal-diamonds">
+        <span>◇</span><span>◈</span><span>◇</span><span>◈</span><span>◇</span>
+      </div>
+    </div>
+
+    <header class="chapter-head">
+      <div class="chapter-num">X</div>
+      <div class="chapter-title-wrap">
+        <p class="chapter-eyebrow">Chapter Ten</p>
+        <h2 class="chapter-title">The Art in Everyday Use</h2>
+        <p class="chapter-sanskrit">उपयोगः · art worn on the body</p>
+      </div>
+    </header>
+
+    <div class="chapter-body">
+      <div class="prose" data-reveal>
+        <p class="lede">
+          Ajrakh is not a gallery object. It has never been. It has been worn by
+          Rabaris, Maldharis, and Ahirs as turbans, lungis, and stoles — on
+          ordinary days, at weddings, during Eid, across the landscape of Kutch.
+          Today it is used for shawls, bedsheets, scarves. Cloth that lives
+          alongside people, not behind glass.
+        </p>
+
+        <p>
+          That matters more than it sounds. When art lives on the body and in
+          the home, it does not lose meaning — it gains a different kind of
+          meaning. It accumulates days. It folds with use. It is gifted, inherited,
+          worn out, replaced. The art cycle is not a wall and a label; it is a
+          body and a season.
+        </p>
+
+        <div class="pullquote">
+          Ajrakhpur is a village where art is still connected to life, body,
+          and routine — not just gallery walls.
+        </div>
+
+        <p>
+          The art in everyday use lies in the fact that Ajrakh is not trapped in
+          a frame. It is worn. It is folded. It is gifted. It is used in ritual
+          and in the domestic. This keeps Ajrakhpur's craft in a completely
+          different conversation from art that gets made, celebrated, sold, and
+          then stored in a climate-controlled room somewhere.
+        </p>
+
+        <ul class="tribe-strip" aria-label="How Ajrakh is used">
+          <li>Turban</li><li>Lungi</li><li>Stole</li>
+          <li>Shawl</li><li>Bedsheet</li><li>Wedding Gift</li><li>Eid Wear</li>
+        </ul>
+      </div>
+    </div>
+  </article>
+
+  <!-- ========== CHAPTER 11 — THE ART IN CONTEMPORARY RELEVANCE ========== -->
+  <article class="chapter" id="ch-contemporary" data-chapter="11">
+    <div class="chapter-seal" aria-hidden="true">
+      <div class="chapter-seal-diamonds">
+        <span>◇</span><span>◈</span><span>◇</span><span>◈</span><span>◇</span>
+      </div>
+    </div>
+
+    <header class="chapter-head">
+      <div class="chapter-num">XI</div>
+      <div class="chapter-title-wrap">
+        <p class="chapter-eyebrow">Chapter Eleven</p>
+        <h2 class="chapter-title">The Art in Contemporary Relevance</h2>
+        <p class="chapter-sanskrit">आधुनिकता · tradition speaking forward</p>
+      </div>
+    </header>
+
+    <div class="chapter-body">
+      <div class="prose" data-reveal>
+        <p class="lede">
+          Ajrakh has made its way into high-end fashion labels. That sentence is
+          worth reading slowly, because it could mean two very different things
+          depending on how it happened. What matters is not just that Ajrakh
+          entered contemporary design — it is that it entered without losing
+          what it actually is.
+        </p>
+
+        <p>
+          The natural dye logic of Ajrakh offers something contemporary design
+          circles want but cannot easily manufacture: genuine material rootedness.
+          Not a "natural aesthetic" applied as a branding layer — actual knowledge
+          of pigment, chemistry, landscape, and process, accumulated over
+          generations in a specific place.
+        </p>
+
+        <div class="pullquote">
+          Ajrakhpur offers a model of how heritage can speak to contemporary
+          design without becoming fake ethnic chic nonsense. The tradition
+          knows something the trend does not.
+        </div>
+
+        <p>
+          The art in contemporary relevance lies in Ajrakh's ability to remain
+          traditional while still feeling urgently present. Modular surface
+          design. Natural dye logic. Strong craft identity. A palette that feels
+          both ancient and completely current. Ajrakhpur matters today because it
+          holds all of this in one place — not as archive, but as active practice.
+        </p>
+
+        <ul class="tribe-strip" aria-label="Why Ajrakh is relevant now">
+          <li>Natural Dye Logic</li><li>Modular Design</li><li>Craft Identity</li>
+          <li>Sustainable Roots</li><li>Living Practice</li><li>Fashion Integration</li>
+        </ul>
+      </div>
+    </div>
+  </article>
+
+  <!-- ========== CLOSING WHISPER ========== -->
+  <section class="bhuj-close" aria-label="Closing">
+    <div class="diamonds" aria-hidden="true">◇ &nbsp; ◈ &nbsp; ◇ &nbsp; ◈ &nbsp; ◇</div>
+    <p class="sanskrit">यत्र नीलः वस्त्रे वसति, तत्र कलाः श्वसिति</p>
+    <p class="translation"><em>where indigo lives in cloth, art breathes.</em></p>
+  </section>
+
+  <!-- ========== FOOTER (matches homepage) ========== -->
+  <footer class="site-foot" id="site-foot">
+    <div class="foot-divider" aria-hidden="true">
+      <span>◇</span><span>◈</span><span>◇</span><span>◈</span><span>◇</span>
+    </div>
+
+    <div class="foot-inner">
+      <div class="foot-col foot-brand">
+        <a href="index.html#top" class="foot-mark" aria-label="TRIBAL TRACES">
+          <svg class="foot-logo" viewBox="0 0 32 32" aria-hidden="true">
+            <circle cx="16" cy="16" r="3.4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+            <g stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+              <line x1="16" y1="4"    x2="16" y2="8.5"/>
+              <line x1="16" y1="23.5" x2="16" y2="28"/>
+              <line x1="4"  y1="16"   x2="8.5" y2="16"/>
+              <line x1="23.5" y1="16" x2="28" y2="16"/>
+              <line x1="7"  y1="7"    x2="10" y2="10"/>
+              <line x1="22" y1="22"   x2="25" y2="25"/>
+              <line x1="25" y1="7"    x2="22" y2="10"/>
+              <line x1="10" y1="22"   x2="7"  y2="25"/>
+            </g>
+          </svg>
+          <span class="foot-wordmark">TRIBAL TRACES</span>
+        </a>
+        <p class="foot-tag"><em>a calm ode to India —</em><br/>stories, crafts, and quiet corners<br/>of a country that still listens.</p>
+      </div>
+
+      <div class="foot-col">
+        <h4 class="foot-title">Explore</h4>
+        <ul class="foot-list">
+          <li><a href="begin.html">Begin</a></li>
+          <li><a href="index.html#map-section">Map</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="#">About</a></li>
+        </ul>
+      </div>
+
+      <div class="foot-col">
+        <h4 class="foot-title">Threads</h4>
+        <ul class="foot-list">
+          <li><a href="#">Journal</a></li>
+          <li><a href="#">Artisans</a></li>
+          <li><a href="#">Places</a></li>
+          <li><a href="#">Rituals</a></li>
+        </ul>
+      </div>
+
+      <div class="foot-col">
+        <h4 class="foot-title">Connect</h4>
+        <ul class="foot-list">
+          <li><a href="#">Email</a></li>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">Newsletter</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="foot-whisper">
+      सत्यं शिवं सुन्दरम् &nbsp;·&nbsp; <em>truth, goodness, beauty</em>
+    </p>
+
+    <div class="foot-bottom">
+      <span>made slowly</span>
+      <span class="foot-bullet" aria-hidden="true">◇</span>
+      <span>© 2026 TRIBAL TRACES</span>
+      <span class="foot-bullet" aria-hidden="true">◇</span>
+      <span>all stories belong to their tellers</span>
+    </div>
+  </footer>
+
+  <script>
+    // =========================================================
+    // AJRAKHPUR PAGE — reveal & progress rail
+    // =========================================================
+    (function () {
+      'use strict';
+
+      // ── 1. Wrap every word in prose blocks for word-by-word reveal ──
+      const proseBlocks = document.querySelectorAll('[data-reveal]');
+      proseBlocks.forEach((block) => {
+        const nodes = block.querySelectorAll('p, .pullquote, li');
+        let wordIndex = 0;
+        nodes.forEach((node) => {
+          const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, null);
+          const textNodes = [];
+          let n;
+          while ((n = walker.nextNode())) textNodes.push(n);
+
+          textNodes.forEach((tn) => {
+            const text = tn.nodeValue;
+            if (!text.trim()) return;
+            const frag = document.createDocumentFragment();
+            text.split(/(\s+)/).forEach((chunk) => {
+              if (chunk.match(/^\s+$/)) {
+                frag.appendChild(document.createTextNode(chunk));
+              } else if (chunk.length) {
+                const span = document.createElement('span');
+                span.className = 'w';
+                span.textContent = chunk;
+                span.style.transitionDelay = Math.min(wordIndex * 18, 2400) + 'ms';
+                frag.appendChild(span);
+                wordIndex++;
+              }
+            });
+            tn.parentNode.replaceChild(frag, tn);
+          });
+        });
+      });
+
+      // ── 2. IntersectionObserver for chapter reveal ──
+      const chapters  = document.querySelectorAll('.chapter');
+      const railDots  = document.querySelectorAll('.rail-dot');
+
+      const revealObs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) e.target.classList.add('revealed');
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+
+      chapters.forEach((c) => revealObs.observe(c));
+
+      // ── 3. Progress rail — active dot follows current chapter ──
+      const activeObs = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          const idx = parseInt(e.target.getAttribute('data-chapter'), 10) - 1;
+          railDots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        });
+      }, { threshold: 0.35 });
+
+      chapters.forEach((c) => activeObs.observe(c));
+
+      // ── 4. Smooth scroll on rail dot click ──
+      railDots.forEach((dot) => {
+        dot.addEventListener('click', (e) => {
+          e.preventDefault();
+          const href = dot.getAttribute('href');
+          const target = document.querySelector(href);
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>

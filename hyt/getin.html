@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enter — TRIBAL TRACES</title>
+
+  <!-- Fonts: Cormorant for English, Tiro Devanagari Sanskrit for the Sanskrit labels -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400&family=Tiro+Devanagari+Sanskrit:ital@0;1&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    :root{
+      --dusk-1: #1f1d1b;
+      --dusk-2: #2a2622;
+      --ivory:  #f5ebd8;
+      --marigold: #e8a34a;
+      --terracotta: #c94b3a;
+      --hair: rgba(245,235,216,0.14);
+    }
+
+    html, body { height: 100%; }
+
+    body{
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 20% 15%, rgba(232,163,74,0.10), transparent 55%),
+        radial-gradient(ellipse at 80% 85%, rgba(201,75,58,0.08), transparent 55%),
+        linear-gradient(180deg, var(--dusk-1) 0%, var(--dusk-2) 100%);
+      color: var(--ivory);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* faint fractal-noise texture */
+    body::before{
+      content:"";
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.06;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>");
+    }
+
+    /* ── Back button (top-left, same feel as empty.html) ── */
+    .back-btn {
+      position: fixed;
+      top: 28px;
+      left: 28px;
+      width: 92px;
+      height: 92px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      opacity: 0.75;
+      transition: opacity 0.25s ease, transform 0.3s ease;
+      z-index: 10;
+    }
+    .back-btn:hover  { opacity: 1; transform: translateX(-3px) scale(1.05); }
+    .back-btn:active { transform: translateX(-1px) scale(0.98); }
+    .back-btn img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+      transform: rotate(-90deg);
+    }
+
+    /* ── Stage ───────────────────────────────────────────── */
+    .getin-stage{
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 24px 60px;
+      text-align: center;
+    }
+
+    .getin-eyebrow{
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: rgba(245,235,216,0.55);
+      margin: 0 0 14px;
+    }
+
+    .getin-title{
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(30px, 4.6vw, 54px);
+      line-height: 1.2;
+      letter-spacing: 0.01em;
+      color: var(--ivory);
+      margin: 0 0 8px;
+    }
+
+    .getin-sanskrit-title{
+      font-family: 'Tiro Devanagari Sanskrit', serif;
+      font-size: clamp(18px, 2.2vw, 24px);
+      color: var(--marigold);
+      opacity: 0.85;
+      margin: 0 0 64px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Two-option row ──────────────────────────────────── */
+    .getin-options{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(40px, 9vw, 120px);
+      flex-wrap: wrap;
+    }
+
+    .getin-option{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      padding: 14px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .getin-option:hover { transform: translateY(-6px); }
+    .getin-option:active { transform: translateY(-2px) scale(0.98); }
+
+    .getin-option-img-wrap{
+      width: clamp(180px, 22vw, 260px);
+      height: clamp(180px, 22vw, 260px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: filter 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    /* soft breathing halo */
+    .getin-option-img-wrap::after{
+      content: "";
+      position: absolute;
+      inset: -14px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,163,74,0.14), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.45s ease;
+      pointer-events: none;
+    }
+    .getin-option:hover .getin-option-img-wrap::after { opacity: 1; }
+
+    .getin-option-img-wrap img{
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 8px 22px rgba(0,0,0,0.35));
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+    .getin-option:hover .getin-option-img-wrap img {
+      transform: scale(1.04);
+    }
+
+    .getin-option-label{
+      font-family: 'Tiro Devanagari Sanskrit', serif;
+      font-size: clamp(22px, 2.6vw, 30px);
+      color: var(--ivory);
+      letter-spacing: 0.04em;
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    .getin-option-sub{
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: rgba(245,235,216,0.5);
+      margin-top: 4px;
+    }
+
+    /* thin divider between the two options (only on wide screens) */
+    .getin-divider{
+      width: 1px;
+      height: 160px;
+      background: linear-gradient(180deg,
+        transparent 0%,
+        rgba(245,235,216,0.22) 50%,
+        transparent 100%);
+      align-self: center;
+    }
+
+    /* ── Footer whisper ──────────────────────────────────── */
+    .getin-whisper{
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      text-transform: lowercase;
+      color: rgba(245,235,216,0.38);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* ── Entrance animations ─────────────────────────────── */
+    @keyframes rise-in {
+      0%   { opacity: 0; transform: translateY(18px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .getin-eyebrow,
+    .getin-title,
+    .getin-sanskrit-title,
+    .getin-options,
+    .getin-whisper {
+      opacity: 0;
+      animation: rise-in 1.1s cubic-bezier(0.4,0,0.2,1) forwards;
+    }
+    .getin-eyebrow         { animation-delay: 0.10s; }
+    .getin-title           { animation-delay: 0.35s; }
+    .getin-sanskrit-title  { animation-delay: 0.60s; }
+    .getin-options         { animation-delay: 0.95s; }
+    .getin-whisper         { animation-delay: 1.40s; }
+
+    /* ── Page exit (soft fade on click) ──────────────────── */
+    body {
+      transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1),
+                  filter  0.7s cubic-bezier(0.4,0,0.2,1);
+    }
+    body.leaving {
+      opacity: 0;
+      filter: blur(4px);
+    }
+    body.leaving .getin-option.chosen .getin-option-img-wrap {
+      transform: scale(1.08);
+      transition: transform 0.7s cubic-bezier(0.4,0,0.2,1);
+    }
+    body.leaving .getin-option.chosen .getin-option-img-wrap::after {
+      opacity: 1;
+      transition: opacity 0.5s ease;
+    }
+
+    /* ── Mobile ──────────────────────────────────────────── */
+    @media (max-width: 720px) {
+      .back-btn { top: 18px; left: 18px; width: 68px; height: 68px; }
+      .getin-divider { display: none; }
+      .getin-options { gap: 48px; flex-direction: column; }
+      .getin-sanskrit-title { margin-bottom: 44px; }
+      .getin-whisper { font-size: 12px; letter-spacing: 0.12em; white-space: normal; width: 90%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Back to Begin -->
+  <a href="begin.html" class="back-btn" aria-label="Back">
+    <img src="back.png" alt="Back" />
+  </a>
+
+  <main class="getin-stage">
+
+    <p class="getin-eyebrow">step inside</p>
+    <h1 class="getin-title">choose your path</h1>
+    <p class="getin-sanskrit-title">स्वमार्गं चिनु</p>
+
+    <div class="getin-options">
+
+      <!-- Login -->
+      <a href="index.html" class="getin-option" aria-label="Login">
+        <div class="getin-option-img-wrap">
+          <img src="login.png" alt="" />
+        </div>
+        <p class="getin-option-label">प्रवेशः</p>
+        <p class="getin-option-sub">login</p>
+      </a>
+
+      <div class="getin-divider" aria-hidden="true"></div>
+
+      <!-- Sign Up -->
+      <a href="index.html" class="getin-option" aria-label="Sign up">
+        <div class="getin-option-img-wrap">
+          <img src="signup.png" alt="" />
+        </div>
+        <p class="getin-option-label">पञ्जीकरणम्</p>
+        <p class="getin-option-sub">sign up</p>
+      </a>
+
+    </div>
+
+    <p class="getin-whisper">अतिथिदेवो भव &nbsp;·&nbsp; the guest is divine</p>
+
+  </main>
+
+  <script>
+    (function () {
+      const options = document.querySelectorAll('.getin-option');
+      options.forEach(function (opt) {
+        opt.addEventListener('click', function (e) {
+          const href = opt.getAttribute('href');
+          if (!href || href === '#') return;
+          e.preventDefault();
+          opt.classList.add('chosen');
+          document.body.classList.add('leaving');
+          setTimeout(function () { window.location.href = href; }, 650);
+        });
+      });
+
+      // soft fade for the back button too
+      const back = document.querySelector('.back-btn');
+      if (back) {
+        back.addEventListener('click', function (e) {
+          const href = back.getAttribute('href');
+          if (!href) return;
+          e.preventDefault();
+          document.body.classList.add('leaving');
+          setTimeout(function () { window.location.href = href; }, 550);
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>

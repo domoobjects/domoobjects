@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRIBAL TRACES</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Tiro+Devanagari+Sanskrit:ital@0;1&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* ── Review pop-up ───────────────────────────────────── */
+    #review-popup {
+      position: fixed;
+      bottom: 36px;
+      right: 36px;
+      z-index: 900;
+      width: 258px;
+      background: rgba(245, 241, 232, 0.97);
+      backdrop-filter: blur(16px) saturate(1.2);
+      -webkit-backdrop-filter: blur(16px) saturate(1.2);
+      border: 1px solid rgba(125, 32, 39, 0.18);
+      border-radius: 16px;
+      box-shadow:
+        0 14px 40px rgba(40, 20, 8, 0.22),
+        0 2px 8px rgba(40, 20, 8, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.55);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(14px);
+      pointer-events: none;
+      transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    #review-popup.rp-visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    #review-popup.rp-hiding {
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+    }
+    #rp-bar {
+      height: 2px;
+      background: #7d2027;
+      width: 100%;
+      transform-origin: left center;
+      transform: scaleX(1);
+    }
+    .rp-inner {
+      padding: 18px 20px 16px;
+    }
+    .rp-text {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.58;
+      color: #3d1020;
+      letter-spacing: 0.02em;
+      margin-bottom: 16px;
+    }
+    .rp-btns {
+      display: flex;
+      gap: 9px;
+    }
+    .rp-btns button {
+      flex: 1;
+      padding: 8px 0;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.30em;
+      text-transform: uppercase;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+    }
+    #rp-yes {
+      background: #7d2027;
+      color: #f5ebd8;
+      border: 1px solid #7d2027;
+    }
+    #rp-yes:hover { background: #5c1518; border-color: #5c1518; }
+    #rp-no {
+      background: transparent;
+      color: rgba(61, 16, 32, 0.68);
+      border: 1px solid rgba(125, 32, 39, 0.26);
+    }
+    #rp-no:hover {
+      background: rgba(125, 32, 39, 0.07);
+      border-color: rgba(125, 32, 39, 0.45);
+    }
+    @media (max-width: 480px) {
+      #review-popup { right: 16px; bottom: 20px; width: calc(100vw - 32px); }
+    }
+
+    /* ── Audio Tour ──────────────────────────────────────── */
+    .tour-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 6, 2, 0.62);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, visibility 0s linear 0.4s;
+    }
+    .tour-overlay.open {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.4s ease;
+    }
+
+    .tour-panel {
+      width: min(460px, 88vw);
+      background: rgba(245, 241, 232, 0.98);
+      border: 1px solid rgba(125, 32, 39, 0.16);
+      border-radius: 4px;
+      padding: 44px 48px 40px;
+      text-align: center;
+      box-shadow:
+        0 32px 80px rgba(0, 0, 0, 0.40),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      transform: scale(0.96) translateY(8px);
+      transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .tour-overlay.open .tour-panel {
+      transform: scale(1) translateY(0);
+    }
+
+    .tour-step {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 0.44em;
+      text-transform: uppercase;
+      color: rgba(26, 26, 26, 0.36);
+      margin-bottom: 20px;
+    }
+
+    .tour-heading {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(28px, 4vw, 38px);
+      color: #1a1a1a;
+      letter-spacing: 0.02em;
+      line-height: 1.22;
+      margin-bottom: 16px;
+    }
+
+    .tour-divider {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      color: rgba(125, 32, 39, 0.34);
+      font-size: 9px;
+      margin-bottom: 22px;
+    }
+
+    .tour-body {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.74;
+      color: rgba(26, 26, 26, 0.58);
+      letter-spacing: 0.02em;
+      margin-bottom: 30px;
+    }
+
+    .tour-btn {
+      display: inline-block;
+      padding: 10px 36px;
+      background: #7d2027;
+      color: #f5ebd8;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      border: 1px solid #7d2027;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+    .tour-btn:hover { background: #5c1518; border-color: #5c1518; }
+
+    .tour-btn-ghost {
+      display: inline-block;
+      padding: 10px 36px;
+      background: transparent;
+      color: rgba(61, 16, 32, 0.65);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      border: 1px solid rgba(125, 32, 39, 0.26);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    }
+    .tour-btn-ghost:hover {
+      background: rgba(125, 32, 39, 0.07);
+      border-color: rgba(125, 32, 39, 0.48);
+      color: #7d2027;
+    }
+
+    .tour-lang-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 14px 20px;
+      background: rgba(255, 248, 234, 0.7);
+      border: 1px solid rgba(125, 32, 39, 0.16);
+      border-radius: 3px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-size: 20px;
+      color: #1a1a1a;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+    .tour-lang-btn:hover {
+      background: rgba(125, 32, 39, 0.05);
+      border-color: rgba(125, 32, 39, 0.42);
+    }
+    .tour-lang-arrow {
+      color: rgba(125, 32, 39, 0.46);
+      font-style: normal;
+      font-size: 14px;
+    }
+
+    .tour-quit-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    /* Lock overlay — intercepts all pointer events during tour */
+    #tour-lock {
+      position: fixed;
+      inset: 0;
+      z-index: 1500;
+      cursor: default;
+      display: none;
+    }
+    #tour-lock.active { display: block; }
+
+    /* ESC hint notification */
+    #tour-esc-hint {
+      position: fixed;
+      bottom: 24px;
+      left: 22px;
+      z-index: 3000;
+      padding: 8px 18px;
+      background: rgba(26, 26, 26, 0.84);
+      color: #f5ebd8;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      border-radius: 3px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(5px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #tour-esc-hint.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Language toggle in hamburger menu ──────────────── */
+    .pop-lang-wrap {
+      opacity: 0;
+      transform: translateY(10px);
+      transition:
+        opacity 0.5s cubic-bezier(0.2,0.7,0.2,1) calc(0.38s + 5 * 0.08s),
+        transform 0.5s cubic-bezier(0.2,0.7,0.2,1) calc(0.38s + 5 * 0.08s);
+    }
+    .menu-overlay.open .pop-lang-wrap { opacity: 1; transform: translateY(0); }
+
+    .pop-item--lang {
+      display: grid;
+      grid-template-columns: 26px 1fr auto 18px;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: #1a1a1a;
+      position: relative;
+      transition: background 0.35s ease;
+    }
+    .pop-item--lang:hover { background: rgba(232,163,74,0.15); }
+    .pop-item--lang::before {
+      content: "";
+      position: absolute;
+      left: 4px; top: 14px; bottom: 14px;
+      width: 2px;
+      background: #e8a34a;
+      border-radius: 2px;
+      transform: scaleY(0);
+      transform-origin: center;
+      transition: transform 0.45s cubic-bezier(0.2,0.7,0.2,1);
+    }
+    .pop-item--lang:hover::before,
+    .pop-lang-wrap.open .pop-item--lang::before { transform: scaleY(1); }
+
+    .pi-lang-chevron {
+      font-size: 16px;
+      color: rgba(125,32,39,0.50);
+      line-height: 1;
+      text-align: right;
+      display: inline-block;
+      transition: transform 0.35s cubic-bezier(0.2,0.7,0.2,1), opacity 0.3s ease;
+      opacity: 0;
+    }
+    .pop-item--lang:hover .pi-lang-chevron { opacity: 1; }
+    .pop-lang-wrap.open .pi-lang-chevron   { opacity: 1; transform: rotate(180deg); }
+
+    .lang-sub {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.42s cubic-bezier(0.2,0.7,0.2,1), opacity 0.3s ease;
+      padding: 0 12px 0 24px;
+    }
+    .pop-lang-wrap.open .lang-sub { max-height: 110px; opacity: 1; }
+
+    .lang-opt {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      padding: 9px 12px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .lang-opt:hover { background: rgba(232,163,74,0.15); }
+
+    .lang-opt-mark {
+      color: #7d2027;
+      font-size: 8px;
+      width: 10px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .lang-opt-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 22px;
+      color: #1a1a1a;
+      letter-spacing: -0.005em;
+      line-height: 1;
+      transition: color 0.3s ease;
+    }
+    .lang-opt:hover .lang-opt-name { color: #7d2027; }
+
+    /* ── Hindi font overrides ────────────────────────────── */
+    body.lang-hi .hero-wordmark-text {
+      font-family: 'Tiro Devanagari Sanskrit', serif;
+      font-size: clamp(42px, 8vw, 110px);
+    }
+    body.lang-hi .hero-wordmark-sub,
+    body.lang-hi .scroll-cue-label,
+    body.lang-hi .nav-wordmark,
+    body.lang-hi .foot-wordmark {
+      font-family: 'Tiro Devanagari Sanskrit', serif;
+    }
+
+    /* ── Footer review button ────────────────────────────── */
+    .foot-review-wrap {
+      text-align: center;
+      margin: 0 auto 28px;
+    }
+    .foot-review-btn {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: rgba(61, 16, 32, 0.62);
+      text-decoration: none;
+      padding: 7px 20px;
+      border: 1px solid rgba(125, 32, 39, 0.22);
+      border-radius: 999px;
+      transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+    }
+    .foot-review-btn:hover {
+      color: #7d2027;
+      border-color: rgba(125, 32, 39, 0.55);
+      background: rgba(125, 32, 39, 0.06);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ======================================================
+       NAVBAR  —  "Island" form
+       A soft, floating cream-glass pill.  Tribal DNA is whisper-
+       quiet: a small Warli sun mark beside the wordmark, tiny
+       Ajrakh diamond separators between the links, and a 3-dot
+       Pithora menu glyph.
+  ====================================================== -->
+  <nav id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-island">
+
+      <!-- Left — small Warli sun + wordmark -->
+      <a href="#top" class="nav-brand" aria-label="TRIBAL TRACES — home">
+        <svg class="nav-logo" viewBox="0 0 32 32" aria-hidden="true">
+          <circle cx="16" cy="16" r="3.4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <g stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+            <line x1="16" y1="4"   x2="16" y2="8.5"/>
+            <line x1="16" y1="23.5" x2="16" y2="28"/>
+            <line x1="4"  y1="16"  x2="8.5" y2="16"/>
+            <line x1="23.5" y1="16" x2="28" y2="16"/>
+            <line x1="7"  y1="7"  x2="10" y2="10"/>
+            <line x1="22" y1="22" x2="25" y2="25"/>
+            <line x1="25" y1="7"  x2="22" y2="10"/>
+            <line x1="10" y1="22" x2="7"  y2="25"/>
+          </g>
+        </svg>
+        <span class="nav-wordmark" data-i18n="nav-wordmark">Tribal Traces</span>
+      </a>
+
+      <!-- Center — nav links with tiny Ajrakh diamond separators -->
+      <ul class="nav-links" role="menubar">
+        <li role="none"><a role="menuitem" href="begin.html"    class="nav-title" data-i18n="nav-begin">Begin</a></li>
+        <li class="nav-sep" aria-hidden="true">◇</li>
+        <li role="none"><a role="menuitem" href="#map-section"  class="nav-title" data-i18n="nav-map">Map</a></li>
+        <li class="nav-sep" aria-hidden="true">◇</li>
+        <li role="none"><a role="menuitem" href="gallery.html"  class="nav-title" data-i18n="nav-gallery">Gallery</a></li>
+        <li class="nav-sep" aria-hidden="true">◇</li>
+        <li role="none"><a role="menuitem" href="about.html"    class="nav-title" data-i18n="nav-about">About</a></li>
+      </ul>
+
+      <!-- Right — 3-dot Pithora menu -->
+      <button type="button" class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="menu-overlay">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════════
+       HAMBURGER MENU — floating popover
+       A small parchment card that drops from under ☰.
+  ══════════════════════════════════════════════════ -->
+  <div class="menu-overlay" id="menu-overlay" aria-hidden="true">
+    <div class="menu-scrim"></div>
+
+    <div class="menu-pop" role="dialog" aria-modal="true" aria-label="Navigation menu">
+      <span class="pop-tail" aria-hidden="true"></span>
+
+      <header class="pop-head">
+        <span class="pop-eyebrow" data-i18n="menu-eyebrow">Menu</span>
+        <span class="pop-sep">◇</span>
+        <span class="pop-sans" data-i18n="menu-sans">मार्गः</span>
+      </header>
+
+      <div class="pop-rule" aria-hidden="true"></div>
+
+      <nav class="pop-list" aria-label="Primary">
+        <a class="pop-item" href="begin.html" style="--i:0">
+          <span class="pi-num">I</span>
+          <span class="pi-word" data-i18n="menu-begin">Begin</span>
+          <span class="pi-sans" data-i18n="menu-begin-sans">आरम्भः</span>
+          <span class="pi-arrow" aria-hidden="true">⟶</span>
+        </a>
+        <a class="pop-item" href="index.html#map-section" style="--i:1">
+          <span class="pi-num">II</span>
+          <span class="pi-word" data-i18n="menu-map">Map</span>
+          <span class="pi-sans" data-i18n="menu-map-sans">भूचित्रम्</span>
+          <span class="pi-arrow" aria-hidden="true">⟶</span>
+        </a>
+        <a class="pop-item" href="gallery.html" style="--i:2">
+          <span class="pi-num">III</span>
+          <span class="pi-word" data-i18n="menu-gallery">Gallery</span>
+          <span class="pi-sans" data-i18n="menu-gallery-sans">शिल्पालयः</span>
+          <span class="pi-arrow" aria-hidden="true">⟶</span>
+        </a>
+        <a class="pop-item" href="about.html" style="--i:3">
+          <span class="pi-num">IV</span>
+          <span class="pi-word" data-i18n="menu-about">About</span>
+          <span class="pi-sans" data-i18n="menu-about-sans">विषये</span>
+          <span class="pi-arrow" aria-hidden="true">⟶</span>
+        </a>
+        <a class="pop-item" href="#" id="tour-menu-btn" style="--i:4" aria-label="Start Audio Tour">
+          <span class="pi-num">V</span>
+          <span class="pi-word" data-i18n="menu-audio">Audio Tour</span>
+          <span class="pi-sans" data-i18n="menu-audio-sans">श्रव्यः</span>
+          <span class="pi-arrow" aria-hidden="true">⟶</span>
+        </a>
+        <!-- Language toggle -->
+        <div class="pop-lang-wrap" id="pop-lang-wrap" style="--i:5">
+          <button class="pop-item pop-item--lang" id="lang-toggle-btn" aria-expanded="false">
+            <span class="pi-num">VI</span>
+            <span class="pi-word" data-i18n="menu-lang">Language</span>
+            <span class="pi-sans" data-i18n="menu-lang-sans">भाषा</span>
+            <span class="pi-lang-chevron" aria-hidden="true">⌄</span>
+          </button>
+          <div class="lang-sub" id="lang-sub" aria-hidden="true">
+            <button class="lang-opt" id="lang-opt-en" data-lang="en">
+              <span class="lang-opt-mark">◆</span>
+              <span class="lang-opt-name" data-i18n="menu-lang-en">English</span>
+            </button>
+            <button class="lang-opt" id="lang-opt-hi" data-lang="hi">
+              <span class="lang-opt-mark">◇</span>
+              <span class="lang-opt-name" data-i18n="menu-lang-hi">हिन्दी</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <footer class="pop-foot">
+        <span class="pf-diamonds" aria-hidden="true">◇ · ◈ · ◇</span>
+        <span class="pf-whisper" data-i18n-html="pop-foot-whisper"><em>truth · goodness · beauty</em></span>
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- ======================================================
+       HERO
+       hero-track provides the scroll distance (300vh).
+       hero-stage is sticky — stays in view during that scroll.
+  ====================================================== -->
+  <section class="hero-track" aria-label="Hero">
+    <div class="hero-stage">
+
+      <!-- Particle canvas — abstract India constellation -->
+      <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+      <!-- Centered intro wordmark — fades as you scroll -->
+      <div class="hero-wordmark" id="hero-wordmark" aria-hidden="true">
+        <span class="hero-wordmark-text" data-i18n="hero-title">TRIBAL TRACES</span>
+        <span class="hero-wordmark-sub" data-i18n="hero-sub">tribal's visual notes</span>
+      </div>
+
+      <!-- Scroll cue -->
+      <div class="scroll-cue" aria-hidden="true">
+        <div class="scroll-cue-line"></div>
+        <span class="scroll-cue-label" data-i18n="scroll-cue">scroll</span>
+      </div>
+
+    </div><!-- /hero-stage -->
+  </section><!-- /hero-track -->
+
+  <!-- ======================================================
+       MAP SECTION — Interactive India / Gujarat
+  ====================================================== -->
+  <section class="map-section" id="map-section">
+    <div class="map-wrapper" id="map-wrapper">
+      <svg
+        id="india-map"
+        viewBox="0 0 800 900"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-label="Interactive India map — click Gujarat to explore"
+      >
+        <defs>
+          <!-- Soft glow for Gujarat dots -->
+          <filter id="gj-glow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          <!-- Stronger glow on hover -->
+          <filter id="gj-glow-strong" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Layer 1: faint India silhouette -->
+        <g id="india-base"></g>
+
+        <!-- Layer 2: all-India dot field -->
+        <g id="india-dots"></g>
+
+        <!-- Layer 3: Gujarat interactive dots -->
+        <g id="gujarat-dots"></g>
+
+        <!-- Layer 4: Gujarat detail dotted map (hidden until second click) -->
+        <g id="gujarat-detail" style="opacity:0; pointer-events:none;"></g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ======================================================
+       FOOTER — quiet closing band
+       A parchment coda: small Warli sun, four columns, a
+       Sanskrit whisper, Ajrakh diamonds as separators.
+  ====================================================== -->
+  <footer class="site-foot" id="site-foot">
+
+    <!-- Diamond divider (Ajrakh tessellation rhythm) -->
+    <div class="foot-divider" aria-hidden="true">
+      <span>◇</span><span>◈</span><span>◇</span><span>◈</span><span>◇</span>
+    </div>
+
+    <div class="foot-inner">
+
+      <!-- Brand column -->
+      <div class="foot-col foot-brand">
+        <a href="#top" class="foot-mark" aria-label="TRIBAL TRACES">
+          <svg class="foot-logo" viewBox="0 0 32 32" aria-hidden="true">
+            <circle cx="16" cy="16" r="3.4" fill="none" stroke="currentColor" stroke-width="1.2"/>
+            <g stroke="currentColor" stroke-width="1.2" stroke-linecap="round">
+              <line x1="16" y1="4"    x2="16" y2="8.5"/>
+              <line x1="16" y1="23.5" x2="16" y2="28"/>
+              <line x1="4"  y1="16"   x2="8.5" y2="16"/>
+              <line x1="23.5" y1="16" x2="28" y2="16"/>
+              <line x1="7"  y1="7"    x2="10" y2="10"/>
+              <line x1="22" y1="22"   x2="25" y2="25"/>
+              <line x1="25" y1="7"    x2="22" y2="10"/>
+              <line x1="10" y1="22"   x2="7"  y2="25"/>
+            </g>
+          </svg>
+          <span class="foot-wordmark" data-i18n="foot-wordmark">TRIBAL TRACES</span>
+        </a>
+        <p class="foot-tag" data-i18n-html="foot-tag"><em>a calm ode to India —</em><br/>stories, crafts, and quiet corners<br/>of a country that still listens.</p>
+      </div>
+
+      <!-- Explore column -->
+      <div class="foot-col">
+        <h4 class="foot-title" data-i18n="foot-explore">Explore</h4>
+        <ul class="foot-list">
+          <li><a href="begin.html"   data-i18n="foot-begin">Begin</a></li>
+          <li><a href="#map-section" data-i18n="foot-map">Map</a></li>
+          <li><a href="#"            data-i18n="foot-gallery">Gallery</a></li>
+          <li><a href="about.html"   data-i18n="foot-about">About</a></li>
+        </ul>
+      </div>
+
+      <!-- Threads column -->
+      <div class="foot-col">
+        <h4 class="foot-title" data-i18n="foot-threads">Threads</h4>
+        <ul class="foot-list">
+          <li><a href="#" data-i18n="foot-journal">Journal</a></li>
+          <li><a href="#" data-i18n="foot-artisans">Artisans</a></li>
+          <li><a href="#" data-i18n="foot-places">Places</a></li>
+          <li><a href="#" data-i18n="foot-rituals">Rituals</a></li>
+        </ul>
+      </div>
+
+      <!-- Connect column -->
+      <div class="foot-col">
+        <h4 class="foot-title" data-i18n="foot-connect">Connect</h4>
+        <ul class="foot-list">
+          <li><a href="#" data-i18n="foot-email">Email</a></li>
+          <li><a href="#" data-i18n="foot-instagram">Instagram</a></li>
+          <li><a href="#" data-i18n="foot-newsletter">Newsletter</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Sanskrit whisper -->
+    <p class="foot-whisper" data-i18n-html="foot-whisper">
+      सत्यं शिवं सुन्दरम् &nbsp;·&nbsp; <em>truth, goodness, beauty</em>
+    </p>
+
+    <!-- Review link -->
+    <div class="foot-review-wrap">
+      <a href="review.html" class="foot-review-btn" data-i18n="foot-review-btn">◇ &nbsp;Reviews&nbsp; ◇</a>
+    </div>
+
+    <!-- Bottom line -->
+    <div class="foot-bottom">
+      <span data-i18n="foot-made">made slowly</span>
+      <span class="foot-bullet" aria-hidden="true">◇</span>
+      <span data-i18n="foot-copyright">© 2026 TRIBAL TRACES</span>
+      <span class="foot-bullet" aria-hidden="true">◇</span>
+      <span data-i18n="foot-stories">all stories belong to their tellers</span>
+    </div>
+
+  </footer>
+
+  <span class="version-tag" aria-hidden="true">v1.0</span>
+
+  <!-- ══════════ AUDIO TOUR PANELS ══════════ -->
+
+  <!-- Panel 1: Welcome -->
+  <div class="tour-overlay" id="tour-overlay-1" aria-hidden="true">
+    <div class="tour-panel">
+      <p class="tour-step">◇ &nbsp;audio tour · 01 of 03&nbsp; ◇</p>
+      <h2 class="tour-heading">Welcome to<br/>the Audio Tour</h2>
+      <div class="tour-divider" aria-hidden="true">◇ &nbsp;◈&nbsp; ◇</div>
+      <p class="tour-body">A guided listening experience through Tribal Traces. Sit back — the story comes to you. The site moves on its own. You only listen.</p>
+      <button class="tour-btn" id="tour-next-1">Next</button>
+    </div>
+  </div>
+
+  <!-- Panel 2: Language -->
+  <div class="tour-overlay" id="tour-overlay-2" aria-hidden="true">
+    <div class="tour-panel">
+      <p class="tour-step">◇ &nbsp;audio tour · 02 of 03&nbsp; ◇</p>
+      <h2 class="tour-heading">Choose<br/>Language</h2>
+      <div class="tour-divider" aria-hidden="true">◇ &nbsp;◈&nbsp; ◇</div>
+      <button class="tour-lang-btn" id="tour-lang-en">
+        <span>English</span>
+        <span class="tour-lang-arrow">⟶</span>
+      </button>
+      <button class="tour-lang-btn" id="tour-lang-hi">
+        <span>हिन्दी</span>
+        <span class="tour-lang-arrow">⟶</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Panel 3: Instructions -->
+  <div class="tour-overlay" id="tour-overlay-3" aria-hidden="true">
+    <div class="tour-panel">
+      <p class="tour-step">◇ &nbsp;audio tour · 03 of 03&nbsp; ◇</p>
+      <h2 class="tour-heading">You're all set.</h2>
+      <div class="tour-divider" aria-hidden="true">◇ &nbsp;◈&nbsp; ◇</div>
+      <p class="tour-body">To quit the tour at any time,<br/>press <strong>ESC</strong> on your keyboard.</p>
+      <button class="tour-btn" id="tour-begin">Begin Tour</button>
+    </div>
+  </div>
+
+  <!-- Quit confirmation -->
+  <div class="tour-overlay" id="tour-overlay-quit" aria-hidden="true">
+    <div class="tour-panel">
+      <p class="tour-step">◇ &nbsp;audio tour&nbsp; ◇</p>
+      <h2 class="tour-heading">Quit the tour?</h2>
+      <div class="tour-divider" aria-hidden="true">◇ &nbsp;◈&nbsp; ◇</div>
+      <p class="tour-body">The audio will stop and you'll return to the homepage.</p>
+      <div class="tour-quit-btns">
+        <button class="tour-btn" id="tour-quit-yes">Yes, quit</button>
+        <button class="tour-btn-ghost" id="tour-quit-no">No, continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lock overlay (blocks all interaction during tour) -->
+  <div id="tour-lock"></div>
+
+  <!-- ESC hint notification -->
+  <div id="tour-esc-hint" aria-live="polite">Press ESC to quit</div>
+
+  <!-- Tour audio -->
+  <audio id="tour-audio" src="rec1.mp3" preload="auto"></audio>
+
+  <!-- ══════════ TOUR SETTINGS ══════════ -->
+  <style>
+    /* ── Tour Settings Button ─────────────────────────────── */
+    #tour-settings {
+      position: fixed;
+      top: 28px;
+      left: 28px;
+      z-index: 2100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    #tour-settings.ts-on {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #ts-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(18, 10, 6, 0.72);
+      border: 1.5px solid rgba(232, 163, 74, 0.36);
+      backdrop-filter: blur(14px) saturate(1.2);
+      -webkit-backdrop-filter: blur(14px) saturate(1.2);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.38), inset 0 1px 0 rgba(232,163,74,0.10);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(245, 235, 216, 0.76);
+      transition:
+        background 0.32s ease, border-color 0.32s ease,
+        color 0.32s ease, box-shadow 0.32s ease,
+        transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    #ts-btn:hover {
+      background: rgba(18, 10, 6, 0.90);
+      border-color: rgba(232, 163, 74, 0.65);
+      color: #e8a34a;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.42), 0 0 0 5px rgba(232,163,74,0.07);
+    }
+    #ts-btn.ts-open {
+      transform: rotate(75deg);
+      border-color: rgba(232, 163, 74, 0.70);
+      color: #e8a34a;
+    }
+    #ts-btn svg { width: 23px; height: 23px; flex-shrink: 0; }
+
+    /* ── Settings Panel ───────────────────────────────────── */
+    #ts-panel {
+      position: absolute;
+      top: 72px;
+      left: 0;
+      width: 232px;
+      background: rgba(245, 241, 232, 0.97);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border: 1px solid rgba(125, 32, 39, 0.14);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow:
+        0 22px 60px rgba(40,20,8,0.26),
+        0 4px 12px rgba(40,20,8,0.13),
+        inset 0 1px 0 rgba(255,255,255,0.62);
+      opacity: 0;
+      transform: translateY(-12px) scale(0.93);
+      pointer-events: none;
+      transition:
+        opacity 0.30s cubic-bezier(0.2,0.7,0.2,1),
+        transform 0.30s cubic-bezier(0.2,0.7,0.2,1);
+    }
+    #ts-panel.ts-panel-open {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+    #ts-top-bar {
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, #b78a3c 40%, #e8a34a 60%, transparent 100%);
+    }
+    .ts-head {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 8px;
+      font-weight: 400;
+      letter-spacing: 0.44em;
+      text-transform: uppercase;
+      color: rgba(125, 32, 39, 0.46);
+      text-align: center;
+      padding: 12px 16px 9px;
+      margin: 0;
+      border-bottom: 1px solid rgba(125, 32, 39, 0.09);
+    }
+    #ts-speed-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      padding: 12px 14px 12px 18px;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(125, 32, 39, 0.07);
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    #ts-speed-row:hover { background: rgba(125,32,39,0.04); }
+    .ts-row-label {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 18px;
+      letter-spacing: 0.01em;
+      color: #3d1020;
+      flex: 1;
+      text-align: left;
+      line-height: 1;
+    }
+    .ts-row-badge {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      color: rgba(125,32,39,0.52);
+      margin-right: 7px;
+    }
+    .ts-row-chevron {
+      color: rgba(125,32,39,0.36);
+      font-size: 14px;
+      line-height: 1;
+      display: inline-block;
+      transition: transform 0.28s ease;
+    }
+    #ts-speed-row.ts-row-open .ts-row-chevron { transform: rotate(180deg); }
+
+    /* ── Speed grid ───────────────────────────────────────── */
+    #ts-speed-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      padding: 0 14px;
+      max-height: 0;
+      overflow: hidden;
+      transition:
+        max-height 0.38s cubic-bezier(0.4,0,0.2,1),
+        padding    0.38s cubic-bezier(0.4,0,0.2,1);
+    }
+    #ts-speed-grid.ts-grid-open {
+      max-height: 130px;
+      padding: 12px 14px 15px;
+    }
+    .ts-spd-btn {
+      padding: 9px 4px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 9.5px;
+      font-weight: 500;
+      letter-spacing: 0.13em;
+      color: rgba(61,16,32,0.56);
+      background: rgba(125,32,39,0.06);
+      border: 1px solid rgba(125,32,39,0.12);
+      border-radius: 7px;
+      cursor: pointer;
+      text-align: center;
+      transition:
+        background 0.2s ease, border-color 0.2s ease,
+        color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    .ts-spd-btn:hover {
+      background: rgba(125,32,39,0.11);
+      border-color: rgba(125,32,39,0.26);
+      color: #3d1020;
+      transform: translateY(-1px);
+    }
+    .ts-spd-btn.ts-spd-active {
+      background: #7d2027;
+      border-color: #7d2027;
+      color: #f5ebd8;
+      box-shadow: 0 3px 10px rgba(125,32,39,0.28);
+      transform: none;
+    }
+    .ts-spd-btn.ts-spd-active:hover {
+      background: #5c1518;
+      border-color: #5c1518;
+    }
+  </style>
+
+  <div id="tour-settings" role="region" aria-label="Tour settings" aria-hidden="true">
+    <button id="ts-btn" aria-label="Open tour settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="3"/>
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0
+             002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0
+             001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0
+             00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0
+             00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0
+             00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0
+             00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0
+             001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+      </svg>
+    </button>
+
+    <div id="ts-panel">
+      <div id="ts-top-bar"></div>
+      <p class="ts-head">◇ &nbsp;settings&nbsp; ◇</p>
+      <button id="ts-speed-row">
+        <span class="ts-row-label">Speed</span>
+        <span class="ts-row-badge" id="ts-speed-val">1×</span>
+        <span class="ts-row-chevron">⌄</span>
+      </button>
+      <div id="ts-speed-grid" aria-hidden="true">
+        <button class="ts-spd-btn" data-speed="0.25">0.25×</button>
+        <button class="ts-spd-btn" data-speed="0.5">0.50×</button>
+        <button class="ts-spd-btn ts-spd-active" data-speed="1">1×</button>
+        <button class="ts-spd-btn" data-speed="1.5">1.5×</button>
+        <button class="ts-spd-btn" data-speed="2">2×</button>
+        <button class="ts-spd-btn" data-speed="3">3×</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review pop-up -->
+  <div id="review-popup" role="dialog" aria-modal="true" aria-label="Review prompt" aria-hidden="true">
+    <div id="rp-bar"></div>
+    <div class="rp-inner">
+      <p class="rp-text">Do you want to see the review section?</p>
+      <div class="rp-btns">
+        <button type="button" id="rp-yes">Yes</button>
+        <button type="button" id="rp-no">No</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+
+  <!-- ══════════ HAMBURGER MENU CONTROL ══════════ -->
+  <script>
+    (function () {
+      'use strict';
+      const btn     = document.getElementById('hamburger');
+      const overlay = document.getElementById('menu-overlay');
+      const closeEl = document.getElementById('menu-close');
+      const scrim   = overlay && overlay.querySelector('.menu-scrim');
+      if (!btn || !overlay) return;
+
+      function openMenu () {
+        overlay.classList.add('open');
+        btn.classList.add('is-open');
+        btn.setAttribute('aria-expanded', 'true');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeMenu () {
+        overlay.classList.remove('open');
+        btn.classList.remove('is-open');
+        btn.setAttribute('aria-expanded', 'false');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      btn.addEventListener('click', () => {
+        if (overlay.classList.contains('open')) closeMenu();
+        else openMenu();
+      });
+      if (closeEl) closeEl.addEventListener('click', closeMenu);
+      if (scrim)   scrim.addEventListener('click', closeMenu);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.classList.contains('open')) closeMenu();
+      });
+
+      // Close menu when any link inside is clicked (smoother for in-page hashes)
+      overlay.querySelectorAll('.menu-item').forEach((item) => {
+        item.addEventListener('click', () => { setTimeout(closeMenu, 160); });
+      });
+    })();
+  </script>
+
+  <!-- ══════════ LANGUAGE SWITCHER ══════════ -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* ── Translations ── */
+      var T = {
+        en: {
+          'nav-wordmark':      "Tribal Traces",
+          'nav-begin':         'Begin',
+          'nav-map':           'Map',
+          'nav-gallery':       'Gallery',
+          'nav-about':         'About',
+          'hero-title':        "TRIBAL TRACES",
+          'hero-sub':          "tribal's visual notes",
+          'scroll-cue':        'scroll',
+          'menu-eyebrow':      'Menu',
+          'menu-sans':         'मार्गः',
+          'menu-begin':        'Begin',       'menu-begin-sans':  'आरम्भः',
+          'menu-map':          'Map',         'menu-map-sans':    'भूचित्रम्',
+          'menu-gallery':      'Gallery',     'menu-gallery-sans':'शिल्पालयः',
+          'menu-about':        'About',       'menu-about-sans':  'विषये',
+          'menu-audio':        'Audio Tour',  'menu-audio-sans':  'श्रव्यः',
+          'menu-lang':         'Language',    'menu-lang-sans':   'भाषा',
+          'menu-lang-en':      'English',
+          'menu-lang-hi':      'हिन्दी',
+          'foot-wordmark':     "TRIBAL TRACES",
+          'foot-explore':      'Explore',
+          'foot-begin':        'Begin',       'foot-map':         'Map',
+          'foot-gallery':      'Gallery',     'foot-about':       'About',
+          'foot-threads':      'Threads',
+          'foot-journal':      'Journal',     'foot-artisans':    'Artisans',
+          'foot-places':       'Places',      'foot-rituals':     'Rituals',
+          'foot-connect':      'Connect',
+          'foot-email':        'Email',       'foot-instagram':   'Instagram',
+          'foot-newsletter':   'Newsletter',
+          'foot-made':         'made slowly',
+          'foot-copyright':    "© 2026 TRIBAL TRACES",
+          'foot-stories':      'all stories belong to their tellers',
+          'foot-review-btn':   '◇ \u00a0Reviews\u00a0 ◇'
+        },
+        hi: {
+          'nav-wordmark':      'ट्राइबल ट्रेसेस',
+          'nav-begin':         'प्रारम्भ',
+          'nav-map':           'मानचित्र',
+          'nav-gallery':       'दीर्घा',
+          'nav-about':         'परिचय',
+          'hero-title':        'ट्राइबल ट्रेसेस',
+          'hero-sub':          'जनजातीय दृश्य नोट्स',
+          'scroll-cue':        'नीचे जाएँ',
+          'menu-eyebrow':      'मेनू',
+          'menu-sans':         'मार्गः',
+          'menu-begin':        'प्रारम्भ',   'menu-begin-sans':  'आरम्भः',
+          'menu-map':          'मानचित्र',   'menu-map-sans':    'नक्शा',
+          'menu-gallery':      'दीर्घा',     'menu-gallery-sans':'चित्रशाला',
+          'menu-about':        'परिचय',      'menu-about-sans':  'विषय',
+          'menu-audio':        'ऑडियो भ्रमण','menu-audio-sans':  'श्रव्य',
+          'menu-lang':         'भाषा',       'menu-lang-sans':   'भाषा',
+          'menu-lang-en':      'English',
+          'menu-lang-hi':      'हिन्दी',
+          'foot-wordmark':     'ट्राइबल ट्रेसेस',
+          'foot-explore':      'अन्वेषण',
+          'foot-begin':        'प्रारम्भ',   'foot-map':         'मानचित्र',
+          'foot-gallery':      'दीर्घा',     'foot-about':       'परिचय',
+          'foot-threads':      'धागे',
+          'foot-journal':      'पत्रिका',    'foot-artisans':    'कारीगर',
+          'foot-places':       'स्थान',      'foot-rituals':     'अनुष्ठान',
+          'foot-connect':      'संपर्क',
+          'foot-email':        'ईमेल',       'foot-instagram':   'इंस्टाग्राम',
+          'foot-newsletter':   'समाचारपत्र',
+          'foot-made':         'धीरे-धीरे बना',
+          'foot-copyright':    '© २०२६ ट्राइबल ट्रेसेस',
+          'foot-stories':      'सभी कहानियाँ अपने कहने वालों की हैं',
+          'foot-review-btn':   '◇ \u00a0समीक्षाएँ\u00a0 ◇'
+        }
+      };
+
+      var TH = {
+        en: {
+          'foot-tag':        '<em>a calm ode to India —</em><br/>stories, crafts, and quiet corners<br/>of a country that still listens.',
+          'foot-whisper':    'सत्यं शिवं सुन्दरम् &nbsp;·&nbsp; <em>truth, goodness, beauty</em>',
+          'pop-foot-whisper':'<em>truth · goodness · beauty</em>'
+        },
+        hi: {
+          'foot-tag':        '<em>भारत को एक शांत अर्चना —</em><br/>कहानियाँ, शिल्प, और एक देश के<br/>शांत कोने जो अभी भी सुनता है।',
+          'foot-whisper':    'सत्यं शिवं सुन्दरम् &nbsp;·&nbsp; <em>सत्य, शिव, सुन्दर</em>',
+          'pop-foot-whisper':'<em>सत्य · शिव · सुन्दर</em>'
+        }
+      };
+
+      var currentLang = 'en';
+
+      /* ── Apply language ── */
+      function applyLang(lang) {
+        currentLang = lang;
+        var map  = T[lang];
+        var mapH = TH[lang];
+
+        document.querySelectorAll('[data-i18n]').forEach(function (el) {
+          var key = el.getAttribute('data-i18n');
+          if (map[key] !== undefined) el.textContent = map[key];
+        });
+        document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+          var key = el.getAttribute('data-i18n-html');
+          if (mapH[key] !== undefined) el.innerHTML = mapH[key];
+        });
+
+        /* body class for font overrides */
+        document.body.classList.toggle('lang-hi', lang === 'hi');
+
+        /* update option marks */
+        document.getElementById('lang-opt-en').querySelector('.lang-opt-mark').textContent = lang === 'en' ? '◆' : '◇';
+        document.getElementById('lang-opt-hi').querySelector('.lang-opt-mark').textContent = lang === 'hi' ? '◆' : '◇';
+
+        localStorage.setItem('to-lang', lang);
+      }
+
+      /* ── Language toggle button ── */
+      var wrap      = document.getElementById('pop-lang-wrap');
+      var toggleBtn = document.getElementById('lang-toggle-btn');
+      var sub       = document.getElementById('lang-sub');
+
+      toggleBtn.addEventListener('click', function () {
+        var open = wrap.classList.toggle('open');
+        toggleBtn.setAttribute('aria-expanded', open);
+        sub.setAttribute('aria-hidden', !open);
+      });
+
+      document.getElementById('lang-opt-en').addEventListener('click', function () {
+        applyLang('en');
+        wrap.classList.remove('open');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        sub.setAttribute('aria-hidden', 'true');
+      });
+
+      document.getElementById('lang-opt-hi').addEventListener('click', function () {
+        applyLang('hi');
+        wrap.classList.remove('open');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        sub.setAttribute('aria-hidden', 'true');
+      });
+
+      /* ── Restore saved preference ── */
+      var saved = localStorage.getItem('to-lang');
+      if (saved && saved !== 'en') applyLang(saved);
+
+      /* expose for audio tour IIFE */
+      window._applyLang = applyLang;
+
+    }());
+  </script>
+
+  <!-- ══════════ AUDIO TOUR CONTROL ══════════ -->
+  <script>
+    (function () {
+      'use strict';
+
+      var menuBtn      = document.getElementById('tour-menu-btn');
+      var overlay1     = document.getElementById('tour-overlay-1');
+      var overlay2     = document.getElementById('tour-overlay-2');
+      var overlay3     = document.getElementById('tour-overlay-3');
+      var overlayQuit  = document.getElementById('tour-overlay-quit');
+      var lockDiv      = document.getElementById('tour-lock');
+      var escHint      = document.getElementById('tour-esc-hint');
+      var audio        = document.getElementById('tour-audio');
+
+      var tourRunning  = false;
+      var hintTimer    = null;
+      var tourLang     = 'en';
+
+      /* ── Tour Settings refs ── */
+      var settingsEl   = document.getElementById('tour-settings');
+      var tsBtn        = document.getElementById('ts-btn');
+      var tsPanel      = document.getElementById('ts-panel');
+      var tsSpeedRow   = document.getElementById('ts-speed-row');
+      var tsSpeedGrid  = document.getElementById('ts-speed-grid');
+      var tsSpeedVal   = document.getElementById('ts-speed-val');
+      var tsOpen       = false;
+      var tsGridOpen   = false;
+
+      function openOverlay(el) {
+        el.classList.add('open');
+        el.setAttribute('aria-hidden', 'false');
+      }
+      function closeOverlay(el) {
+        el.classList.remove('open');
+        el.setAttribute('aria-hidden', 'true');
+      }
+
+      /* ── Open tour from hamburger menu ── */
+      menuBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        // close hamburger menu
+        var menuOverlay = document.getElementById('menu-overlay');
+        var hamburger   = document.getElementById('hamburger');
+        menuOverlay.classList.remove('open');
+        menuOverlay.setAttribute('aria-hidden', 'true');
+        hamburger.classList.remove('is-open');
+        hamburger.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+        // show first panel
+        openOverlay(overlay1);
+      });
+
+      /* ── Panel flow ── */
+      document.getElementById('tour-next-1').addEventListener('click', function () {
+        closeOverlay(overlay1);
+        setTimeout(function () { openOverlay(overlay2); }, 80);
+      });
+
+      document.getElementById('tour-lang-en').addEventListener('click', function () {
+        tourLang = 'en';
+        if (window._applyLang) window._applyLang('en');
+        closeOverlay(overlay2);
+        setTimeout(function () { openOverlay(overlay3); }, 80);
+      });
+
+      document.getElementById('tour-lang-hi').addEventListener('click', function () {
+        tourLang = 'hi';
+        if (window._applyLang) window._applyLang('hi');
+        closeOverlay(overlay2);
+        setTimeout(function () { openOverlay(overlay3); }, 80);
+      });
+
+      document.getElementById('tour-begin').addEventListener('click', function () {
+        closeOverlay(overlay3);
+        setTimeout(startTour, 420);
+      });
+
+      /* ── Start tour ── */
+      function startTour() {
+        tourRunning = true;
+        document.body.style.overflow = 'hidden';
+        lockDiv.classList.add('active');
+        audio.src = (tourLang === 'hi') ? 'rec1hindi.mp3' : 'rec1.mp3';
+        audio.load();
+        audio.currentTime = 0;
+        window.scrollTo(0, 0);
+        resetTourEvents();
+        audio.play().catch(function () {});
+        audio.addEventListener('ended', endTour, { once: true });
+        requestAnimationFrame(tourTimingTick);
+        showTourSettings();
+      }
+
+      /* ── End tour ── */
+      function endTour() {
+        tourRunning = false;
+        lockDiv.classList.remove('active');
+        document.body.style.overflow = '';
+        hideTourSettings();
+      }
+
+      /* ── Auto-scroll helper for tour choreography ──
+         Temporarily lifts overflow:hidden so JS scrollTo works,
+         animates over `duration` ms with ease-out, then calls onDone.
+         Does NOT restore overflow:hidden — event handlers keep blocking
+         user input for the rest of the tour.                          ── */
+      function tourAutoScroll(to, duration, onDone) {
+        var from  = window.scrollY;
+        document.body.style.overflow = '';
+        var start = null;
+        function step(ts) {
+          if (!tourRunning) { if (onDone) onDone(); return; }
+          if (!start) start = ts;
+          var elapsed = ts - start;
+          var raw = Math.min(elapsed / duration, 1);
+          var t   = raw * (2 - raw);          // ease-out quad
+          window.scrollTo(0, Math.round(from + (to - from) * t));
+          if (raw < 1) { requestAnimationFrame(step); return; }
+          if (onDone) onDone();
+        }
+        requestAnimationFrame(step);
+      }
+
+      /* ── Tour timing events ── */
+      var TOUR_EVENTS = [
+        {
+          /* 1:22 — scroll so particles fully form the India constellation */
+          time: 82,
+          fired: false,
+          run: function () {
+            var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            tourAutoScroll(Math.round(0.55 * maxScroll), 5500, null);
+          }
+        },
+        {
+          /* 1:54 — scroll down to the interactive SVG India map section */
+          time: 114,
+          fired: false,
+          run: function () {
+            var mapSec = document.getElementById('map-section');
+            var target = mapSec ? mapSec.offsetTop : window.scrollY;
+            tourAutoScroll(target, 2500, null);
+          }
+        },
+        {
+          /* 1:59 — programmatically click a Gujarat dot to trigger zoom */
+          time: 119,
+          fired: false,
+          run: function () {
+            var gjDot = document.querySelector('#gujarat-dots .gj-dot');
+            if (gjDot) {
+              gjDot.dispatchEvent(
+                new MouseEvent('click', { bubbles: true, cancelable: true })
+              );
+            }
+          }
+        }
+      ];
+
+      function resetTourEvents() {
+        TOUR_EVENTS.forEach(function (ev) { ev.fired = false; });
+      }
+
+      function tourTimingTick() {
+        if (!tourRunning) return;
+        var ct = audio.currentTime;
+        TOUR_EVENTS.forEach(function (ev) {
+          if (!ev.fired && ct >= ev.time) {
+            ev.fired = true;
+            ev.run();
+          }
+        });
+        requestAnimationFrame(tourTimingTick);
+      }
+
+      /* ── Tour Settings: show / hide ── */
+      function showTourSettings() {
+        settingsEl.classList.add('ts-on');
+        settingsEl.setAttribute('aria-hidden', 'false');
+      }
+      function hideTourSettings() {
+        settingsEl.classList.remove('ts-on');
+        settingsEl.setAttribute('aria-hidden', 'true');
+        closeTsPanel();
+        audio.playbackRate = 1;
+        tsSpeedVal.textContent = '1×';
+        document.querySelectorAll('.ts-spd-btn').forEach(function (b) {
+          b.classList.toggle('ts-spd-active', b.dataset.speed === '1');
+        });
+      }
+
+      function openTsPanel() {
+        tsOpen = true;
+        tsBtn.classList.add('ts-open');
+        tsPanel.classList.add('ts-panel-open');
+        tsPanel.setAttribute('aria-hidden', 'false');
+      }
+      function closeTsPanel() {
+        tsOpen = false;
+        tsBtn.classList.remove('ts-open');
+        tsPanel.classList.remove('ts-panel-open');
+        tsPanel.setAttribute('aria-hidden', 'true');
+        closeTsGrid();
+      }
+      function closeTsGrid() {
+        tsGridOpen = false;
+        tsSpeedRow.classList.remove('ts-row-open');
+        tsSpeedGrid.classList.remove('ts-grid-open');
+        tsSpeedGrid.setAttribute('aria-hidden', 'true');
+      }
+
+      /* Gear button toggle */
+      tsBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (tsOpen) { closeTsPanel(); } else { openTsPanel(); }
+      });
+
+      /* Speed row toggle */
+      tsSpeedRow.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (tsGridOpen) {
+          closeTsGrid();
+        } else {
+          tsGridOpen = true;
+          tsSpeedRow.classList.add('ts-row-open');
+          tsSpeedGrid.classList.add('ts-grid-open');
+          tsSpeedGrid.setAttribute('aria-hidden', 'false');
+        }
+      });
+
+      /* Speed buttons */
+      document.querySelectorAll('.ts-spd-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var rate = parseFloat(btn.dataset.speed);
+          audio.playbackRate = rate;
+          tsSpeedVal.textContent = btn.textContent;
+          document.querySelectorAll('.ts-spd-btn').forEach(function (b) {
+            b.classList.remove('ts-spd-active');
+          });
+          btn.classList.add('ts-spd-active');
+        });
+      });
+
+      /* Click outside → close panel */
+      document.addEventListener('click', function (e) {
+        if (tsOpen && !settingsEl.contains(e.target)) { closeTsPanel(); }
+      });
+
+      /* ── Lock overlay click → show ESC hint ── */
+      lockDiv.addEventListener('click', showEscHint);
+
+      function showEscHint() {
+        if (hintTimer) clearTimeout(hintTimer);
+        escHint.classList.add('show');
+        hintTimer = setTimeout(function () {
+          escHint.classList.remove('show');
+        }, 3000);
+      }
+
+      /* ── Block scroll keys & wheel during tour ── */
+      var scrollKeys = [' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight',
+                        'PageUp','PageDown','Home','End','Tab'];
+      document.addEventListener('keydown', function (e) {
+        if (!tourRunning || overlayQuit.classList.contains('open')) return;
+        if (scrollKeys.indexOf(e.key) !== -1) {
+          e.preventDefault();
+          showEscHint();
+        }
+      });
+
+      document.addEventListener('wheel', function (e) {
+        if (tourRunning && !overlayQuit.classList.contains('open')) {
+          e.preventDefault();
+          showEscHint();
+        }
+      }, { passive: false });
+
+      document.addEventListener('touchmove', function (e) {
+        if (tourRunning && !overlayQuit.classList.contains('open')) {
+          e.preventDefault();
+          showEscHint();
+        }
+      }, { passive: false });
+
+      /* ── ESC key ── */
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+
+        // quit overlay open → ESC = No (continue)
+        if (overlayQuit.classList.contains('open')) {
+          closeOverlay(overlayQuit);
+          if (tourRunning) audio.play().catch(function () {});
+          return;
+        }
+        // intro panels open → cancel tour setup
+        if (overlay1.classList.contains('open')) { closeOverlay(overlay1); return; }
+        if (overlay2.classList.contains('open')) { closeOverlay(overlay2); return; }
+        if (overlay3.classList.contains('open')) { closeOverlay(overlay3); return; }
+        // tour running → show quit dialog
+        if (tourRunning) {
+          audio.pause();
+          openOverlay(overlayQuit);
+        }
+      });
+
+      /* ── Quit: Yes ── */
+      document.getElementById('tour-quit-yes').addEventListener('click', function () {
+        audio.pause();
+        audio.currentTime = 0;
+        closeOverlay(overlayQuit);
+        endTour();
+        window.location.href = 'index.html';
+      });
+
+      /* ── Quit: No ── */
+      document.getElementById('tour-quit-no').addEventListener('click', function () {
+        closeOverlay(overlayQuit);
+        if (tourRunning) audio.play().catch(function () {});
+      });
+
+    }());
+  </script>
+
+  <!-- ══════════ REVIEW POP-UP CONTROL ══════════ -->
+  <script>
+    (function () {
+      'use strict';
+      var popup  = document.getElementById('review-popup');
+      var bar    = document.getElementById('rp-bar');
+      var btnYes = document.getElementById('rp-yes');
+      var btnNo  = document.getElementById('rp-no');
+      if (!popup || !bar) return;
+
+      var autoTimer = null;
+
+      function showPopup() {
+        popup.classList.remove('rp-hiding');
+        popup.classList.add('rp-visible');
+        popup.setAttribute('aria-hidden', 'false');
+
+        // Countdown bar: reset to full, then drain to zero over 5 s
+        bar.style.transition = 'none';
+        bar.style.transform  = 'scaleX(1)';
+        bar.getBoundingClientRect(); // force reflow
+        bar.style.transition = 'transform 5s linear';
+        bar.style.transform  = 'scaleX(0)';
+
+        autoTimer = setTimeout(hidePopup, 5000);
+      }
+
+      function hidePopup() {
+        if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+        popup.classList.remove('rp-visible');
+        popup.classList.add('rp-hiding');
+        popup.setAttribute('aria-hidden', 'true');
+      }
+
+      // Show after 15 seconds
+      setTimeout(showPopup, 15000);
+
+      btnYes.addEventListener('click', function () { window.location.href = 'review.html'; });
+      btnNo.addEventListener('click', hidePopup);
+    }());
+  </script>
+</body>
+</html>

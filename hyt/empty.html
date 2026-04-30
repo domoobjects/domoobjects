@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Empty Page — TRIBAL TRACES</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    body {
+      min-height: 100vh;
+      background: var(--bg-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-content {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .empty-content h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(32px, 6vw, 64px);
+      font-weight: 300;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-dark);
+      opacity: 0.65;
+    }
+
+    /* ── Back button (image) ─────────────────────────────── */
+    .back-btn {
+      position: fixed;
+      top: 32px;
+      left: 32px;
+      width: 110px;
+      height: 110px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.25s ease, transform 0.3s ease;
+      z-index: 100;
+    }
+
+    .back-btn:hover {
+      opacity: 1;
+      transform: translateX(-4px) scale(1.06);
+    }
+
+    .back-btn:active {
+      transform: translateX(-2px) scale(0.98);
+    }
+
+    .back-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+      transform: rotate(-90deg);   /* rotate 90° toward the left */
+    }
+
+    @media (max-width: 600px) {
+      .back-btn { top: 20px; left: 20px; width: 76px; height: 76px; }
+    }
+
+    /* ── Side arrow buttons (center-left, center-right) ─── */
+    .side-arrow {
+      position: fixed;
+      top: 50%;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.25s ease, transform 0.3s ease;
+      z-index: 100;
+    }
+
+    .side-arrow img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+    }
+
+    /* left arrow — as-is */
+    .side-arrow.left {
+      left: 40px;
+      width: 95px;
+      height: 95px;
+      transform: translateY(-50%);
+    }
+    .side-arrow.left:hover  { opacity: 1; transform: translateY(-50%) translateX(-5px) scale(1.05); }
+    .side-arrow.left:active { transform: translateY(-50%) translateX(-2px) scale(0.98); }
+
+    /* right arrow — rotated 180° and a touch bigger */
+    .side-arrow.right {
+      right: 40px;
+      width: 115px;
+      height: 115px;
+      transform: translateY(-50%);
+    }
+    .side-arrow.right img {
+      transform: rotate(180deg);
+    }
+    .side-arrow.right:hover  { opacity: 1; transform: translateY(-50%) translateX(5px) scale(1.05); }
+    .side-arrow.right:active { transform: translateY(-50%) translateX(2px) scale(0.98); }
+
+    @media (max-width: 700px) {
+      .side-arrow.left  { left: 16px;  width: 80px;  height: 80px;  }
+      .side-arrow.right { right: 16px; width: 100px; height: 100px; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-btn" aria-label="Back to home">
+    <img src="back.png" alt="Back" />
+  </a>
+
+  <button type="button" class="side-arrow left" aria-label="Previous">
+    <img src="arrow.png" alt="" />
+  </button>
+
+  <button type="button" class="side-arrow right" aria-label="Next">
+    <img src="arrow.png" alt="" />
+  </button>
+
+  <div class="empty-content">
+    <h1>Empty Page</h1>
+  </div>
+</body>
+</html>
